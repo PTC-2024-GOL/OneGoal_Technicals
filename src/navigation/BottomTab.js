@@ -4,6 +4,8 @@ import { View, Text, StyleSheet,TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import TeamsScreen from '../screens/TeamsScreen';
 
 // Navegador Bottom Tabs Navigator
 const Tab = createBottomTabNavigator();
@@ -40,11 +42,12 @@ export default function BottomTab({ logueado, setLogueado }) {
         },
         headerTintColor: '#fff',
         tabBarLabelStyle: styles.tabBarLabel,
+        headerTitleAlign: 'center',
       })}
     >
       <Tab.Screen
         name="Equipos"
-        component={LoginScreen}
+        component={TeamsScreen}
         options={{
           title: 'Equipos',
         }}
@@ -61,7 +64,7 @@ export default function BottomTab({ logueado, setLogueado }) {
       />
       <Tab.Screen
         name="Perfil"
-        component={LoginScreen}
+        component={ProfileScreen}
         options={{
           title: 'Perfil',
         }}

@@ -95,14 +95,16 @@ const styles = StyleSheet.create({
     elevation: 0,
     backgroundColor: '#03045E',
     borderRadius: 15,
-    height: 90,
+    height: 70,
+    padding: 10,
+    paddingBottom: 15
   },
   tabBarLabel: {
     fontSize: 12,
     fontWeight: 'bold',
   },
   customButtonContainer: {
-    top: -30,
+    top: -25,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -111,12 +113,13 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 35,
     backgroundColor: '#000080',
+    padding: 10
   },
   customButtonTouchable: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#090BA0',
+    backgroundColor: '#000080',
     borderRadius:35,
   },
   customButtonIcon: {

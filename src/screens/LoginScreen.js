@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert} from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
-import fetchData from '../components/components';
+import fetchData from '../../api/components';
 
 const LoginScreen = () => {
 

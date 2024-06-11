@@ -4,7 +4,7 @@ import { View, FlatList, StyleSheet, ActivityIndicator, TextInput, TouchableOpac
 import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider } from 'react-native-paper';
 import fetchData from '../../api/components';
 
-const HomeScreen = () => {
+const HomeScreen = ({ logueado, setLogueado }) => {
   return (
     <PaperProvider>
       <View style={styles.container}>

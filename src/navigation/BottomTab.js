@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet,TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -10,7 +10,7 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab({ logueado, setLogueado }) {
   // Función para renderizar HomeScreen con props
-  const renderHomeScreen = props => (
+  const RenderHomeScreen  = props => (
     <HomeScreen {...props} setLogueado={setLogueado} logueado={logueado} />
   );
 
@@ -30,11 +30,13 @@ export default function BottomTab({ logueado, setLogueado }) {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#FFC300',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#FFF',
+        tabBarInactiveTintColor: '#eee',
         tabBarStyle: styles.tabBar,
         headerStyle: {
-          backgroundColor: '#FFC300',
+          backgroundColor: '#0078B7',
+          borderBottomRightRadius: 35,
+          borderBottomLeftRadius: 35,
         },
         headerTintColor: '#fff',
         tabBarLabelStyle: styles.tabBarLabel,
@@ -49,7 +51,7 @@ export default function BottomTab({ logueado, setLogueado }) {
       />
       <Tab.Screen
         name="Inicio"
-        component={renderHomeScreen}
+        component={RenderHomeScreen }
         options={{
           title: 'Inicio',
           tabBarButton: props => (
@@ -70,9 +72,6 @@ export default function BottomTab({ logueado, setLogueado }) {
 
 const CustomTabBarButton = ({ children, onPress }) => (
   <View style={styles.customButtonContainer}>
-    <View style={styles.shadow}>
-      <Ionicons name="home" size={30} color="#fff" style={styles.customButtonIcon} />
-    </View>
     <View style={styles.customButton}>
       <TouchableOpacity
         style={styles.customButtonTouchable}
@@ -91,7 +90,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     elevation: 0,
-    backgroundColor: '#000080',
+    backgroundColor: '#03045E',
     borderRadius: 15,
     height: 90,
   },
@@ -114,6 +113,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#090BA0',
+    borderRadius:35,
   },
   customButtonIcon: {
     color: '#FFC300',

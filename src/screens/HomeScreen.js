@@ -1,116 +1,256 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { View, FlatList, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider } from 'react-native-paper';
-import fetchData from '../../api/components';
-
-const HomeScreen = ({ logueado, setLogueado }) => {
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import { Dimensions } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+import PieChart from 'react-native-pie-chart';
+ 
+import gol from '../../assets/gol.png';
+import monaco from '../../assets/image 56.png';
+ 
+const screenWidth = Dimensions.get('window').width;
+ 
+export default function App() {
+  const [selectedTeam, setSelectedTeam] = useState();
+ 
+  const widthAndHeight = 150;
+  const series = [5, 2, 1, 3];
+  const sliceColor = ['#4CAF50', '#F44336', '#FFC107', '#00BCD4'];
+ 
   return (
-    <PaperProvider>
-      <View style={styles.container}>
-        <Button mode="contained" style={styles.button}>
-          Cerrar Sesión
-        </Button>
+    <ScrollView style={styles.container}>
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>Bienvenido José Gonzáles</Text>
+        <Text style={styles.subText}>Ponte al día sobre las nuevas actualizaciones</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statLabel}>Partidos ganados</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statLabel}>Partidos perdidos</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>1</Text>
+            <Text style={styles.statLabel}>Partidos empatados</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statLabel}>Goles en contra</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statLabel}>Goles a favor</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statLabel}>Diferencia</Text>
+          </View>
+        </View>
       </View>
-    </PaperProvider>
+      <View style={styles.chartTextContainer}>
+        <PieChart
+          widthAndHeight={widthAndHeight}
+          series={series}
+          sliceColor={sliceColor}
+          doughnut={true}
+          coverRadius={0.45}
+          coverFill={'#FFF'}
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.chartTitle}>Estadísticas generales del equipo</Text>
+          <Text style={styles.chartDescription}>
+            Revisa las estadísticas generales tanto en áreas técnicas, tácticas, técnicas y mentales de los equipos
+          </Text>
+          <Picker
+            selectedValue={selectedTeam}
+            style={styles.picker}
+            onValueChange={(itemValue, itemIndex) => setSelectedTeam(itemValue)}
+          >
+            <Picker.Item label="Elige un equipo" value="" />
+            <Picker.Item label="Equipo 1" value="team1" />
+            <Picker.Item label="Equipo 2" value="team2" />
+          </Picker>
+        </View>
+      </View>
+      <View style={styles.matchContainer}>
+        <Text style={styles.matchDate}>Miércoles 14 de agosto de 2023</Text>
+        <Text style={styles.matchCategory}>Categoría 17</Text>
+        <View style={styles.matchResult}>
+          <View style={styles.teamContainer}>
+            <Image
+              source={gol}
+              style={styles.teamLogo}
+            />
+            <View style={styles.ancho}>
+              <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
+            </View>
+          </View>
+          <Text style={styles.score}>3 - 1</Text>
+          <View style={styles.teamContainer}>
+            <Image
+              source={monaco}
+              style={styles.teamLogo}
+            />
+            <View style={styles.ancho}>
+            <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
-};
-
+}
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+    marginBottom:100,
+  },
+  header: {
+    backgroundColor: '#007bff',
+    padding: 20,
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 24,
+  },
+  welcomeContainer: {
+    padding: 20,
+    margin: 10,
+    elevation: 5,
+    borderTopEndRadius: 30,
+    borderTopStartRadius: 30,
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30.01,
   },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#6200ee',
-    textAlign: 'center',
-    margin: 20,
   },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#6200ee',
-    borderRadius: 8,
-  },
-  containerInput: {
-    flexDirection: 'column',
-    alignItems: 'center',
+  subText: {
+    fontSize: 14,
+    color: '#888',
     marginBottom: 20,
   },
-  containerRow: {
+  statsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statBox: {
+    width: '30%',
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  chartTextContainer: {
+    flexDirection: 'row',
+    padding: 20,
+    alignItems: 'center',
+    margin: 10,
+    elevation: 5,
+    borderTopEndRadius: 30,
+    borderTopStartRadius: 30,
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30.01,
+  },
+  textContainer: {
+    flex: 1,
+    paddingLeft: 20,
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  chartDescription: {
+    textAlign: 'left',
+    fontSize: 12,
+    color: '#888',
+    marginTop: 10,
+  },
+  picker: {
+    height: 50,
+    width: 200,
+    marginTop: 20,
+  },
+  matchContainer: {
+    padding: 20,
+    alignItems: 'center',
+    margin: 10,
+    elevation: 5,
+    borderTopEndRadius: 30,
+    borderTopStartRadius: 30,
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30.01,
+  },
+  matchDate: {
+    fontSize: 14,
+    color: '#888',
+  },
+  matchCategory: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  matchResult: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
   },
-  input: {
-    width: '80%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 10,
-    margin: 5,
+  teamContainer: {
+    alignItems: 'center',
   },
-  botonAgregar: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 4,
-    maxHeight: 70,
-    marginTop: 10,
+  teamLogo: {
+    width: 40,
+    height: 40,
+    marginBottom: 5,
+    borderRadius: 50,
   },
-  buttonActualizar: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: 'green',
-    borderRadius: 8,
-  },
-  buttonEliminar: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 8,
-  },
-  buttonClose: {
-    marginStart: 15,
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 8,
-  },
-  botonAgregarTexto: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  title: {
-    fontSize: 24,
+  teamName: {
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: '#f9f9f9',
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 8,
-    elevation: 3, // Para Android
-    shadowColor: '#000', // Para iOS
-    shadowOffset: { width: 0, height: 2 }, // Para iOS
-    shadowOpacity: 0.8, // Para iOS
-    shadowRadius: 2, // Para iOS
-  },
-  cardText: {
-    fontSize: 18,
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-  }, title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
   },
+  score: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 20,
+  },
+  navContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#f0f0f0',
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 5,
+  },
+  ancho: {
+    maxWidth:100,
+  },
 });
-
-export default HomeScreen;

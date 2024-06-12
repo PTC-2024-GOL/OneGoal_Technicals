@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     color: 'red',
-  }, title: {
+  }, tittle: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,

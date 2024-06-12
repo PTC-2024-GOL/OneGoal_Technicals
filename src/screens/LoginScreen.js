@@ -70,8 +70,9 @@ const LoginScreen = ({ logueado, setLogueado }) => {
       <ImageBackground source={background} style={styles.background}>
         <View style={styles.overlay}>
           <Image source={logo} style={styles.logo} />
+          <Text style={styles.logInText}>Inicio de sesión</Text>
           <TextInput
-            placeholder='Usuario'
+            placeholder='Correo electrónico'
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -87,7 +88,7 @@ const LoginScreen = ({ logueado, setLogueado }) => {
             labelStyle={{ color: 'white' }}
           />
           <TextInput
-            placeholder='Clave'
+            placeholder='Contraseña'
             style={styles.input}
             secureTextEntry
             underlineColor="transparent"
@@ -128,25 +129,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Overlay con transparencia
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Overlay con transparencia
   },
   logo: {
     width: 150, // Ajusta el tamaño del logo según tus necesidades
     height: 150,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 5,
   },
   input: {
     marginBottom: 15,
     backgroundColor: 'transparent', // Hace el fondo del input transparente
-    borderRadius: 10,
+    borderBottomStartRadius: 10,
+    borderTopStartRadius: 10,
+    borderBottomEndRadius: 10,
+    borderTopEndRadius: 10,
     borderWidth: 1,
     borderColor: 'white',
   },
   button: {
     marginTop: 10,
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 15,
     overflow: 'hidden',
   },
   gradient: {
@@ -157,15 +161,23 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: 'semibold',
     fontSize: 16,
   },
   forgotPassword: {
     marginTop: 10,
     textAlign: 'center',
     color: '#FFFFFF',
-    textDecorationLine: 'underline',
+    fontWeight: 'semibold',
+    fontSize: 15
   },
+  logInText: {
+    textAlign: 'center',
+    color: '#fff',
+    marginBottom: 30,
+    marginTop: -10,
+    fontSize: 16
+  }
 });
 
 export default LoginScreen;

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image, Alert } from 'react-native';
+import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image } from 'react-native';
 import { TextInput, DefaultTheme, Provider as PaperProvider, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
+import AlertComponent from '../components/AlertComponent';
+import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
 
 // Importa la imagen de fondo y el logo
 import background from '../../assets/background.png';
@@ -24,9 +26,16 @@ const LoginScreen = ({ logueado, setLogueado }) => {
   // Estados para los campos de alias y clave
   const [alias, setAlias] = useState('');
   const [clave, setClave] = useState('');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertType, setAlertType] = useState(1);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertCallback, setAlertCallback] = useState(null);
 
   // URL de la API para el usuario
   const USER_API = 'services/technics/tecnicos.php';
+
+
+  const navigation = useNavigation(); // Obtiene el objeto de navegación
 
   // Manejo de inicio de sesión
   const handleLogin = async () => {
@@ -39,15 +48,29 @@ const LoginScreen = ({ logueado, setLogueado }) => {
       // Realización de la petición de inicio de sesión
       const data = await fetchData(USER_API, 'logIn', formData);
       if (data.status) {
-        setLogueado(!logueado);
+        setAlertType(1);
+        setAlertMessage(`${data.message}`);
+        setAlertCallback(() => () => setLogueado(!logueado));
+        setAlertVisible(true);
       } else {
         console.log(data);
-        Alert.alert('Error sesión', data.error);
+        setAlertType(2);
+        setAlertMessage(`Error sesión: ${data.error}`);
+        setAlertCallback(null);
+        setAlertVisible(true);
       }
     } catch (error) {
       console.log('Error: ', error);
-      Alert.alert('Error sesión', error);
+      setAlertType(2);
+      setAlertMessage(`Error: ${error}`);
+      setAlertCallback(null);
+      setAlertVisible(true);
     }
+  };
+
+  const handleAlertClose = () => {
+    setAlertVisible(false);
+    if (alertCallback) alertCallback();
   };
 
   // Manejo de cierre de sesión
@@ -64,6 +87,12 @@ const LoginScreen = ({ logueado, setLogueado }) => {
       Alert.alert('Error sesión', error);
     }
   };
+
+  const handleForgotPassword = () => {
+    // Navegar a la pantalla de recuperación de contraseña
+    navigation.navigate('RecoverPassword');
+  };
+
 
   return (
     <PaperProvider theme={theme}>
@@ -110,12 +139,17 @@ const LoginScreen = ({ logueado, setLogueado }) => {
               <Text style={styles.buttonText}>Iniciar sesión</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity mode="contained" onPress={handleLogOut} style={styles.button}>
-            <Text>Cerrar Sesión</Text> 
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={styles.forgotPassword}>¿Desea recuperar contraseña?</Text>
           </TouchableOpacity>
-          <Text style={styles.forgotPassword}>¿Desea recuperar contraseña?</Text>
         </View>
       </ImageBackground>
+      <AlertComponent
+        visible={alertVisible}
+        type={alertType}
+        message={alertMessage}
+        onClose={handleAlertClose}
+      />
     </PaperProvider>
   );
 };

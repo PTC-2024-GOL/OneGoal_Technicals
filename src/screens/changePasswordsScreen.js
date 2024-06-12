@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
+
  
-export default function RecoverPasswordScreen() {
+const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
- 
+  
+  const navigation = useNavigation(); // Obtiene el objeto de navegación
+
   const handleRecoverPassword = () => {
     setMessage('¡Revisa tu bandeja de entrada!');
   };
  
+  
+  const handleForgotLogin = () => {
+    // Navegar a la pantalla de recuperación de contraseña
+    navigation.navigate('LoginScreen');
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity style={styles.backButton} onPress={handleForgotLogin}>
         <Text style={styles.backText}>←</Text>
       </TouchableOpacity>
       <Image source={require('../../assets/recuperacion.png')} style={styles.image} />
@@ -80,3 +90,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 }); 
+
+export default RecoverPasswordScreen;

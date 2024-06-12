@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet,TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -12,12 +12,20 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab({ logueado, setLogueado }) {
   // Función para renderizar HomeScreen con props
-  const RenderHomeScreen  = props => (
+  const RenderHomeScreen = props => (
     <HomeScreen {...props} setLogueado={setLogueado} logueado={logueado} />
   );
-
+  // Función para renderizar HomeScreen con props
+  const RenderProfileScreen = props => (
+    <ProfileScreen {...props} setLogueado={setLogueado} logueado={logueado} />
+  );
+  // Función para renderizar HomeScreen con props
+  const RenderTeamsScreen = props => (
+    <TeamsScreen {...props} setLogueado={setLogueado} logueado={logueado} />
+  );
   return (
     <Tab.Navigator
+      initialRouteName="Inicio"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -47,14 +55,14 @@ export default function BottomTab({ logueado, setLogueado }) {
     >
       <Tab.Screen
         name="Equipos"
-        component={TeamsScreen}
+        component={RenderTeamsScreen}
         options={{
           title: 'Equipos',
         }}
       />
       <Tab.Screen
         name="Inicio"
-        component={RenderHomeScreen }
+        component={RenderHomeScreen}
         options={{
           title: 'Inicio',
           tabBarButton: props => (
@@ -64,7 +72,7 @@ export default function BottomTab({ logueado, setLogueado }) {
       />
       <Tab.Screen
         name="Perfil"
-        component={ProfileScreen}
+        component={RenderProfileScreen}
         options={{
           title: 'Perfil',
         }}
@@ -120,7 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000080',
-    borderRadius:35,
+    borderRadius: 35,
   },
   customButtonIcon: {
     color: '#FFC300',

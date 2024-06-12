@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image,Alert } from 'react-native';
-import { TextInput, DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image, Alert } from 'react-native';
+import { TextInput, DefaultTheme, Provider as PaperProvider, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
 
@@ -21,15 +21,12 @@ const theme = {
 };
 
 const LoginScreen = ({ logueado, setLogueado }) => {
-
   // Estados para los campos de alias y clave
   const [alias, setAlias] = useState('');
   const [clave, setClave] = useState('');
 
-
   // URL de la API para el usuario
   const USER_API = 'services/technics/tecnicos.php';
-
 
   // Manejo de inicio de sesión
   const handleLogin = async () => {
@@ -45,14 +42,13 @@ const LoginScreen = ({ logueado, setLogueado }) => {
         setLogueado(!logueado);
       } else {
         console.log(data);
-        Alert.alert('Error sesion', data.error);
+        Alert.alert('Error sesión', data.error);
       }
     } catch (error) {
       console.log('Error: ', error);
-      Alert.alert('Error sesion',error);
+      Alert.alert('Error sesión', error);
     }
   };
-
 
   // Manejo de cierre de sesión
   const handleLogOut = async () => {
@@ -61,11 +57,11 @@ const LoginScreen = ({ logueado, setLogueado }) => {
       if (data.status) {
         setLogueado(false);
       } else {
-        Alert.alert('Error sesion', data.error);
+        Alert.alert('Error sesión', data.error);
       }
     } catch (error) {
       console.log('Error: ', error);
-      Alert.alert('Error sesion',error);
+      Alert.alert('Error sesión', error);
     }
   };
 
@@ -75,33 +71,35 @@ const LoginScreen = ({ logueado, setLogueado }) => {
         <View style={styles.overlay}>
           <Image source={logo} style={styles.logo} />
           <TextInput
-            label="Usuario"
+            placeholder='Usuario'
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
-            theme={{ colors: { text: 'white', primary: 'white', placeholder: 'white' } }}
             underlineColor="transparent"
             mode="flat"
             selectionColor="white"
             placeholderTextColor="white"
             textColor='#ffffff'
-            inputStyle={{ color: 'white' }}  // Asegura que el texto escrito sea blanco
             value={alias}
             onChangeText={setAlias}
+            cursorColor='white'
+            theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
+            labelStyle={{ color: 'white' }}
           />
           <TextInput
-            label="Clave"
+            placeholder='Clave'
             style={styles.input}
             secureTextEntry
-            theme={{ colors: { text: 'white', primary: 'white', placeholder: 'white' } }}
             underlineColor="transparent"
             mode="flat"
             selectionColor="white"
             placeholderTextColor="white"
             textColor='#ffffff'
-            inputStyle={{ color: 'white' }}  // Asegura que el texto escrito sea blanco
             value={clave}
             onChangeText={setClave}
+            cursorColor='white'
+            theme={{ colors: { primary: 'white', placeholder: 'white', text: 'white', background: 'transparent' } }}
+            labelStyle={{ color: 'white' }} // Estilo personalizado para el label
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <LinearGradient
@@ -111,10 +109,10 @@ const LoginScreen = ({ logueado, setLogueado }) => {
               <Text style={styles.buttonText}>Iniciar sesión</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <Text style={styles.forgotPassword}>¿Desea recuperar contraseña?</Text>
           <TouchableOpacity mode="contained" onPress={handleLogOut} style={styles.button}>
-            <Text>Cerrar Sesión</Text>
+            <Text>Cerrar Sesión</Text> 
           </TouchableOpacity>
+          <Text style={styles.forgotPassword}>¿Desea recuperar contraseña?</Text>
         </View>
       </ImageBackground>
     </PaperProvider>

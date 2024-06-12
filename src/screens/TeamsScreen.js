@@ -5,10 +5,29 @@ import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider } from 'r
 import fetchData from '../../api/components';
 
 const TeamsScreen = ({ logueado, setLogueado }) => {
+
+  // URL de la API para el usuario
+  const USER_API = 'services/technics/tecnicos.php';
+
+  // Manejo de cierre de sesión
+  const handleLogOut = async () => {
+    try {
+      const data = await fetchData(USER_API, 'logOut');
+      if (data.status) {
+        setLogueado(false);
+      } else {
+        Alert.alert('Error sesión', data.error);
+      }
+    } catch (error) {
+      console.log('Error: ', error);
+      Alert.alert('Error sesión', error);
+    }
+  };
+
   return (
     <PaperProvider>
       <View style={styles.container}>
-        <Button mode="contained" style={styles.button}>
+        <Button mode="contained" onPress={handleLogOut} style={styles.button}>
           Cerrar Sesión
         </Button>
       </View>

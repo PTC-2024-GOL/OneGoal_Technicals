@@ -76,6 +76,7 @@ export default function BottomTab({ logueado, setLogueado }) {
         component={RenderProfileScreen}
         options={{
           title: 'Perfil',
+          headerShown:false
         }}
       />
     </Tab.Navigator>

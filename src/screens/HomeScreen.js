@@ -9,8 +9,8 @@ import gol from '../../assets/gol.png';
 import monaco from '../../assets/image 56.png';
  
 const screenWidth = Dimensions.get('window').width;
- 
-export default function App() {
+
+const HomeScreen = ({ logueado, setLogueado }) => {
   const [selectedTeam, setSelectedTeam] = useState();
  
   const widthAndHeight = 150;
@@ -102,6 +102,7 @@ export default function App() {
     </ScrollView>
   );
 }
+
  
 const styles = StyleSheet.create({
   container: {
@@ -254,3 +255,5 @@ const styles = StyleSheet.create({
     maxWidth:100,
   },
 });
+
+export default HomeScreen;

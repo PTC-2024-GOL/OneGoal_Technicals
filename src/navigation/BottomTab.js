@@ -58,6 +58,7 @@ export default function BottomTab({ logueado, setLogueado }) {
         component={RenderTeamsScreen}
         options={{
           title: 'Equipos',
+          headerShown: false
         }}
       />
       <Tab.Screen

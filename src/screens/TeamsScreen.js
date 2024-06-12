@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, FlatList, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider } from 'react-native-paper';
+import {View, FlatList, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Alert, Image} from 'react-native';
+import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider,Searchbar } from 'react-native-paper';
 import fetchData from '../../api/components';
+import {LinearGradient} from "expo-linear-gradient";
 
 const TeamsScreen = ({ logueado, setLogueado }) => {
 
@@ -25,111 +26,63 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
   };
 
   return (
-    <PaperProvider>
-      <View style={styles.container}>
-        <Button mode="contained" onPress={handleLogOut} style={styles.button}>
-          Cerrar Sesión
-        </Button>
-      </View>
-    </PaperProvider>
+    <View>
+        <LinearGradient colors={['#341567', '#6829CD']}  style={styles.titleContainer}>
+          <View style={styles.row}>
+            <View style={styles.col}>
+              <View style={styles.row2}>
+                <Image style={styles.images} source={require('../../assets/gol_blanco 2.png')}/>
+                <Text style={styles.title}>Equipos</Text>
+              </View>
+                <Text style={styles.subtitle}>Lleva el control de tus equipos</Text>
+            </View>
+            <View style={styles.col}>
+                <Image source={require('../../assets/footbalMan.png')}/>
+            </View>
+          </View>
+          <Searchbar style={styles.search}
+              placeholder="Buscar..."
+          />
+        </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+  titleContainer: {
+    paddingTop: 40,
   },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#6200ee',
-    textAlign: 'center',
-    margin: 20,
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#6200ee',
-    borderRadius: 8,
-  },
-  containerInput: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  containerRow: {
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: "center",
+    marginVertical: 20,
   },
-  input: {
-    width: '80%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 10,
-    margin: 5,
+  row2: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: "center",
+    marginHorizontal: 10
   },
-  botonAgregar: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 4,
-    maxHeight: 70,
-    marginTop: 10,
-  },
-  buttonActualizar: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: 'green',
-    borderRadius: 8,
-  },
-  buttonEliminar: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 8,
-  },
-  buttonClose: {
-    marginStart: 15,
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 8,
-  },
-  botonAgregarTexto: {
-    color: '#fff',
-    fontSize: 16,
+  images: {
+    width: 60,
+    height: 60
   },
   title: {
-    fontSize: 24,
+    fontSize: 35,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: "#fff"
   },
-  card: {
-    backgroundColor: '#f9f9f9',
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 8,
-    elevation: 3, // Para Android
-    shadowColor: '#000', // Para iOS
-    shadowOffset: { width: 0, height: 2 }, // Para iOS
-    shadowOpacity: 0.8, // Para iOS
-    shadowRadius: 2, // Para iOS
+  subtitle: {
+    color: '#FFF73E',
+    marginStart: 25,
+    fontSize: 17
   },
-  cardText: {
-    fontSize: 18,
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-  }, title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
+  search: {
+    marginHorizontal: 20,
+    marginBottom: 35
+  }
 });
 
 export default TeamsScreen;

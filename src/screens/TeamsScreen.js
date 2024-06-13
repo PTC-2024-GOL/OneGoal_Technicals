@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
-  FlatList,
   StyleSheet,
-  ActivityIndicator,
-  TextInput,
   TouchableOpacity,
   Alert,
   Image,
-  ScrollView
+  ScrollView,
+  Modal
 } from 'react-native';
-import { Text, Button, Modal, Dialog, Paragraph, Portal, PaperProvider,Searchbar } from 'react-native-paper';
+import { Text, Button, Dialog, Paragraph, Portal, PaperProvider,Searchbar } from 'react-native-paper';
 import fetchData from '../../api/components';
 import {LinearGradient} from "expo-linear-gradient";
 
@@ -19,6 +16,8 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
 
   // URL de la API para el usuario
   const USER_API = 'services/technics/tecnicos.php';
+  //Declaración de variable para manejar el modal.
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Manejo de cierre de sesión
   const handleLogOut = async () => {
@@ -37,6 +36,7 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
 
   return (
     <View>
+      {/*HEADER MORADO*/}
         <LinearGradient colors={['#341567', '#6829CD']}  style={styles.titleContainer}>
           <View style={styles.row}>
             <View style={styles.col}>
@@ -55,14 +55,16 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
           />
         </LinearGradient>
 
-
+          {/*Contedor para la indicacion y las cartas*/}
           <View style={styles.container}>
+            {/*Indicacion*/}
             <View style={styles.row3}>
               <Image style={styles.images2} source={require('../../assets/Soccer Ball.png')}/>
               <Text>Revisa el cuerpo técnico de cada equipo así como los jugadores por equipo.</Text>
             </View>
+            {/*Scroll para las cartas*/}
             <ScrollView>
-              {/*Estilo para las cartas*/}
+              {/*Cartas*/}
               <View style={styles.cardsContainer}>
                 <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
                   <Text style={styles.cardTitle}>GOL</Text>
@@ -88,20 +90,26 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
                     </View>
                   </View>
                 </View>
+
                 {/*Botones de la carta*/}
-                <TouchableOpacity style={styles.buttonOne} onPress={() => (navigation.navigate('LoginScreen'))}>
+                {/*ABRE EL MODAL DE TECNICO*/}
+                <TouchableOpacity style={styles.buttonOne} onPress={() => setModalVisible(true)}>
                   <View style={styles.rowButton}>
                     <Image style={styles.imageCard} source={require('../../assets/soccerBall.png')}/>
                     <Text style={styles.text}>Ver cuerpo técnico</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonSecond} onPress={() => (navigation.navigate('LoginScreen'))}>
+
+                {/*REDIRIGIR A PANTALLA DE JUGADORES*/}
+                <TouchableOpacity style={styles.buttonSecond} onPress={()=>{}}>
                   <View style={styles.rowButton}>
                     <Image style={styles.imageCard} source={require('../../assets/soccer.png')}/>
                     <Text style={styles.text}>Ver jugadores</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonThird} onPress={() => (navigation.navigate('LoginScreen'))}>
+
+                {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
+                <TouchableOpacity style={styles.buttonThird} onPress={()=> {}}>
                   <View style={styles.rowButton}>
                     <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
                     <Text style={styles.text}>Ver entrenamientos</Text>
@@ -110,6 +118,64 @@ const TeamsScreen = ({ logueado, setLogueado }) => {
               </View>
             </ScrollView>
           </View>
+
+          {/*Modal*/}
+          <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={()=> {setModalVisible(!modalVisible)}}>
+
+            <View style={styles.modalCenter}>
+              <View style={styles.modalContainer}>
+                <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModal}>
+                  <View style={styles.modalRow}>
+                    <Image style={styles.images} source={require('../../assets/gol_blanco 2.png')}/>
+                    <Text style={styles.modalTitle}>Cuerpo técnico</Text>
+                  </View>
+                </LinearGradient>
+
+                <ScrollView>
+                  <View style={styles.content}>
+                    <View style={styles.modalColumn}>
+                      {/*Columna*/}
+                      <View style={styles.card}>
+                        <Image style={styles.cardImg} source={require('../../assets/man.png')}/>
+                        <View style={styles.contentCard}>
+                          <Text style={styles.type}>Primer técnico</Text>
+                          <Text style={styles.name}>Daniel Castro</Text>
+
+                          <View style={styles.footer}>
+                            <Text style={styles.phone}>Telefono:</Text>
+                            <Text>7023-2343</Text>
+                          </View>
+                        </View>
+                      </View>
+                      <View style={styles.card}>
+                        <Image style={styles.cardImg} source={require('../../assets/man.png')}/>
+                        <View style={styles.contentCard}>
+                          <Text style={styles.type}>Primer técnico</Text>
+                          <Text style={styles.name}>José Martínez</Text>
+
+                          <View style={styles.footer}>
+                            <Text style={styles.phone}>Telefono:</Text>
+                            <Text>7023-2343</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/*Botones del modal*/}
+                    <View style={styles.justifyContent}>
+                      <TouchableOpacity style={styles.closeButton} onPress={()=> {setModalVisible(false)}}>
+                        <Text style={styles.text}>Cerrar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
     </View>
   );
 };
@@ -194,6 +260,8 @@ const styles = StyleSheet.create({
     borderRadius: 100/2
   },
   teamImage: {
+    width: 60,
+    height: 60,
     borderRadius: 100/2
   },
   rowCard: {
@@ -237,21 +305,117 @@ const styles = StyleSheet.create({
     marginVertical: 5
   },
   text: {
-    color: '#fff'
+    color: '#fff',
+    textAlign: "center"
   },
   container: {
-    height: 330
+    height: 340
   },
   rowButton: {
     flexDirection: "row",
     gap: 10,
     padding: 10,
-    alignItems:"center"
+    alignItems:"center",
+    justifyContent: "center"
   },
   imageCard: {
     width: 20,
     height: 20
-  }
+  },
+  // Estilos para el modal
+  modalContainer: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    height: 530
+  },
+  modalCenter: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  card: {
+    shadowColor: '#000',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    elevation: 20,
+    flexDirection: "column",
+    alignItems: "center",
+    width: 200,
+    marginVertical: 15
+  },
+  closeButton: {
+    padding: 10,
+    backgroundColor: '#F44262',
+    borderRadius: 10,
+    marginHorizontal: 15,
+    marginTop: 20,
+    width: 100
+  },
+  modalRow: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center"
+  },
+  modalColumn: {
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  modalTitle: {
+    padding:20,
+    color: '#fff',
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 20
+  },
+  headerModal: {
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25
+  },
+  justifyContent: {
+    flexDirection: "row",
+    position: "relative",
+    marginLeft: "auto",
+    bottom: 0,
+    paddingVertical: 5
+  },
+  content: {
+    padding: 25,
+  },
+  contentCard: {
+    padding: 25,
+  },
+  type: {
+    fontWeight: "bold",
+    fontSize: 15,
+    textAlign: "center"
+  },
+  name: {
+    textAlign: "center",
+    fontSize: 15,
+  },
+  phone: {
+    fontWeight: "bold"
+  },
+  footer: {
+    flexDirection: "row",
+    gap: 5,
+    marginTop: 10,
+  },
+  cardImg: {
+    resizeMode: "cover",
+    width: 200,
+    height: 180,
+    borderRadius: 20
+  },
+
 });
 
 export default TeamsScreen;

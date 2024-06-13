@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import RecoverPasswordScreen from '../screens/changePasswordsScreen';
+import PlayersScreen from "../screens/PlayersScreen";
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,11 @@ export default function LoginNav({ logueado, setLogueado }) {
           name='WelcomeScreen'
           options={{headerShown: false}}
           component= {WelcomeScreen}>
+      </Stack.Screen>
+      <Stack.Screen
+           name='PlayersScreen'
+           options={{headerShown: true}}
+           component= {PlayersScreen}>
       </Stack.Screen>
       <Stack.Screen
         name='RecoverPassword'

@@ -19,32 +19,18 @@ const windowHeight = Dimensions.get('window').height;
 
 const TeamsScreen = ({ logueado, setLogueado}) => {
 
+  // URL de la API para el usuario
+  const USER_API = 'services/technics/tecnicos.php';
+
+  //Declaración de variable para manejar el modal.
+  const [modalVisible, setModalVisible] = useState(false);
+
   const navigation = useNavigation();
 
   //Accedemos al stack navigation(LoginNav) y luego a la screen a la que queremos ir (Jugadores).
   const goToPlayersScreen = () => {
     navigation.navigate('LoginNav', {screen: 'Jugadores'});
   }
-
-  // URL de la API para el usuario
-  const USER_API = 'services/technics/tecnicos.php';
-  //Declaración de variable para manejar el modal.
-  const [modalVisible, setModalVisible] = useState(false);
-
-  // Manejo de cierre de sesión
-  const handleLogOut = async () => {
-    try {
-      const data = await fetchData(USER_API, 'logOut');
-      if (data.status) {
-        setLogueado(false);
-      } else {
-        Alert.alert('Error sesión', data.error);
-      }
-    } catch (error) {
-      console.log('Error: ', error);
-      Alert.alert('Error sesión', error);
-    }
-  };
 
   return (
       <View style={styles.mainContainer}>

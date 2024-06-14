@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import TeamsScreen from '../screens/TeamsScreen';
+import LoginNav from '../navigation/LoginNav';
 
 // Navegador Bottom Tabs Navigator
 const Tab = createBottomTabNavigator();
@@ -13,87 +14,100 @@ const Tab = createBottomTabNavigator();
 export default function BottomTab({ logueado, setLogueado }) {
   // Función para renderizar HomeScreen con props
   const RenderHomeScreen = props => (
-    <HomeScreen {...props} setLogueado={setLogueado} logueado={logueado} />
+      <HomeScreen {...props} setLogueado={setLogueado} logueado={logueado} />
   );
   // Función para renderizar HomeScreen con props
   const RenderProfileScreen = props => (
-    <ProfileScreen {...props} setLogueado={setLogueado} logueado={logueado} />
+      <ProfileScreen {...props} setLogueado={setLogueado} logueado={logueado} />
   );
   // Función para renderizar HomeScreen con props
   const RenderTeamsScreen = props => (
-    <TeamsScreen {...props} setLogueado={setLogueado} logueado={logueado} />
+      <TeamsScreen {...props} setLogueado={setLogueado} logueado={logueado} />
   );
   return (
-    <Tab.Navigator
-      initialRouteName="Inicio"
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+      <Tab.Navigator
+          initialRouteName="Inicio"
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
 
-          if (route.name === 'Inicio') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Equipos') {
-            iconName = focused ? 'football' : 'football-outline';
-          } else if (route.name === 'Perfil') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
+              if (route.name === 'Inicio') {
+                iconName = focused ? 'home' : 'home-outline';
+              } else if (route.name === 'Equipos') {
+                iconName = focused ? 'football' : 'football-outline';
+              } else if (route.name === 'Perfil') {
+                iconName = focused ? 'person' : 'person-outline';
+              }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#FFF',
-        tabBarInactiveTintColor: '#eee',
-        tabBarStyle: styles.tabBar,
-        headerStyle: {
-          backgroundColor: '#0078B7',
-          borderBottomRightRadius: 35,
-          borderBottomLeftRadius: 35,
-        },
-        headerTintColor: '#fff',
-        tabBarLabelStyle: styles.tabBarLabel,
-        headerTitleAlign: 'center',
-      })}
-    >
-      <Tab.Screen
-        name="Equipos"
-        component={RenderTeamsScreen}
-        options={{
-          title: 'Equipos',
-          headerShown: false
-        }}
-      />
-      <Tab.Screen
-        name="Inicio"
-        component={RenderHomeScreen}
-        options={{
-          title: 'Inicio',
-          tabBarButton: props => (
-            <CustomTabBarButton {...props} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Perfil"
-        component={RenderProfileScreen}
-        options={{
-          title: 'Perfil',
-          headerShown:false
-        }}
-      />
-    </Tab.Navigator>
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: '#FFF',
+            tabBarInactiveTintColor: '#eee',
+            tabBarStyle: styles.tabBar,
+            headerStyle: {
+              backgroundColor: '#0078B7',
+              borderBottomRightRadius: 35,
+              borderBottomLeftRadius: 35,
+            },
+            headerTintColor: '#fff',
+            tabBarLabelStyle: styles.tabBarLabel,
+            headerTitleAlign: 'center',
+          })}
+      >
+        <Tab.Screen
+            name="Equipos"
+            component={RenderTeamsScreen}
+            options={{
+              title: 'Equipos',
+              headerShown: false
+            }}
+        />
+        <Tab.Screen
+            name="Inicio"
+            component={RenderHomeScreen}
+            options={{
+              title: 'Inicio',
+              tabBarButton: props => (
+                  <CustomTabBarButton {...props} />
+              ),
+            }}
+        />
+        <Tab.Screen
+            name="Perfil"
+            component={RenderProfileScreen}
+            options={{
+              title: 'Perfil',
+              headerShown:false
+            }}
+        />
+
+
+        {/*Pantalla fuera del BottomTab*/}
+        {/*Accedemos al Stack navigation que se encuentra en LoginNav  */}
+        <Tab.Screen
+            name="LoginNav"
+            component={LoginNav}
+            //Escondemos la opcion para que no aparezca en el BottomTab
+            options={({ route }) => ({
+              tabBarButton: () => null,
+              headerShown: false
+            })}
+        />
+      </Tab.Navigator>
   );
 }
 
 const CustomTabBarButton = ({ children, onPress }) => (
-  <View style={styles.customButtonContainer}>
-    <View style={styles.customButton}>
-      <TouchableOpacity
-        style={styles.customButtonTouchable}
-        onPress={onPress}
-      >
-        {children}
-      </TouchableOpacity>
+    <View style={styles.customButtonContainer}>
+      <View style={styles.customButton}>
+        <TouchableOpacity
+            style={styles.customButtonTouchable}
+            onPress={onPress}
+        >
+          {children}
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
 );
 
 const styles = StyleSheet.create({
@@ -107,14 +121,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     height: 70,
     padding: 10,
-    paddingBottom: 15
+    paddingBottom: 15,
   },
   tabBarLabel: {
     fontSize: 12,
     fontWeight: 'bold',
   },
   customButtonContainer: {
-    top: -25,
+    top: -16,
     justifyContent: 'center',
     alignItems: 'center',
   },

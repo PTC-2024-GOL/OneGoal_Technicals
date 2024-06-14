@@ -10,6 +10,9 @@ import monaco from '../../assets/image 56.png';
  
 const screenWidth = Dimensions.get('window').width;
 
+//Toma la altura de la pantalla en la que se este ejecutando
+const windowHeight = Dimensions.get('window').height;
+
 const HomeScreen = ({ logueado, setLogueado }) => {
   const [selectedTeam, setSelectedTeam] = useState();
  
@@ -108,7 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    marginBottom:100,
+    marginBottom: windowHeight * 0.16
   },
   header: {
     backgroundColor: '#007bff',

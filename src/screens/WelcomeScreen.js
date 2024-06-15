@@ -3,10 +3,12 @@ import {
     View,
     StyleSheet,
     TouchableOpacity,
-    Image,
+    Image, Dimensions,
 } from 'react-native';
 import { Text} from 'react-native-paper';
 import {LinearGradient} from "expo-linear-gradient";
+
+const width = Dimensions.get('window').width;
 
 const WelcomeScreen = () => {
   const navigation = useNavigation();
@@ -46,8 +48,8 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 25,
         width: 180,
-        marginTop: 20,
-        marginHorizontal: 20
+        marginTop: 40,
+        marginHorizontal: 20,
     },
     linearGradient: {
         flex: 1
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     image: {
         flex: 1,
         resizeMode: 'cover',
-        aspectRatio: 0.8,
+        aspectRatio: width * 0.003,
         borderRadius: 30
     },
     title: {

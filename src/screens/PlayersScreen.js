@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView} from "react-native";
 import { Chip } from 'react-native-paper';
+import {useNavigation} from "@react-navigation/native";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
+
 const PlayersScreen = ({}) => {
     //Estilos para los chips
     const [style, setStyle] = useState({ borderColor: `#FBA200`, backgroundColor: `#0078B7`});
+
+    const navigation = useNavigation();
+
+    const goToPlayersDetails = () => {
+        navigation.navigate('PlayersDetails');
+    }
 
     return(
         <View style={styles.container}>
@@ -24,7 +32,7 @@ const PlayersScreen = ({}) => {
             </View>
             {/*Codigo para las cards*/}
             <ScrollView>
-                <TouchableOpacity style={styles.card}>
+                <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
                     <View style={styles.rowCard}>
                         <View style={styles.dorsal}>
                             <Text style={styles.subtitleDorsal}>Dorsal</Text>
@@ -36,12 +44,12 @@ const PlayersScreen = ({}) => {
                             </View>
 
                             <Text style={styles.subtitleCard}>Defensa</Text>
-                            <Text style={styles.titleCard}>Camilo Eduardo Sánchez Morales</Text>
+                            <Text style={styles.titleCard}>José Daniel López Alfaro</Text>
                         </View>
                         <Image style={styles.imgCard}  source={require('../../assets/man.png')}></Image>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.card}>
+                <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
                     <View style={styles.rowCard}>
                         <View style={styles.dorsal}>
                             <Text style={styles.subtitleDorsal}>Dorsal</Text>
@@ -53,7 +61,7 @@ const PlayersScreen = ({}) => {
                             </View>
 
                             <Text style={styles.subtitleCard}>Defensa</Text>
-                            <Text style={styles.titleCard}>Camilo Eduardo Sánchez Morales</Text>
+                            <Text style={styles.titleCard}>José Daniel López Alfaro</Text>
                         </View>
                         <Image style={styles.imgCard}  source={require('../../assets/man.png')}></Image>
                     </View>
@@ -102,15 +110,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 10,
         elevation: 5,
-        borderRadius: 15,
         marginBottom: 20
     },
     dorsal: {
         backgroundColor: '#f2f7ff',
-        padding: 10,
+        padding: 5,
         paddingTop: 20,
-        borderTopLeftRadius: 15,
-        borderBottomLeftRadius: 15,
+        paddingEnd: 10
     },
     rowCard: {
         flexDirection: 'row',
@@ -127,14 +133,14 @@ const styles = StyleSheet.create({
         borderRadius: 100/2
     },
     status: {
-        borderColor: '#F3645E',
+        borderColor: '#3E8F0C',
         borderWidth: 1,
         width: 70,
         borderRadius: 10,
         marginBottom: 10
     },
     statusText: {
-        color: '#F3645E',
+        color: '#3E8F0C',
         textAlign: 'center',
         fontSize: 10
     },
@@ -151,11 +157,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 10,
         textAlign: 'center',
-        color: '#020887'
+        color: '#020887',
+        marginStart: 15
     },
     subtitleDorsal: {
         fontSize: 12,
-        textAlign: 'center'
+        textAlign: 'center',
+        marginStart: 15
     }
 });
 export default PlayersScreen;

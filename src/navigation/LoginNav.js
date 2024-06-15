@@ -4,6 +4,8 @@ import LoginScreen from '../screens/LoginScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import RecoverPasswordScreen from '../screens/changePasswordsScreen';
 import PlayersScreen from '../screens/PlayersScreen';
+import PlayersDetails from "../screens/PlayersDetails";
+import playersDetails from "../screens/PlayersDetails";
 
 const Stack = createStackNavigator();
 
@@ -43,6 +45,12 @@ export default function LoginNav({ logueado, setLogueado }) {
          options={{headerShown: true}}
       >
         {props => <PlayersScreen{...props} setLogueado={setLogueado} logueado={logueado} />}
+      </Stack.Screen>
+      <Stack.Screen
+         name='PlayersDetails'
+         options={{headerShown: false}}
+      >
+        {props => <PlayersDetails{...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

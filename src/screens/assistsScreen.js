@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
+import { LinearGradient } from 'expo-linear-gradient';
+import soccer from '../../assets/icon-observacion.png';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
+const players = [
+    { name: 'Juan Perez', color: '#4CAF50' },
+    { name: 'José Morán', color: '#F44336' },
+    { name: 'Maicol Leandro', color: '#2196F3' },
+    { name: 'Eduardo Cubias', color: '#2196F3' },
+];
+
+
+
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
+
+
     const [selectedStatus, setSelectedStatus] = useState(status);
 
     const handleStatusChange = (value) => {
@@ -50,6 +63,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 };
 
 const AssistsScreen = () => {
+    const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
 
     const playersData = [
@@ -127,8 +141,62 @@ const AssistsScreen = () => {
                 ) : (
                     // Aquí va el contenido de Observaciones
                     <View style={styles.observationsContainer}>
-                        <Text>Observaciones de los jugadores</Text>
-                        {/* Agregar contenido específico para observaciones */}
+                        <ScrollView>
+                            {/* Encabezado */}
+                            <View style={styles.headerM}>
+                                <Text style={styles.headerTextM}>Jugadores</Text>
+                                <Text style={styles.headerTextM}>Observación</Text>
+                            </View>
+
+                            {/* Lista de jugadores */}
+                            {players.map((player, index) => (
+                                <View key={index} style={[styles.playerContainerM, { borderLeftColor: player.color }]}>
+                                    <Text style={styles.playerTextM}>{player.name}</Text>
+                                    <TouchableOpacity
+                                        style={styles.observationButtonM}
+                                        onPress={() => setModalVisible(true)}
+                                    >
+                                        <Image source={soccer}></Image>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                        </ScrollView>
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalVisible}
+                            onRequestClose={() => { setModalVisible(!modalVisible); }}
+                        >
+                            <View style={styles.modalCenterM}>
+                                <View style={styles.modalContainerM}>
+                                    <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
+                                        <View style={styles.modalRowM}>
+                                            <Image style={styles.imagesM} source={require('../../assets/gol_blanco 2.png')} />
+                                            <Text style={styles.modalTitleM}>Observación</Text>
+                                        </View>
+                                    </LinearGradient>
+
+                                    <ScrollView>
+                                        <View style={styles.contentM}>
+                                            <View style={styles.observationBoxM}>
+                                                <View style={styles.blueLineM}></View>
+                                                <Text style={styles.observationTextM}>
+                                                    Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
+                                                </Text>
+                                            </View>
+                                            <View style={styles.justifyContentM}>
+                                                <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
+                                                    <Text style={styles.buttonTextM}>Guardar</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
+                                                    <Text style={styles.buttonTextM}>Cerrar</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    </ScrollView>
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
                 )}
             </ScrollView>
@@ -228,7 +296,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 0.1,
         elevation: 2,
-        borderRadius:20,
+        borderRadius: 20,
     },
     selectScheduleText: {
         fontSize: 16,
@@ -278,6 +346,145 @@ const styles = StyleSheet.create({
     observationsContainer: {
         padding: 16,
     },
+    //MODAL
+    headerM: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        backgroundColor: '#3F51B5',
+        padding: 15,
+        borderRadius: 30,
+        marginBottom: 20,
+    },
+    headerTextM: {
+        color: '#fff',
+        fontWeight: 'bold', 
+        fontSize: 16,
+        flex: 1,
+        textAlign: 'center',
+    },
+    playerContainerM: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 15,
+        borderLeftWidth: 10,
+    },
+    playerTextM: {
+        fontSize: 16,
+    },
+    observationButtonM: {
+        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 5,
+    },
+    observationIconM: {
+        width: 24,
+        height: 24,
+    },
+    modalCenterM: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContainerM: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 25,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: 350,
+    },
+    headerModalM: {
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        padding: 20,
+    },
+    modalRowM: {
+        flexDirection: 'row',
+        gap: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalTitleM: {
+        color: '#fff',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 20,
+        marginLeft: 10,
+    },
+    imagesM: {
+        width: 40,
+        height: 40,
+        resizeMode: 'contain',
+    },
+    contentM: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    observationBoxM: {
+        backgroundColor: '#f0f4f8',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '100%',
+        position: 'relative',
+    },
+    blueLineM: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 5,
+        backgroundColor: '#2196F3',
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 10,
+    },
+    observationTextM: {
+        fontSize: 16,
+        color: '#333',
+        textAlign: 'center',
+        marginLeft: 10,
+    },
+    closeButtonM: {
+        padding: 10,
+        backgroundColor: '#F44262',
+        borderRadius: 10,
+        width: 100,
+        alignItems: 'center',
+        marginLeft: 10,
+    },
+    buttonTextM: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    justifyContentM: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        padding: 10,
+        marginLeft: 90,
+    },
+    saveButtonM: {
+        padding: 10,
+        backgroundColor: '#007bff',
+        borderRadius: 10,
+        width: 100,
+        alignItems: 'center',
+    },
+
+    
 });
 
 export default AssistsScreen;

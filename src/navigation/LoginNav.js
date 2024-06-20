@@ -61,7 +61,14 @@ export default function LoginNav({ logueado, setLogueado }) {
       </Stack.Screen>
       <Stack.Screen
          name='Asistencia'
-         options={{headerShown: true}}
+         options={{
+            headerShown: true,
+            headerStyle: {
+                backgroundColor: '#558D32', // Nuevo color de fondo para la pantalla de asistencias
+                borderBottomRightRadius: 35,
+                borderBottomLeftRadius: 35,
+            },
+         }}
       >
         {props => <AssistsScreen{...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>

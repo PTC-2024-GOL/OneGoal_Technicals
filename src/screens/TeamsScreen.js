@@ -32,6 +32,11 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
     navigation.navigate('LoginNav', {screen: 'Jugadores'});
   }
 
+  //Accedemos al stack navigation(LoginNav) y luego a la screen a la que queremos ir (Jugadores).
+  const goToTrainingScreen = () => {
+    navigation.navigate('LoginNav', {screen: 'Entrenamientos'});
+  }
+
   return (
       <View style={styles.mainContainer}>
         {/*HEADER MORADO*/}
@@ -107,7 +112,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
               </TouchableOpacity>
 
               {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
-              <TouchableOpacity style={styles.buttonThird} onPress={()=> {}}>
+              <TouchableOpacity style={styles.buttonThird} onPress={goToTrainingScreen}>
                 <View style={styles.rowButton}>
                   <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
                   <Text style={styles.text}>Ver entrenamientos</Text>
@@ -158,7 +163,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
               </TouchableOpacity>
 
               {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
-              <TouchableOpacity style={styles.buttonThird} onPress={()=> {}}>
+              <TouchableOpacity style={styles.buttonThird} onPress={goToTrainingScreen}>
                 <View style={styles.rowButton}>
                   <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
                   <Text style={styles.text}>Ver entrenamientos</Text>
@@ -232,7 +237,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    marginBottom: windowHeight * 0.15
+    marginBottom: windowHeight * 0.15,
   },
   titleContainer: {
     paddingTop: 40,

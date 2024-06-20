@@ -1,7 +1,7 @@
 // Función que maneja las peticiones fetch
 export default async function fetchData(filename, action, form = null) {
     // Variable que guarda la ip para importarla en la ruta general del servidor
-    let ip = `10.10.1.121`;
+    let ip = `192.168.1.6`;
 
     // URL base del servidor
     const SERVER_URL = `http://${ip}/sitio_gol_sv/api/`;

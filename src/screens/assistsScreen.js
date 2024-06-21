@@ -348,6 +348,8 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         marginBottom: 16,
+        paddingStart: 25,
+        paddingEnd: 25,
     },
     tabActive: {
         flex: 1,

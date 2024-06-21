@@ -68,10 +68,10 @@ const AssistancePlayer = () => {
     const navigation = useNavigation();
 
     const playersData = [
-        { name: 'Jueves 18 de abril', status: 'Asistencia', color: '#5AE107' },
-        { name: 'Jueves 8 de abril', status: 'Falta', color: '#FF0000' },
-        { name: 'Jueves 1 de abril', status: 'Viaje', color: '#007AFF' },
-        { name: 'Jueves 25 de mayo', status: 'Viaje', color: '#007AFF' },
+        { name: 'Jueves 18 de abril', status: 'Asistencia', color: '#4CAF50' },
+        { name: 'Jueves 8 de abril', status: 'Falta', color: '#F44336' },
+        { name: 'Jueves 1 de abril', status: 'Viaje', color: '#2196F3' },
+        { name: 'Jueves 25 de mayo', status: 'Viaje', color: '#2196F3' },
     ];
 
     const [selectedSchedule, setSelectedSchedule] = useState(null);
@@ -169,7 +169,7 @@ const AssistancePlayer = () => {
                     </View>
                 ) : (
                     // Aquí va el contenido de Observaciones
-                    <View style={styles.observationsContainer}>
+                    <View>
                         <ScrollView>
                             {/* Encabezado */}
                             <View style={styles.headerM}>
@@ -179,8 +179,8 @@ const AssistancePlayer = () => {
 
                             {/* Lista de jugadores */}
                             {players.map((player, index) => (
-                                <View key={index} style={[styles.playerContainerM, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerTextM}>{player.name}</Text>
+                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
+                                    <Text style={styles.playerName}>{player.name}</Text>
                                     <TouchableOpacity
                                         style={styles.observationButtonM}
                                         onPress={() => setModalVisible(true)}

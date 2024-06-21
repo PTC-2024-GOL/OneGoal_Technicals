@@ -10,7 +10,6 @@ import foto from '../../assets/chepe.jpg';
 
 
 const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario

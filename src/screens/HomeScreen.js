@@ -4,22 +4,21 @@ import { Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import PieChart from 'react-native-pie-chart';
- 
+
 import gol from '../../assets/gol.png';
 import monaco from '../../assets/image 56.png';
- 
-const screenWidth = Dimensions.get('window').width;
 
-//Toma la altura de la pantalla en la que se este ejecutando
+const screenWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get('window').width;
 
 const HomeScreen = ({ logueado, setLogueado }) => {
   const [selectedTeam, setSelectedTeam] = useState();
- 
+
   const widthAndHeight = 150;
   const series = [5, 2, 1, 3];
   const sliceColor = ['#4CAF50', '#F44336', '#FFC107', '#00BCD4'];
- 
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.welcomeContainer}>
@@ -97,7 +96,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
               style={styles.teamLogo}
             />
             <View style={styles.ancho}>
-            <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
+              <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
             </View>
           </View>
         </View>
@@ -106,11 +105,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   );
 }
 
- 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingHorizontal: windowWidth * 0.02, 
     marginBottom: windowHeight * 0.16
   },
   header: {
@@ -125,11 +124,13 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     padding: 20,
     margin: 10,
-    elevation: 5,
-    borderTopEndRadius: 30,
-    borderTopStartRadius: 30,
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30.01,
+    elevation: 10, 
+    borderRadius: 11,
+    backgroundColor: '#fff',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
   welcomeText: {
     fontSize: 18,
@@ -171,11 +172,13 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     margin: 10,
-    elevation: 5,
-    borderTopEndRadius: 30,
-    borderTopStartRadius: 30,
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30.01,
+    elevation: 10, 
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
   textContainer: {
     flex: 1,
@@ -201,11 +204,13 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     margin: 10,
-    elevation: 5,
-    borderTopEndRadius: 30,
-    borderTopStartRadius: 30,
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30.01,
+    elevation: 10, 
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
   matchDate: {
     fontSize: 14,
@@ -255,7 +260,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   ancho: {
-    maxWidth:100,
+    maxWidth: 100,
   },
 });
 

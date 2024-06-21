@@ -34,6 +34,10 @@ const TrainingCard = ({ date, time, playersPresent, onPress }) => {
 const TrainingsScreen = () => {
     const navigation = useNavigation();
 
+    const goToAssistsM = () => {
+        navigation.navigate('Modificar asistencia');
+    };
+
     const goToAssists = () => {
         navigation.navigate('Asistencia');
     };
@@ -55,7 +59,7 @@ const TrainingsScreen = () => {
                 Aquí puedes ver los entrenamientos de los últimos meses. O también puedes pasar asistencia.
             </Text>
             </View>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={goToAssists}>
                 <Text style={styles.buttonText}>Pasar asistencia</Text>
             </TouchableOpacity>
             <ScrollView style={styles.scrollContainer}>
@@ -65,7 +69,7 @@ const TrainingsScreen = () => {
                         date={item.date}
                         time={item.time}
                         playersPresent={item.playersPresent}
-                        onPress={goToAssists}
+                        onPress={goToAssistsM}
                     />
                 ))}
             </ScrollView>

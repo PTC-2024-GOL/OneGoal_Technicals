@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView } from "react-native";
+import {View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView, TextInput} from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
@@ -186,11 +186,10 @@ const AssistsScreen = () => {
 
                                     <ScrollView>
                                         <View style={styles.contentM}>
+                                            <Text style={styles.fw}>Escribe la observación del jugador</Text>
                                             <View style={styles.observationBoxM}>
                                                 <View style={styles.blueLineM}></View>
-                                                <Text style={styles.observationTextM}>
-                                                    Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
-                                                </Text>
+                                                <TextInput style={styles.observationTextM} multiline={true}/>
                                             </View>
                                             <View style={styles.justifyContentM}>
                                                 <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
@@ -450,7 +449,7 @@ const styles = StyleSheet.create({
     headerModalM: {
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        padding: 20,
+        padding: 20
     },
     modalRowM: {
         flexDirection: 'row',
@@ -472,7 +471,6 @@ const styles = StyleSheet.create({
     },
     contentM: {
         padding: 20,
-        alignItems: 'center',
     },
     observationBoxM: {
         backgroundColor: '#f0f4f8',
@@ -500,8 +498,8 @@ const styles = StyleSheet.create({
     observationTextM: {
         fontSize: 16,
         color: '#333',
-        textAlign: 'center',
         marginLeft: 10,
+        height: 50
     },
     closeButtonM: {
         padding: 10,
@@ -528,6 +526,10 @@ const styles = StyleSheet.create({
         width: 100,
         alignItems: 'center',
     },
+    fw: {
+        fontWeight: "bold",
+        marginBottom: 10
+    }
 
     
 });

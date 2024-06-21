@@ -11,10 +11,10 @@ const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 const players = [
-    { name: 'Juan Perez', color: '#4CAF50' },
-    { name: 'José Morán', color: '#F44336' },
-    { name: 'Maicol Leandro', color: '#2196F3' },
-    { name: 'Eduardo Cubias', color: '#2196F3' },
+    { name: '6 de noviembre 2025', color: '#4CAF50' },
+    { name: '14 de noviembre 2025', color: '#F44336' },
+    { name: '16 de noviembre 2025', color: '#2196F3' },
+    { name: '24 de diciembre 2025', color: '#2196F3' },
 ];
 
 
@@ -173,7 +173,7 @@ const AssistancePlayer = () => {
                         <ScrollView>
                             {/* Encabezado */}
                             <View style={styles.headerM}>
-                                <Text style={styles.headerTextM}>Jugadores</Text>
+                                <Text style={styles.headerTextM}>Fecha</Text>
                                 <Text style={styles.headerTextM}>Observación</Text>
                             </View>
 
@@ -343,7 +343,6 @@ const styles = StyleSheet.create({
     },
     textMiniColor: {
         color: 'white',
-        textAlign: "center",
         fontSize: 12,
         position: 'absolute',
         top: 0, // Coloca el texto en la parte superior del contenedor

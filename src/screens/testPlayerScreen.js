@@ -51,7 +51,7 @@ const testPlayerScreen = () => {
                 <Text style={styles.horariotext}>Estas evaluando a Juan Pérez</Text>
             </Text>
             <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Actualizar prueba</Text>
+                <Text style={styles.buttonText}>Guardar prueba</Text>
             </TouchableOpacity>
             <ScrollView style={styles.scrollContainer}>
                     <View>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView } from "react-native";
 import { TextInput, Card, Avatar, Button } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
@@ -7,6 +7,10 @@ import { AntDesign } from "@expo/vector-icons";
 import Entypo from '@expo/vector-icons/Entypo';
 
 import foto from '../../assets/chepe.jpg';
+
+
+const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get('window').width;
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
@@ -52,7 +56,8 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView>
+      <View style={styles.container}>
       <LinearGradient colors={["#03045E", "#647AA3"]} style={styles.header}>
         <Avatar.Image
           size={100}
@@ -146,6 +151,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         )}
       </Card>
     </View>
+    </ScrollView>
   );
 };
 
@@ -154,6 +160,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f0f4f7",
     alignItems: "center",
+    marginBottom: windowHeight * 0.15,
   },
   header: {
     alignItems: "center",

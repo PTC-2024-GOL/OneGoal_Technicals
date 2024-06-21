@@ -55,7 +55,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
                     value: null,
                 }}
                 Icon={() => {
-                    return <Ionicons name="chevron-down" size={16} color="#5AE107" />;
+                    return <Ionicons name="chevron-up" size={16} color="#5AE107" />;
                 }}
             />
         </View>
@@ -101,18 +101,19 @@ const AssistsScreen = () => {
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Guardar asistencia</Text>
             </TouchableOpacity>
-            <View style={styles.selectScheduleContainer}>
-                <Text style={styles.selectScheduleText}>Elige un horario</Text>
                 <RNPickerSelect
                     onValueChange={(value) => setSelectedSchedule(value)}
                     items={scheduleOptions}
-                    style={pickerSelectStyles}
+                    style={pickerSelectScheduleStyles}
+                    useNativeAndroidPickerStyle={false}
                     placeholder={{
                         label: 'Selecciona un horario...',
                         value: null,
                     }}
+                    Icon={() => {
+                        return <Ionicons name="chevron-up" size={32} color="#5AE107" />;
+                    }}
                 />
-            </View>
             <View style={styles.tabContainer}>
                 <TouchableOpacity
                     style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
@@ -129,15 +130,22 @@ const AssistsScreen = () => {
             </View>
             <ScrollView style={styles.scrollContainer}>
                 {activeTab === 'historial' ? (
-                    playerStatuses.map((player, index) => (
-                        <PlayerCard
-                            key={index}
-                            name={player.name}
-                            status={player.status}
-                            color={player.color}
-                            onStatusChange={handleStatusChange}
-                        />
-                    ))
+                    
+                    <View>
+                        <View style={styles.headerM}>
+                            <Text style={styles.headerTextM}>Jugadores</Text>
+                            <Text style={styles.headerTextM}>Asistencias</Text>
+                        </View>
+                        {playerStatuses.map((player, index) => (
+                            <PlayerCard
+                                key={index}
+                                name={player.name}
+                                status={player.status}
+                                color={player.color}
+                                onStatusChange={handleStatusChange}
+                            />
+                        ))}
+                    </View>
                 ) : (
                     // Aquí va el contenido de Observaciones
                     <View style={styles.observationsContainer}>
@@ -203,6 +211,41 @@ const AssistsScreen = () => {
         </View>
     );
 };
+
+const pickerSelectScheduleStyles = StyleSheet.create({
+    inputIOS: {
+        fontSize: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderTopWidth:5,
+        borderTopColor: '#5209B0',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+        backgroundColor: 'white',
+        elevation: 2,
+        width: '100%',
+        marginBottom: 12,
+    },
+    inputAndroid: {
+        fontSize: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderTopWidth:5,
+        borderTopColor: '#5209B0',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+        backgroundColor: 'white',
+        elevation: 2,
+        width: '100%',
+        marginBottom: 12,
+    },
+    iconContainer: {
+        top: 10,
+        right: 12,
+    },
+});
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {

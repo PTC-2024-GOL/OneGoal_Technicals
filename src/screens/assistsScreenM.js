@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
+import edit from '../../assets/iconPlayersScreen/Edit.png';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -67,11 +68,15 @@ const AssistsScreenM = () => {
 
     const navigation = useNavigation();
 
+    const goToTest = () => {
+        navigation.navigate('Pruebas');
+    };
+
     const playersData = [
-        { name: 'Tía paola', status: 'Asistencia', color: '#5AE107' },
-        { name: 'José Morán', status: 'Falta', color: '#FF0000' },
-        { name: 'Maicol Leandro', status: 'Otro', color: '#007AFF' },
-        { name: 'Eduardo Cubias', status: 'Otro', color: '#007AFF' },
+        { name: 'Tía paola', status: 'Asistencia', color: '#4CAF50' },
+        { name: 'José Morán', status: 'Falta', color: '#F44336' },
+        { name: 'Maicol Leandro', status: 'Otro', color: '#2196F3' },
+        { name: 'Eduardo Cubias', status: 'Otro', color: '#2196F3' },
     ];
 
     const [selectedSchedule, setSelectedSchedule] = useState(null);
@@ -107,34 +112,24 @@ const AssistsScreenM = () => {
                 <Text style={styles.buttonText}>Guardar asistencia</Text>
             </TouchableOpacity>
             <View style={styles.tabContainer}>
-            <ScrollView
-                    horizontal={true}
-                    alwaysBounceHorizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.scrollView}>
-                <TouchableOpacity
-                    style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('historial')}
-                >
-                    <Text style={styles.tabText}>Historial</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('observaciones')}
-                >
-                    <Text style={styles.tabText}>Observaciones</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('pruebas')}
-                >
-                    <Text style={styles.tabText}>pruebas</Text>
-                </TouchableOpacity>
-            </ScrollView>
-            </View>
-            <View style={styles.row}>
-                <Text style={styles.leftText}>El promedio global del equipo es: </Text>
-                <Text style={styles.rightText}>8.4</Text>
+                    <TouchableOpacity
+                        style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
+                        onPress={() => setActiveTab('historial')}
+                    >
+                        <Text style={styles.tabText}>Historial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
+                        onPress={() => setActiveTab('observaciones')}
+                    >
+                        <Text style={styles.tabText}>Observaciones</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
+                        onPress={() => setActiveTab('pruebas')}
+                    >
+                        <Text style={styles.tabText}>pruebas</Text>
+                    </TouchableOpacity>
             </View>
             <ScrollView style={styles.scrollContainer}>
                 {activeTab === 'historial' ? (
@@ -156,7 +151,7 @@ const AssistsScreenM = () => {
                     </View>
                 ) : activeTab === 'observaciones' ? (
                     // Aquí va el contenido de Observaciones
-                    <View style={styles.observationsContainer}>
+                    <View>
                         <ScrollView>
                             {/* Encabezado */}
                             <View style={styles.headerM}>
@@ -166,8 +161,8 @@ const AssistsScreenM = () => {
 
                             {/* Lista de jugadores */}
                             {players.map((player, index) => (
-                                <View key={index} style={[styles.playerContainerM, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerTextM}>{player.name}</Text>
+                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
+                                    <Text style={styles.playerName}>{player.name}</Text>
                                     <TouchableOpacity
                                         style={styles.observationButtonM}
                                         onPress={() => setModalVisible(true)}
@@ -214,11 +209,15 @@ const AssistsScreenM = () => {
                             </View>
                         </Modal>
                     </View>
-                     ) : (
+                ) : (
                     // Aquí va el contenido de Pruebas
                     // Aquí va el contenido de Observaciones
-                    <View style={styles.observationsContainer}>
+                    <View>
                         <ScrollView>
+                            <View style={styles.row}>
+                                <Text style={styles.leftText}>El promedio global del equipo es: </Text>
+                                <Text style={styles.rightText}>8.4</Text>
+                            </View>
                             {/* Encabezado */}
                             <View style={styles.headerM}>
                                 <Text style={styles.headerTextM}>Jugador</Text>
@@ -228,14 +227,14 @@ const AssistsScreenM = () => {
 
                             {/* Lista de jugadores */}
                             {players.map((player, index) => (
-                                <View key={index} style={[styles.playerContainerM, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerTextM}>{player.name}</Text>
+                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
+                                    <Text style={styles.playerName}>{player.name}</Text>
                                     <Text style={styles.playerTextPromedio}>{player.promedio}</Text>
                                     <TouchableOpacity
                                         style={styles.observationButtonM}
-                                        onPress={() => setModalVisible(true)}
+                                        onPress={() => goToTest()}
                                     >
-                                        <Image source={soccer}></Image>
+                                        <Image source={edit} style={{ width: 30, height: 30 }} />
                                     </TouchableOpacity>
                                 </View>
                             ))}
@@ -356,8 +355,8 @@ const styles = StyleSheet.create({
         maxWidth: windowWidth,
     },
     scrollView: {
-        flexDirection: 'row',
-        padding: 5 // Cambia el color de fondo del ScrollView a morado
+        flexDirection: 'row', // Cambia el color de fondo del ScrollView a morado
+        alignContent: 'center',
     },
     button: {
         backgroundColor: '#5AE107', // Green color
@@ -373,7 +372,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 16,
     },
-    horariotext:{
+    horariotext: {
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
@@ -399,28 +398,29 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         marginBottom: 16,
-        paddingStart: 25,
-        paddingEnd: 25,
+        paddingStart: 0,
+        paddingEnd: 0,
+        justifyContent: 'space-between'
     },
     tabActive: {
         flex: 1,
-        padding: 12,
-        marginRight: 5,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#334195', // Active tab color
         alignItems: 'center',
         borderRadius: 8,
     },
     tabInactive: {
         flex: 1,
-        padding: 12,
-        marginRight: 5,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#9A9A9A', // Inactive tab color
         alignItems: 'center',
         borderRadius: 8,
     },
     tabText: {
         color: '#FFFFFF',
-        fontSize: 16,
+        fontSize: 13,
         fontWeight: 'bold',
     },
     playerCard: {
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '90%', // Ajusta esto según sea necesario
-        paddingHorizontal: 20, // Ajusta el padding según sea necesario
+        padding: 10, // Añade algo de padding para que no se vea tan pegado a los bordes
     },
     leftText: {
         fontSize: 16,

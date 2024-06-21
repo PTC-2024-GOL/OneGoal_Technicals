@@ -8,6 +8,7 @@ import PlayersDetails from "../screens/PlayersDetails";
 import TrainingsScreen from "../screens/trainingsScreen";
 import AssistsScreen from "../screens/assistsScreen";
 import AssistsScreenM from "../screens/assistsScreenM";
+import TestPlayerScreen from "../screens/testPlayerScreen";
 
 const Stack = createStackNavigator();
 
@@ -85,6 +86,19 @@ export default function LoginNav({ logueado, setLogueado }) {
          }}
       >
         {props => <AssistsScreenM{...props} setLogueado={setLogueado} logueado={logueado} />}
+      </Stack.Screen>
+      <Stack.Screen
+         name='Pruebas'
+         options={{
+            headerShown: true,
+            headerStyle: {
+                backgroundColor: '#0078B7', // Nuevo color de fondo para la pantalla de asistencias
+                borderBottomRightRadius: 35,
+                borderBottomLeftRadius: 35,
+            },
+         }}
+      >
+        {props => <TestPlayerScreen{...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

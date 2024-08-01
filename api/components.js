@@ -1,11 +1,8 @@
+import * as Constantes from './constantes'
 // Función que maneja las peticiones fetch
 export default async function fetchData(filename, action, form = null) {
-    // Variable que guarda la ip para importarla en la ruta general del servidor
-    //let ip = `10.10.1.121`;
-    // ip guayito 
-    let ip = `192.168.0.12`;
     // URL base del servidor
-    const SERVER_URL = `http://${ip}/sitio_gol_sv/api/`;
+    const SERVER_URL = Constantes.SERVER_URL;
 
     // Opciones para la petición fetch
     const OPTIONS = {
@@ -17,7 +14,7 @@ export default async function fetchData(filename, action, form = null) {
         // Construcción de la URL con los parámetros necesarios
         const PATH = new URL(SERVER_URL + filename);
         PATH.searchParams.append('action', action);
-        
+
         // Realización de la petición fetch
         const RESPONSE = await fetch(PATH.href, OPTIONS);
 
@@ -28,11 +25,11 @@ export default async function fetchData(filename, action, form = null) {
 
         // Parseo del JSON de la respuesta
         const DATA = await RESPONSE.json();
-        console.log('RESPONSE', DATA); // Para ver el JSON recibido
+        console.log('RESPONSE: ', DATA);
         return DATA;
 
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.log('Fetch error:', error);
         throw error; // Lanza el error para que useEffect pueda manejarlo
     }
 };

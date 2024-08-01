@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -34,6 +34,9 @@ const TrainingCard = ({ date, time, playersPresent, onPress }) => {
 const TrainingsScreen = () => {
     const navigation = useNavigation();
 
+    const route = useRoute();
+    const { idEquipo } = route.params;
+
     const goToAssistsM = () => {
         navigation.navigate('Modificar asistencia');
     };
@@ -41,6 +44,8 @@ const TrainingsScreen = () => {
     const goToAssists = () => {
         navigation.navigate('Asistencia');
     };
+
+    console.log(idEquipo)
 
     const trainingData = [
         { date: '24 de agosto', time: 'Horario de 9:00 am a 13:00 pm', playersPresent: 21 },

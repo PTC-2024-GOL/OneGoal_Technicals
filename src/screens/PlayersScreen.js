@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView} from "react-native";
 import { Chip } from 'react-native-paper';
-import {useNavigation} from "@react-navigation/native";
+import {useNavigation, useRoute} from "@react-navigation/native";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const PlayersScreen = ({}) => {
+const PlayersScreen = () => {
     //Estilos para los chips
     const [style, setStyle] = useState({ borderColor: `#FBA200`, backgroundColor: `#0078B7`});
 
@@ -15,6 +15,11 @@ const PlayersScreen = ({}) => {
     const goToPlayersDetails = () => {
         navigation.navigate('PlayersDetails');
     }
+
+    const route = useRoute();
+    const { idEquipo } = route.params;
+
+    console.log(idEquipo)
 
     return(
         <View style={styles.container}>

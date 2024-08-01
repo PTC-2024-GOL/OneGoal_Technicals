@@ -12,29 +12,56 @@ import {
 import { Text, Button, Dialog, Paragraph, Portal, PaperProvider,Searchbar } from 'react-native-paper';
 import fetchData from '../../api/components';
 import {LinearGradient} from "expo-linear-gradient";
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import imageData from "../../api/images";
+import {SERVER_URL} from "../../api/constantes";
 
 //Toma la altura de la pantalla en la que se este ejecutando
 const windowHeight = Dimensions.get('window').height;
 
 const TeamsScreen = ({ logueado, setLogueado}) => {
 
-  // URL de la API para el usuario
-  const USER_API = 'services/technics/tecnicos.php';
-
+  const [teams, setTeams] = useState([]);
+  const API = 'services/technics/equipos.php';
   //Declaración de variable para manejar el modal.
   const [modalVisible, setModalVisible] = useState(false);
 
+  const [image, setImage] = '';
+
   const navigation = useNavigation();
 
+  const fillCards = async () => {
+    const DATA = await fetchData(API, 'readAll');
+
+    if(DATA.status){
+      let data = DATA.dataset;
+      setTeams(data);
+    }else{
+      console.log(DATA.error);
+    }
+  }
+
+  useFocusEffect(
+      useCallback(()=>{
+        fillCards();
+      },[])
+  )
+
+
   //Accedemos al stack navigation(LoginNav) y luego a la screen a la que queremos ir (Jugadores).
-  const goToPlayersScreen = () => {
-    navigation.navigate('LoginNav', {screen: 'Jugadores'});
+  const goToPlayersScreen = (idEquipo) => {
+    navigation.navigate('LoginNav', {
+      screen: 'Jugadores',
+      params: {idEquipo}
+    });
   }
 
   //Accedemos al stack navigation(LoginNav) y luego a la screen a la que queremos ir (Jugadores).
-  const goToTrainingScreen = () => {
-    navigation.navigate('LoginNav', {screen: 'Entrenamientos'});
+  const goToTrainingScreen = (idEquipo) => {
+    navigation.navigate('LoginNav', {
+      screen: 'Entrenamientos',
+      params: {idEquipo}
+    });
   }
 
   return (
@@ -68,108 +95,60 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
           {/*Scroll para las cartas*/}
           <ScrollView>
             {/*Cartas*/}
-            <View style={styles.cardsContainer}>
-              <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
-                <Text style={styles.cardTitle}>GOL</Text>
-              </LinearGradient>
-              {/*Fila que tienes tres columnas*/}
-              <View style={styles.rowCard}>
-                {/*Columna 1*/}
-                <View style={styles.imgCard}>
-                  <Image style={styles.teamImage} source={require('../../assets/equipo.png')}/>
-                </View>
-                {/*Columna 2*/}
-                <View>
-                  <Text style={styles.fontWeight}>Categoría</Text>
-                  <Text>Sub 18</Text>
-                </View>
-                {/*Columna 3*/}
-                <View>
-                  <Text style={styles.fontWeight}>Genéro</Text>
-                  {/*Fila*/}
-                  <View style={styles.rowGenero}>
-                    <View style={styles.status}></View>
-                    <Text>Masculino</Text>
+
+            {teams.map((teams, index) => (
+                <View style={styles.cardsContainer}>
+                  <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
+                    <Text style={styles.cardTitle}>{teams.nombre_equipo}</Text>
+                  </LinearGradient>
+                  {/*Fila que tienes tres columnas*/}
+                  <View style={styles.rowCard}>
+                    {/*Columna 1*/}
+                    <View style={styles.imgCard}>
+                      <Image style={styles.teamImage} source={{uri: `${SERVER_URL}images/equipos/${teams.logo_equipo}`}}/>
+                    </View>
+                    {/*Columna 2*/}
+                    <View>
+                      <Text style={styles.fontWeight}>Categoría</Text>
+                      <Text>{teams.nombre_categoria}</Text>
+                    </View>
+                    {/*Columna 3*/}
+                    <View>
+                      <Text style={styles.fontWeight}>Genéro</Text>
+                      {/*Fila*/}
+                      <View style={styles.rowGenero}>
+                        <View style={styles.status}></View>
+                        <Text>{teams.genero_equipo}</Text>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              </View>
 
-              {/*Botones de la carta*/}
-              {/*ABRE EL MODAL DE TECNICO*/}
-              <TouchableOpacity style={styles.buttonOne} onPress={() => setModalVisible(true)}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccerBall.png')}/>
-                  <Text style={styles.text}>Ver cuerpo técnico</Text>
-                </View>
-              </TouchableOpacity>
+                  {/*Botones de la carta*/}
+                  {/*ABRE EL MODAL DE TECNICO*/}
+                  <TouchableOpacity style={styles.buttonOne} onPress={() => setModalVisible(true)}>
+                    <View style={styles.rowButton}>
+                      <Image style={styles.imageCard} source={require('../../assets/soccerBall.png')}/>
+                      <Text style={styles.text}>Ver cuerpo técnico</Text>
+                    </View>
+                  </TouchableOpacity>
 
-              {/*REDIRIGIR A PANTALLA DE JUGADORES*/}
-              <TouchableOpacity style={styles.buttonSecond} onPress={goToPlayersScreen}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccer.png')}/>
-                  <Text style={styles.text}>Ver jugadores</Text>
-                </View>
-              </TouchableOpacity>
+                  {/*REDIRIGIR A PANTALLA DE JUGADORES*/}
+                  <TouchableOpacity style={styles.buttonSecond} onPress={()=>{goToPlayersScreen(teams.id_equipo)}}>
+                    <View style={styles.rowButton}>
+                      <Image style={styles.imageCard} source={require('../../assets/soccer.png')}/>
+                      <Text style={styles.text}>Ver jugadores</Text>
+                    </View>
+                  </TouchableOpacity>
 
-              {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
-              <TouchableOpacity style={styles.buttonThird} onPress={goToTrainingScreen}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
-                  <Text style={styles.text}>Ver entrenamientos</Text>
+                  {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
+                  <TouchableOpacity style={styles.buttonThird} onPress={()=>{goToTrainingScreen(teams.id_equipo)}}>
+                    <View style={styles.rowButton}>
+                      <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
+                      <Text style={styles.text}>Ver entrenamientos</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.cardsContainer}>
-              <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
-                <Text style={styles.cardTitle}>GOL</Text>
-              </LinearGradient>
-              {/*Fila que tienes tres columnas*/}
-              <View style={styles.rowCard}>
-                {/*Columna 1*/}
-                <View style={styles.imgCard}>
-                  <Image style={styles.teamImage} source={require('../../assets/equipo.png')}/>
-                </View>
-                {/*Columna 2*/}
-                <View>
-                  <Text style={styles.fontWeight}>Categoría</Text>
-                  <Text>Sub 18</Text>
-                </View>
-                {/*Columna 3*/}
-                <View>
-                  <Text style={styles.fontWeight}>Genéro</Text>
-                  {/*Fila*/}
-                  <View style={styles.rowGenero}>
-                    <View style={styles.status}></View>
-                    <Text>Masculino</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/*Botones de la carta*/}
-              {/*ABRE EL MODAL DE TECNICO*/}
-              <TouchableOpacity style={styles.buttonOne} onPress={() => setModalVisible(true)}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccerBall.png')}/>
-                  <Text style={styles.text}>Ver cuerpo técnico</Text>
-                </View>
-              </TouchableOpacity>
-
-              {/*REDIRIGIR A PANTALLA DE JUGADORES*/}
-              <TouchableOpacity style={styles.buttonSecond} onPress={goToPlayersScreen}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccer.png')}/>
-                  <Text style={styles.text}>Ver jugadores</Text>
-                </View>
-              </TouchableOpacity>
-
-              {/*REDIRIGIR A PANTALLA DE ENTRENAMIENTOS*/}
-              <TouchableOpacity style={styles.buttonThird} onPress={goToTrainingScreen}>
-                <View style={styles.rowButton}>
-                  <Image style={styles.imageCard} source={require('../../assets/soccerGoal.png')}/>
-                  <Text style={styles.text}>Ver entrenamientos</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            ))}
           </ScrollView>
         </View>
 

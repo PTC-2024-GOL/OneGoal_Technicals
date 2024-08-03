@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView} from "react-native";
 import { Chip } from 'react-native-paper';
-import {useNavigation, useRoute} from "@react-navigation/native";
+import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
+import fetchData from "../../api/components";
+import {SERVER_URL} from "../../api/constantes";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -9,7 +11,8 @@ const windowWidth = Dimensions.get('window').width;
 const PlayersScreen = () => {
     //Estilos para los chips
     const [style, setStyle] = useState({ borderColor: `#FBA200`, backgroundColor: `#0078B7`});
-
+    const API = 'services/technics/participaciones_partidos.php';
+    const [players, setPlayers] = useState([]);
     const navigation = useNavigation();
 
     const goToPlayersDetails = () => {
@@ -19,7 +22,24 @@ const PlayersScreen = () => {
     const route = useRoute();
     const { idEquipo } = route.params;
 
-    console.log(idEquipo)
+    const fillPlayers = async () => {
+        const FORM = new FormData();
+        FORM.append('idEquipo', idEquipo);
+
+        const DATA = await fetchData(API, 'readAllByIdEquipo', FORM);
+        if(DATA.status){
+            let data = DATA.dataset;
+            setPlayers(data);
+        }else {
+            console.log(DATA.error);
+        }
+    }
+
+    useFocusEffect(
+        useCallback(()=>{
+            fillPlayers();
+        },[idEquipo])
+    )
 
     return(
         <View style={styles.container}>
@@ -37,40 +57,25 @@ const PlayersScreen = () => {
             </View>
             {/*Codigo para las cards*/}
             <ScrollView>
-                <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
-                    <View style={styles.rowCard}>
-                        <View style={styles.dorsal}>
-                            <Text style={styles.subtitleDorsal}>Dorsal</Text>
-                            <Text style={styles.titleDorsal}>10</Text>
-                        </View>
-                        <View style={styles.infoCard}>
-                            <View style={styles.status}>
-                                <Text style={styles.statusText}>Activo</Text>
+                {players.map((players, index)=> (
+                    <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
+                        <View style={styles.rowCard}>
+                            <View style={styles.dorsal}>
+                                <Text style={styles.subtitleDorsal}>Dorsal</Text>
+                                <Text style={styles.titleDorsal}>{players.dorsal_jugador}</Text>
                             </View>
+                            <View style={styles.infoCard}>
+                                <View style={styles.status}>
+                                    <Text style={styles.statusText}>{players.estatus_jugador}</Text>
+                                </View>
 
-                            <Text style={styles.subtitleCard}>Defensa</Text>
-                            <Text style={styles.titleCard}>José Daniel López Alfaro</Text>
-                        </View>
-                        <Image style={styles.imgCard}  source={require('../../assets/man.png')}></Image>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
-                    <View style={styles.rowCard}>
-                        <View style={styles.dorsal}>
-                            <Text style={styles.subtitleDorsal}>Dorsal</Text>
-                            <Text style={styles.titleDorsal}>10</Text>
-                        </View>
-                        <View style={styles.infoCard}>
-                            <View style={styles.status}>
-                                <Text style={styles.statusText}>Activo</Text>
+                                <Text style={styles.subtitleCard}>{players.area_de_juego}</Text>
+                                <Text style={styles.titleCard}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
                             </View>
-
-                            <Text style={styles.subtitleCard}>Defensa</Text>
-                            <Text style={styles.titleCard}>José Daniel López Alfaro</Text>
+                            <Image style={styles.imgCard}  source={{uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}`}}></Image>
                         </View>
-                        <Image style={styles.imgCard}  source={require('../../assets/man.png')}></Image>
-                    </View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                ))}
             </ScrollView>
         </View>
     );

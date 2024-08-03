@@ -106,7 +106,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
             </View>
           </View>
           <Searchbar style={styles.search}
-                     placeholder="Buscar..."
+                     placeholder="Buscar nombre del equipo..."
                      onChangeText={setSearch}
                      value={search}
           />

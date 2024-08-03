@@ -11,14 +11,6 @@ import fetchData from '../../../api/components';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const players = [
-    { name: '6 de noviembre 2025', color: '#4CAF50' },
-    { name: '14 de noviembre 2025', color: '#F44336' },
-    { name: '16 de noviembre 2025', color: '#2196F3' },
-    { name: '24 de diciembre 2025', color: '#2196F3' },
-];
-
-
 
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
 
@@ -60,7 +52,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
                     return <Ionicons name="chevron-up" size={16} color="#5AE107" />;
                 }}
                 // desactiva la opción de elegir otra opción
-                disabled={1 == 1}
+                disabled={true}
 
             />
         </View>
@@ -71,6 +63,7 @@ const AssistancePlayer = ({ idJugador }) => {
     const [datosgrafica, setDatosGrafica] = useState({});
     const API = 'services/technics/asistencias.php';
     const playersData = [];
+    const [observaciones, setObservaciones] = useState([]);
     const fillPlayers = async () => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
@@ -100,7 +93,7 @@ const AssistancePlayer = ({ idJugador }) => {
                 return '#9C27B0';
             case 'Falta':
                 return '#FF5722';
-                case 'Ausencia injustificada':
+            case 'Ausencia injustificada':
                 return '#FF5722';
             default:
                 return '#9E9E9E'; // Color por defecto para casos no especificados
@@ -134,7 +127,7 @@ const AssistancePlayer = ({ idJugador }) => {
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
     const [playerStatuses, setPlayerStatuses] = useState(playersData);
-
+    const [players, setPlayers] = useState(playersData);
 
     const handleStatusChange = (name, status) => {
         setPlayerStatuses((prevStatuses) =>
@@ -143,6 +136,10 @@ const AssistancePlayer = ({ idJugador }) => {
             )
         );
     };
+    const llenarObservaciones = (observacion) => {
+        setObservaciones(observacion);
+        setModalVisible(true);
+    }
 
     console.log('datos', datosgrafica.cantidad_asistencia);
     useEffect(() => {
@@ -260,18 +257,19 @@ const AssistancePlayer = ({ idJugador }) => {
                                     <Text style={styles.headerTextM}>Observación</Text>
                                 </View>
 
-                                {/* Lista de jugadores */}
-                                {players.map((player, index) => (
+                                {playerStatuses.filter(player => player.observacion_asistencia !== null).map((player, index) => (
                                     <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                                        <Text style={styles.playerName}>{player.name}</Text>
+                                        <Text style={styles.playerName}>{player.fecha}</Text>
                                         <TouchableOpacity
                                             style={styles.observationButtonM}
-                                            onPress={() => setModalVisible(true)}
+                                            onPress={() => llenarObservaciones(player.observacion_asistencia)}
                                         >
-                                            <Image source={soccer}></Image>
+                                            <Image source={soccer} style={styles.observationIconM} />
                                         </TouchableOpacity>
                                     </View>
                                 ))}
+
+
                             </ScrollView>
                             <Modal
                                 animationType="slide"
@@ -292,7 +290,7 @@ const AssistancePlayer = ({ idJugador }) => {
                                                 <View style={styles.observationBoxM}>
                                                     <View style={styles.blueLineM}></View>
                                                     <Text style={styles.observationTextM}>
-                                                        Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
+                                                        {observaciones}
                                                     </Text>
                                                 </View>
                                                 <View style={styles.justifyContentM}>

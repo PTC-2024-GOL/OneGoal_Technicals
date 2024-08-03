@@ -15,8 +15,9 @@ const PlayersScreen = () => {
     const [players, setPlayers] = useState([]);
     const navigation = useNavigation();
 
-    const goToPlayersDetails = () => {
-        navigation.navigate('PlayersDetails');
+    const goToPlayersDetails = (id_jugador) => {
+        console.log('Este es el jugador seleccionado ',id_jugador);
+        navigation.navigate('PlayersDetails', { id_jugador });
     }
 
     const route = useRoute();
@@ -29,6 +30,7 @@ const PlayersScreen = () => {
         const DATA = await fetchData(API, 'readAllByIdEquipo', FORM);
         if(DATA.status){
             let data = DATA.dataset;
+            console.log(data);
             setPlayers(data);
         }else {
             console.log(DATA.error);
@@ -57,22 +59,22 @@ const PlayersScreen = () => {
             </View>
             {/*Codigo para las cards*/}
             <ScrollView>
-                {players.map((players, index)=> (
-                    <TouchableOpacity onPress={goToPlayersDetails} style={styles.card}>
+                {players.map((player, index)=> (
+                    <TouchableOpacity key={index} onPress={() => goToPlayersDetails(player.id_jugador)} style={styles.card}>
                         <View style={styles.rowCard}>
                             <View style={styles.dorsal}>
                                 <Text style={styles.subtitleDorsal}>Dorsal</Text>
-                                <Text style={styles.titleDorsal}>{players.dorsal_jugador}</Text>
+                                <Text style={styles.titleDorsal}>{player.dorsal_jugador}</Text>
                             </View>
                             <View style={styles.infoCard}>
                                 <View style={styles.status}>
-                                    <Text style={styles.statusText}>{players.estatus_jugador}</Text>
+                                    <Text style={styles.statusText}>{player.estatus_jugador}</Text>
                                 </View>
 
-                                <Text style={styles.subtitleCard}>{players.area_de_juego}</Text>
-                                <Text style={styles.titleCard}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
+                                <Text style={styles.subtitleCard}>{player.area_de_juego}</Text>
+                                <Text style={styles.titleCard}>{player.nombre_jugador + ' ' + player.apellido_jugador}</Text>
                             </View>
-                            <Image style={styles.imgCard}  source={{uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}`}}></Image>
+                            <Image style={styles.imgCard}  source={{uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}`}}></Image>
                         </View>
                     </TouchableOpacity>
                 ))}

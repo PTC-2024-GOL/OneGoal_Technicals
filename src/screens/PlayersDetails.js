@@ -2,6 +2,7 @@ import {StyleSheet, View, Text, SafeAreaView} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
 import {Avatar, Chip} from "react-native-paper";
 import {useState} from "react";
+import {useRoute} from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
 import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
 import AssistancePlayer from "../components/playersComponent/assistancePlayer";
@@ -9,21 +10,25 @@ import AssistancePlayer from "../components/playersComponent/assistancePlayer";
 const PlayersDetails = () => {
     // Manejo del cambio de pantallas.
     const [activeSection, setActiveSection] = useState('informacion');
-    //Manejo para el estilo de los botones.
+    // Manejo para el estilo de los botones.
     const [activeChip, setActiveChip] = useState('informacion');
 
-    //Funcion que permite el cambio de pantallas, recibe un parametro (opciones de los botones (informacion, rendimiento o asistencias))
+    // Obtén el parámetro de la ruta
+    const route = useRoute();
+    const { id_jugador } = route.params;
+
+    // Función que permite el cambio de pantallas, recibe un parámetro (opciones de los botones (informacion, rendimiento o asistencias))
     const changeScreen = (section) => {
-        //Manejo para el cambio de pantalla
+        // Manejo para el cambio de pantalla
         setActiveSection(section);
-        //Manejo para el estilo de los chips
+        // Manejo para el estilo de los chips
         setActiveChip(section);
     };
 
-    //Variable que guardara el contenido que se mostrara en la pantalla
+    // Variable que guardará el contenido que se mostrará en la pantalla
     let contentComponent;
-    //Evaluamos la opcion que se ha elegido y dependiendo de ello injectara el componente de la informacion requerida a contentComponent.
-    switch (activeSection){
+    // Evaluamos la opción que se ha elegido y dependiendo de ello inyectará el componente de la información requerida a contentComponent.
+    switch (activeSection) {
         case 'informacion':
             contentComponent = <InfoPlayers/>;
             break;
@@ -37,7 +42,7 @@ const PlayersDetails = () => {
             contentComponent = null;
     }
 
-    return(
+    return (
         <View style={styles.container}>
             {/*HEADER*/}
             <LinearGradient style={styles.linearGradient} colors={['#03045E', '#0608C4']}>
@@ -63,14 +68,12 @@ const PlayersDetails = () => {
                     onPress={() => changeScreen('asistencias')}
                     textStyle={{color: activeChip === 'asistencias' ? 'white' : '#9A9A9A'}}>Asistencias
                 </Chip>
-
             </View>
 
             {/*INFORMACION SELECCIONADA*/}
             {contentComponent}
-
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -100,7 +103,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-evenly"
     }
-
 });
 
 export default PlayersDetails;

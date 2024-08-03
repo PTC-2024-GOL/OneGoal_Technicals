@@ -59,6 +59,9 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
                 Icon={() => {
                     return <Ionicons name="chevron-up" size={16} color="#5AE107" />;
                 }}
+                // desactiva la opción de elegir otra opción
+                disabled={1 == 1}
+
             />
         </View>
     );
@@ -67,45 +70,84 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 const AssistancePlayer = ({ idJugador }) => {
     const [datosgrafica, setDatosGrafica] = useState({});
     const API = 'services/technics/asistencias.php';
+    const playersData = [];
     const fillPlayers = async () => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
 
         const DATA = await fetchData(API, 'readOnePlayerStadistic', FORM);
-        if(DATA.status){
+        if (DATA.status) {
             let data = DATA.dataset;
             console.log(data);
             setDatosGrafica(data);
             console.log(datosgrafica);
-        }else {
+        } else {
             console.log(DATA.error);
         }
     }
+
+    const getColorByAssistance = (assistance) => {
+        switch (assistance) {
+            case 'Asistencia':
+                return '#4CAF50';
+            case 'Lesion':
+                return '#F44336';
+            case 'Trabajo':
+                return '#2196F3';
+            case 'Estudio':
+                return '#FFC107';
+            case 'Enfermedad':
+                return '#9C27B0';
+            case 'Falta':
+                return '#FF5722';
+                case 'Ausencia injustificada':
+                return '#FF5722';
+            default:
+                return '#9E9E9E'; // Color por defecto para casos no especificados
+        }
+    }
+
+    const fillPlayersAssistance = async () => {
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API, 'readOnePlayer', FORM);
+        if (DATA.status) {
+            let data = DATA.dataset;
+
+            // Mapear y asignar colores
+            const updatedData = data.map(record => ({
+                ...record,
+                color: getColorByAssistance(record.asistencia)
+            }));
+
+            setPlayerStatuses(updatedData);
+        } else {
+            console.log(DATA.error);
+        }
+    };
     const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
     console.log('ando aqui');
-    const playersData = [
-        { name: 'Jueves 18 de abril', status: 'Asistencia', color: '#4CAF50' },
-        { name: 'Jueves 8 de abril', status: 'Falta', color: '#F44336' },
-        { name: 'Jueves 1 de abril', status: 'Viaje', color: '#2196F3' },
-        { name: 'Jueves 25 de mayo', status: 'Viaje', color: '#2196F3' },
-    ];
+
 
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
     const [playerStatuses, setPlayerStatuses] = useState(playersData);
 
+
     const handleStatusChange = (name, status) => {
         setPlayerStatuses((prevStatuses) =>
             prevStatuses.map((player) =>
-                player.name === name ? { ...player, status } : player
+                player.fecha === name ? { ...player, asistencia: status } : player
             )
         );
     };
-    
+
     console.log('datos', datosgrafica.cantidad_asistencia);
     useEffect(() => {
         fillPlayers();
+        fillPlayersAssistance();
     }, []);
 
     return (
@@ -201,8 +243,8 @@ const AssistancePlayer = ({ idJugador }) => {
                             {playerStatuses.map((player, index) => (
                                 <PlayerCard
                                     key={index}
-                                    name={player.name}
-                                    status={player.status}
+                                    name={player.fecha}
+                                    status={player.asistencia}
                                     color={player.color}
                                     onStatusChange={handleStatusChange}
                                 />
@@ -450,7 +492,7 @@ const styles = StyleSheet.create({
     },
     headerTextM: {
         color: '#fff',
-        fontWeight: 'bold', 
+        fontWeight: 'bold',
         fontSize: 16,
         flex: 1,
         textAlign: 'center',

@@ -26,11 +26,22 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
   //Declaración de variable para manejar el modal.
   const [modalVisible, setModalVisible] = useState(false);
   const [technicals, setTechnicals] = useState([]);
+  const [search, setSearch] = useState('');
 
   const navigation = useNavigation();
 
   const fillCards = async () => {
-    const DATA = await fetchData(API, 'readAll');
+    let action;
+    let FORM = new FormData();
+    if(search){
+      FORM.append('search', search);
+      action = 'searchRows';
+    }else{
+      action = 'readAll';
+      FORM = null
+    }
+
+    const DATA = await fetchData(API, action, FORM);
 
     if(DATA.status){
       let data = DATA.dataset;
@@ -58,7 +69,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
   useFocusEffect(
       useCallback(()=>{
         fillCards();
-      },[])
+      },[search])
   )
 
 
@@ -96,6 +107,8 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
           </View>
           <Searchbar style={styles.search}
                      placeholder="Buscar..."
+                     onChangeText={setSearch}
+                     value={search}
           />
         </LinearGradient>
 

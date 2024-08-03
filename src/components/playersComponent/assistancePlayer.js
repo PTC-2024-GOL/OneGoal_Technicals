@@ -1,11 +1,12 @@
 import { View, StyleSheet, Image, ScrollView, Modal, Dimensions, TouchableOpacity } from "react-native";
 import { Avatar, Button, Card, Text } from 'react-native-paper';
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../../assets/icon-observacion.png';
+import fetchData from '../../../api/components';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -63,10 +64,26 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
     );
 };
 
-const AssistancePlayer = () => {
+const AssistancePlayer = ({ idJugador }) => {
+    const [datosgrafica, setDatosGrafica] = useState({});
+    const API = 'services/technics/asistencias.php';
+    const fillPlayers = async () => {
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API, 'readOnePlayerStadistic', FORM);
+        if(DATA.status){
+            let data = DATA.dataset;
+            console.log(data);
+            setDatosGrafica(data);
+            console.log(datosgrafica);
+        }else {
+            console.log(DATA.error);
+        }
+    }
     const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
-
+    console.log('ando aqui');
     const playersData = [
         { name: 'Jueves 18 de abril', status: 'Asistencia', color: '#4CAF50' },
         { name: 'Jueves 8 de abril', status: 'Falta', color: '#F44336' },
@@ -85,12 +102,17 @@ const AssistancePlayer = () => {
             )
         );
     };
+    
+    console.log('datos', datosgrafica.cantidad_asistencia);
+    useEffect(() => {
+        fillPlayers();
+    }, []);
 
     return (
         <ScrollView>
             <View style={styles.container}>
 
-                {/*Primeras cartas*/}
+                {/* Primeras cartas */}
                 <ScrollView
                     horizontal={true}
                     alwaysBounceHorizontal={true}
@@ -100,134 +122,153 @@ const AssistancePlayer = () => {
                         <Card style={styles.card}>
                             <Card style={styles.cardBlue}>
                                 <Text style={styles.textMiniColor}>Asistencias</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>5</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>{datosgrafica.cantidad_asistencia}</Text>
                             </Card>
                         </Card>
                         <Card style={styles.card}>
                             <Card style={styles.cardCyan}>
-                            <Text style={styles.textMiniColor}>Porcentaje de asistencias</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>85%</Text>
+                                <Text style={styles.textMiniColor}>Porcentaje de asistencias</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>
+                                    {datosgrafica.porcentaje_asistencia ? `${Math.round(datosgrafica.porcentaje_asistencia)}%` : '0%'}
+                                </Text>
                             </Card>
                         </Card>
                         <Card style={styles.card}>
                             <Card style={styles.cardPurple}>
-                            <Text style={styles.textMiniColor}>Inasistenicas injustificadas</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>21</Text>
+                                <Text style={styles.textMiniColor}>Inasistencias injustificadas</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>{datosgrafica.cantidad_ausencia_injustificada}</Text>
                             </Card>
                         </Card>
                         <Card style={styles.card}>
                             <Card style={styles.cardBlue}>
-                                <Text style={styles.textMiniColor}>Inasistencias justificadas</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>16</Text>
+                                <Text style={styles.textMiniColor}>Porcentaje de injustificadas</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>
+                                    {datosgrafica.porcentaje_ausencia_injustificada ? `${Math.round(datosgrafica.porcentaje_ausencia_injustificada)}%` : '0%'}
+                                </Text>
                             </Card>
                         </Card>
                         <Card style={styles.card}>
                             <Card style={styles.cardCyan}>
-                            <Text style={styles.textMiniColor}>Inasistencia por enfermedad</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>4</Text>
+                                <Text style={styles.textMiniColor}>Inasistencia por enfermedad</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>{datosgrafica.cantidad_enfermedad}</Text>
+                            </Card>
+                        </Card>
+                        <Card style={styles.card}>
+                            <Card style={styles.cardBlue}>
+                                <Text style={styles.textMiniColor}>Porcentaje de enfermedad</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>
+                                    {datosgrafica.porcentaje_ausencia_injustificada ? `${Math.round(datosgrafica.porcentaje_enfermedad)}%` : '0%'}
+                                </Text>
                             </Card>
                         </Card>
                         <Card style={styles.card}>
                             <Card style={styles.cardPurple}>
-                            <Text style={styles.textMiniColor}>Inasistencia por lesión</Text>
-                                <Text style={styles.textColor} variant='displayMedium'>30</Text>
+                                <Text style={styles.textMiniColor}>Inasistencia por otra razón</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>{datosgrafica.cantidad_otro}</Text>
+                            </Card>
+                        </Card>
+                        <Card style={styles.card}>
+                            <Card style={styles.cardBlue}>
+                                <Text style={styles.textMiniColor}>Porcentaje de otra razón</Text>
+                                <Text style={styles.textColor} variant='displayMedium'>
+                                    {datosgrafica.porcentaje_ausencia_injustificada ? `${Math.round(datosgrafica.porcentaje_otro)}%` : '0%'}
+                                </Text>
                             </Card>
                         </Card>
                     </View>
-                </ScrollView >
+                </ScrollView>
                 <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('historial')}
-                >
-                    <Text style={styles.tabText}>Historial</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('observaciones')}
-                >
-                    <Text style={styles.tabText}>Observaciones</Text>
-                </TouchableOpacity>
-            </View>
-            <ScrollView style={styles.scrollContainer}>
-                {activeTab === 'historial' ? (
-                    
-                    <View>
-                        <View style={styles.headerM}>
-                            <Text style={styles.headerTextM}>Fecha</Text>
-                            <Text style={styles.headerTextM}>Asistencias</Text>
-                        </View>
-                        {playerStatuses.map((player, index) => (
-                            <PlayerCard
-                                key={index}
-                                name={player.name}
-                                status={player.status}
-                                color={player.color}
-                                onStatusChange={handleStatusChange}
-                            />
-                        ))}
-                    </View>
-                ) : (
-                    // Aquí va el contenido de Observaciones
-                    <View>
-                        <ScrollView>
-                            {/* Encabezado */}
+                    <TouchableOpacity
+                        style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
+                        onPress={() => setActiveTab('historial')}
+                    >
+                        <Text style={styles.tabText}>Historial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
+                        onPress={() => setActiveTab('observaciones')}
+                    >
+                        <Text style={styles.tabText}>Observaciones</Text>
+                    </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.scrollContainer}>
+                    {activeTab === 'historial' ? (
+                        <View>
                             <View style={styles.headerM}>
                                 <Text style={styles.headerTextM}>Fecha</Text>
-                                <Text style={styles.headerTextM}>Observación</Text>
+                                <Text style={styles.headerTextM}>Asistencias</Text>
                             </View>
-
-                            {/* Lista de jugadores */}
-                            {players.map((player, index) => (
-                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerName}>{player.name}</Text>
-                                    <TouchableOpacity
-                                        style={styles.observationButtonM}
-                                        onPress={() => setModalVisible(true)}
-                                    >
-                                        <Image source={soccer}></Image>
-                                    </TouchableOpacity>
-                                </View>
+                            {playerStatuses.map((player, index) => (
+                                <PlayerCard
+                                    key={index}
+                                    name={player.name}
+                                    status={player.status}
+                                    color={player.color}
+                                    onStatusChange={handleStatusChange}
+                                />
                             ))}
-                        </ScrollView>
-                        <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible}
-                            onRequestClose={() => { setModalVisible(!modalVisible); }}
-                        >
-                            <View style={styles.modalCenterM}>
-                                <View style={styles.modalContainerM}>
-                                    <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
-                                        <View style={styles.modalRowM}>
-                                            <Text style={styles.modalTitleM}>Observación</Text>
-                                        </View>
-                                    </LinearGradient>
-
-                                    <ScrollView>
-                                        <View style={styles.contentM}>
-                                            <View style={styles.observationBoxM}>
-                                                <View style={styles.blueLineM}></View>
-                                                <Text style={styles.observationTextM}>
-                                                    Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
-                                                </Text>
-                                            </View>
-                                            <View style={styles.justifyContentM}>
-                                                <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Guardar</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Cerrar</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    </ScrollView>
+                        </View>
+                    ) : (
+                        // Aquí va el contenido de Observaciones
+                        <View>
+                            <ScrollView>
+                                {/* Encabezado */}
+                                <View style={styles.headerM}>
+                                    <Text style={styles.headerTextM}>Fecha</Text>
+                                    <Text style={styles.headerTextM}>Observación</Text>
                                 </View>
-                            </View>
-                        </Modal>
-                    </View>
-                )}
-            </ScrollView>
+
+                                {/* Lista de jugadores */}
+                                {players.map((player, index) => (
+                                    <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
+                                        <Text style={styles.playerName}>{player.name}</Text>
+                                        <TouchableOpacity
+                                            style={styles.observationButtonM}
+                                            onPress={() => setModalVisible(true)}
+                                        >
+                                            <Image source={soccer}></Image>
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                            <Modal
+                                animationType="slide"
+                                transparent={true}
+                                visible={modalVisible}
+                                onRequestClose={() => { setModalVisible(!modalVisible); }}
+                            >
+                                <View style={styles.modalCenterM}>
+                                    <View style={styles.modalContainerM}>
+                                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
+                                            <View style={styles.modalRowM}>
+                                                <Text style={styles.modalTitleM}>Observación</Text>
+                                            </View>
+                                        </LinearGradient>
+
+                                        <ScrollView>
+                                            <View style={styles.contentM}>
+                                                <View style={styles.observationBoxM}>
+                                                    <View style={styles.blueLineM}></View>
+                                                    <Text style={styles.observationTextM}>
+                                                        Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.justifyContentM}>
+                                                    <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
+                                                        <Text style={styles.buttonTextM}>Guardar</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
+                                                        <Text style={styles.buttonTextM}>Cerrar</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </ScrollView>
+                                    </View>
+                                </View>
+                            </Modal>
+                        </View>
+                    )}
+                </ScrollView>
             </View>
         </ScrollView>
     );
@@ -339,6 +380,7 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: "center",
         top: 24,
+        fontSize: 38,
         marginBottom: 20
     },
     textMiniColor: {

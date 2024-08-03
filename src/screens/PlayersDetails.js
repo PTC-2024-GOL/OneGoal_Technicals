@@ -35,9 +35,9 @@ const PlayersDetails = () => {
         case 'rendimiento':
             contentComponent = <TrainingPlayer/>;
             break;
-        case 'asistencias':
-            contentComponent = <AssistancePlayer/>;
-            break;
+            case 'asistencias':
+                contentComponent = <AssistancePlayer idJugador={id_jugador} />;
+                break;
         default:
             contentComponent = null;
     }

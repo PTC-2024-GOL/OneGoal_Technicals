@@ -1,20 +1,21 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
+import fetchData from '../../api/components';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 import soccer from '../../assets/Player-soccer.png';
 
-const TrainingCard = ({ date, time, playersPresent, onPress }) => {
+const TrainingCard = ({ date, time, playersPresent, onPress, idEntrenamiento }) => {
     return (
         <TouchableOpacity style={styles.card}>
             <Text style={styles.date}>{date}</Text>
             <Text style={styles.time}>{time}</Text>
             <View style={styles.infoRow}>
-                <TouchableOpacity style={styles.infoRowTwo} onPress={onPress}>
+                <TouchableOpacity style={styles.infoRowTwo}  onPress={() => onPress(idEntrenamiento)}>
                     <View style={styles.iconButton}>
                         <Image source={soccer}></Image>
                     </View>
@@ -33,50 +34,77 @@ const TrainingCard = ({ date, time, playersPresent, onPress }) => {
 
 const TrainingsScreen = () => {
     const navigation = useNavigation();
-
     const route = useRoute();
     const { idEquipo } = route.params;
+    console.log('Id del equipo pantalla de mostrar entrenamientos: ' + idEquipo);
 
-    const goToAssistsM = () => {
-        navigation.navigate('Modificar asistencia');
+    const goToAssistsM = (idEntrenamiento) => {
+        navigation.navigate('Modificar asistencia', { idEntrenamiento, idEquipo }); // Pasar idEntrenamiento y idEquipo
     };
 
     const goToAssists = () => {
-        navigation.navigate('Asistencia');
+        navigation.navigate('Asistencia', { idEquipo });
     };
 
-    console.log(idEquipo)
+    const [trainings, setTrainings] = useState([]);
+    const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
+    const API = 'services/technics/entrenamientos.php';
 
-    const trainingData = [
-        { date: '24 de agosto', time: 'Horario de 9:00 am a 13:00 pm', playersPresent: 21 },
-        { date: '19 de agosto', time: 'Horario de 9:00 am a 13:00 pm', playersPresent: 10 },
-        { date: '18 de agosto', time: 'Horario de 15:00 pm a 17:00 pm', playersPresent: 15 },
-        { date: '17 de agosto', time: 'Horario de 15:00 pm a 17:00 pm', playersPresent: 21 },
-        { date: '15 de agosto', time: 'Horario de 13:00 pm a 15:00 pm', playersPresent: 21 },
-    ];
+    const fillCards = async () => {
+        const form = new FormData();
+        form.append('idEquipo', idEquipo);
+        const DATA = await fetchData(API, 'readAllMobile', form);
+
+        if (DATA.status) {
+            let data = DATA.dataset;
+            setTrainings(data);
+        } else {
+            console.log(DATA.error);
+        }
+    };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fillCards();
+        setRefreshing(false);
+    }, [idEquipo]);
+
+    useEffect(() => {
+        fillCards();
+    }, [idEquipo]);
 
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>Entrenamientos</Text>
             <View style={styles.infoRowTree}>
-            <Ionicons name="football" size={35} color="black"/>
-            <Text style={styles.subHeaderText}>
-                Aquí puedes ver los entrenamientos de los últimos meses. O también puedes pasar asistencia.
-            </Text>
+                <Ionicons name="football" size={35} color="black" />
+                <Text style={styles.subHeaderText}>
+                    Aquí puedes ver los entrenamientos de los últimos meses. O también puedes pasar asistencia.
+                </Text>
             </View>
             <TouchableOpacity style={styles.button} onPress={goToAssists}>
                 <Text style={styles.buttonText}>Pasar asistencia</Text>
             </TouchableOpacity>
-            <ScrollView style={styles.scrollContainer}>
-                {trainingData.map((item, index) => (
+            <ScrollView
+                style={styles.scrollContainer}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+            >
+                {trainings.map((item, index) => (
                     <TrainingCard
                         key={index}
-                        date={item.date}
-                        time={item.time}
-                        playersPresent={item.playersPresent}
+                        date={item.FECHA}
+                        time={item.HORARIO}
+                        playersPresent={item.JUGADORES_PRESENTES}
+                        idEntrenamiento={item.IDEN}
                         onPress={goToAssistsM}
                     />
                 ))}
+                {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
             </ScrollView>
         </View>
     );
@@ -150,7 +178,7 @@ const styles = StyleSheet.create({
     infoRowTree: {
         flexDirection: 'row',
         alignItems: 'center',
-        margin:6,
+        margin: 6,
     },
     linkText: {
         color: '#000000',

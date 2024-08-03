@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useRoute } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
@@ -67,6 +67,10 @@ const AssistsScreenM = () => {
     const [modalVisible, setModalVisible] = useState(false);
 
     const navigation = useNavigation();
+    const route = useRoute();
+    const { idEntrenamiento, idEquipo } = route.params;
+    console.log('Id del entrenamiento pantalla de modificar: ' + idEntrenamiento);
+    console.log('Id del equipo pantalla de modificar: ' + idEquipo);
 
     const goToTest = () => {
         navigation.navigate('Pruebas');

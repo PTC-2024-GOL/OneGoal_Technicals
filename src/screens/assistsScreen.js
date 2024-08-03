@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView, TextInput} from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useRoute } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
@@ -65,6 +65,9 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 const AssistsScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
+    const route = useRoute();
+    const { idEquipo } = route.params;
+    console.log('Id del equipo pantalla de crear: ' + idEquipo);
 
     const playersData = [
         { name: 'Juan Perez', status: 'Asistencia', color: '#4CAF50' },

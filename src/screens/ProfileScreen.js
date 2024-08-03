@@ -1,38 +1,73 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image } from "react-native";
 import { TextInput, Card, Avatar, Button } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
 import { AntDesign } from "@expo/vector-icons";
 import Entypo from '@expo/vector-icons/Entypo';
-
+import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import imageData from "../../api/images";
 import foto from '../../assets/chepe.jpg';
-
 
 const windowHeight = Dimensions.get('window').height;
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
   const USER_API = "services/technics/tecnicos.php";
-
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: "José Orlando Martínez Peña",
+    name: "José Orlando",
+    fullname: "Martínez Peña",
     email: "chepe@gmail.com",
-    dui: "12345678-9",
     phone: "1212-1212",
+    dui: "12345678-9",
+    birthday: new Date("2005-09-26"),
+    image: Image.resolveAssetSource(foto).uri,
   });
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const handleEditPress = () => {
-    if (isEditing) {
-      setIsEditing(false);
-    } else {
-      setIsEditing(true);
-    }
+    setIsEditing(!isEditing);
   };
 
-  const handleSavePress = () => {
-    setIsEditing(false);
+  const handleSavePress = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("nombrePerfil", profile.name);
+      formData.append("apellidoPerfil", profile.fullname);
+      formData.append("correoPerfil", profile.email);
+      formData.append("duiPerfil", profile.dui);
+      if (profile.birthday instanceof Date) {
+        formData.append("fechanacimientoPerfil", profile.birthday.toISOString().split('T')[0]);
+      } else {
+        Alert.alert("Error", "Fecha de nacimiento no válida");
+        return;
+      }
+      formData.append("telefonoPerfil", profile.phone);
+      if (profile.image) {
+        const uriParts = profile.image.split('.');
+        const fileType = uriParts[uriParts.length - 1];
+        formData.append("imagen", {
+          uri: profile.image,
+          name: `photo.${fileType}`,
+          type: `image/${fileType}`,
+        });
+      }
+
+      const response = await fetchData(USER_API, "updateRowProfile", formData);
+
+      if (response.status) {
+        Alert.alert(response.message);
+        setIsEditing(false);
+      } else {
+        Alert.alert("Error", response.error);
+      }
+    } catch (error) {
+      Alert.alert("No se pudo acceder a la API", error.message);
+      console.log(error.message);
+    }
   };
 
   const handleChange = (name, value) => {
@@ -54,16 +89,67 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  const pickImage = async () => {
+    if (isEditing) {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setProfile({ ...profile, image: result.assets[0].uri });
+      }
+    }
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || profile.birthday;
+    setShowDatePicker(false);
+    handleChange("birthday", currentDate);
+  };
+
+  const readProfile = async () => {
+    try {
+      const data = await fetchData(USER_API, 'readProfile');
+      const profileData = data.dataset;
+      const imageUrl = profileData.IMAGEN ? await imageData('tecnicos', profileData.IMAGEN) : Image.resolveAssetSource(foto).uri;
+
+      setProfile({
+        name: profileData.NOMBRETEC,
+        fullname: profileData.APELLIDO,
+        email: profileData.CORREO,
+        dui: profileData.DUI,
+        phone: profileData.TELÉFONO,
+        birthday: new Date(profileData.NACIMIENTO),
+        image: imageUrl,
+      });
+
+      console.log(data.dataset);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('petición hecha');
+    }
+  };
+
+  useEffect(() => {
+    readProfile();
+  }, []);
+
   return (
     <ScrollView>
       <View style={styles.container}>
       <LinearGradient colors={["#03045E", "#647AA3"]} style={styles.header}>
-        <Avatar.Image
-          size={100}
-          source={foto}
-        />
-        <Text style={styles.name}>José Martínez</Text>
-        <Text style={styles.title}>Técnico</Text>
+          <TouchableOpacity onPress={pickImage}>
+            <Avatar.Image
+              size={100}
+              source={{ uri: profile.image }}
+            />
+          </TouchableOpacity>
+          <Text style={styles.name}>{profile.name}</Text>
+          <Text style={styles.email}>{profile.email}</Text>
         <TouchableOpacity onPress={handleEditPress} style={styles.editIcon}>
           <AntDesign name={isEditing ? "leftcircle" : "edit"} size={30} color="#FFF"/>
         </TouchableOpacity>
@@ -89,6 +175,20 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
             </View>
           </View>
           <View style={styles.inputContainer}>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Apellido:</Text>
+                <View style={styles.rowContent}>
+                  <AntDesign name="user" size={24} />
+                  <TextInput
+                    style={styles.infoText}
+                    value={profile.fullname}
+                    editable={isEditing}
+                    onChangeText={(text) => handleChange("fullname", text)}
+                  />
+                </View>
+              </View>
+            </View>
+          <View style={styles.inputContainer}>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Correo:</Text>
               <View style={styles.rowContent}>
@@ -102,6 +202,27 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
               </View>
             </View>
           </View>
+          <View style={[styles.inputContainer, { flex: 1 }]}>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Fecha de nacimiento:</Text>
+                <View style={styles.rowContent}>
+                  <Entypo name="calendar" size={24} />
+                  <TouchableOpacity onPress={() => isEditing && setShowDatePicker(true)}>
+                    <Text style={styles.infoText}>
+                      {profile.birthday.toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={profile.birthday}
+                      mode="date"
+                      display="default"
+                      onChange={onDateChange}
+                    />
+                  )}
+                </View>
+              </View>
+            </View>
           <View style={styles.fila}>
             <View style={[styles.inputContainer, { flex: 1 }]}>
               <View style={styles.infoRow}>
@@ -132,12 +253,6 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
               </View>
             </View>
           </View>
-          
-          <View style={styles.activeSinceRow}>
-          <View style={styles.status}></View>
-            <Text style={styles.infoText2}>Activo desde</Text>
-          </View>
-          <Text style={styles.dateText}>30 de septiembre de 2023</Text>
         </Card.Content>
         {isEditing && (
           <Button
@@ -268,6 +383,12 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 100/2
+  },
+  email: {
+    fontSize: 20,
+    color: "white",
+    fontWeight: "bold",
+    marginVertical: 5,
   },
 });
 

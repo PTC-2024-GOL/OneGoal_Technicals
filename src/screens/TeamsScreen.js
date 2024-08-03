@@ -25,8 +25,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
   const API = 'services/technics/equipos.php';
   //Declaración de variable para manejar el modal.
   const [modalVisible, setModalVisible] = useState(false);
-
-  const [image, setImage] = '';
+  const [technicals, setTechnicals] = useState([]);
 
   const navigation = useNavigation();
 
@@ -40,6 +39,21 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
       console.log(DATA.error);
     }
   }
+
+  const seeModal = async (id) => {
+    setModalVisible(true);
+    const FORM = new FormData();
+    FORM.append('idEquipo', id);
+    const DATA = await fetchData(API, 'readAllStaff', FORM);
+
+    if(DATA.status){
+      let data = DATA.dataset;
+      setTechnicals(data);
+    }else{
+      console.log(DATA.error);
+    }
+
+  };
 
   useFocusEffect(
       useCallback(()=>{
@@ -125,7 +139,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
 
                   {/*Botones de la carta*/}
                   {/*ABRE EL MODAL DE TECNICO*/}
-                  <TouchableOpacity style={styles.buttonOne} onPress={() => setModalVisible(true)}>
+                  <TouchableOpacity style={styles.buttonOne} onPress={() => seeModal(teams.id_equipo)}>
                     <View style={styles.rowButton}>
                       <Image style={styles.imageCard} source={require('../../assets/soccerBall.png')}/>
                       <Text style={styles.text}>Ver cuerpo técnico</Text>
@@ -172,30 +186,20 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                 <View style={styles.content}>
                   <View style={styles.modalColumn}>
                     {/*Columna*/}
-                    <View style={styles.card}>
-                      <Image style={styles.cardImg} source={require('../../assets/man.png')}/>
-                      <View style={styles.contentCard}>
-                        <Text style={styles.type}>Primer técnico</Text>
-                        <Text style={styles.name}>Daniel Castro</Text>
+                    {technicals.map((technicals, index) => (
+                      <View style={styles.card}>
+                        <Image style={styles.cardImg} source={{uri:`${SERVER_URL}images/tecnicos/${technicals.foto_tecnico}`}}/>
+                        <View style={styles.contentCard}>
+                          <Text style={styles.type}>{technicals.nombre_rol_tecnico}</Text>
+                          <Text style={styles.name}>{technicals.nombre_tecnico + ' ' + technicals.apellido_tecnico}</Text>
 
-                        <View style={styles.footer}>
-                          <Text style={styles.phone}>Telefono:</Text>
-                          <Text>7023-2343</Text>
+                          <View style={styles.footer}>
+                            <Text style={styles.phone}>Telefono:</Text>
+                            <Text>{technicals.telefono_tecnico}</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                    <View style={styles.card}>
-                      <Image style={styles.cardImg} source={require('../../assets/man.png')}/>
-                      <View style={styles.contentCard}>
-                        <Text style={styles.type}>Primer técnico</Text>
-                        <Text style={styles.name}>José Martínez</Text>
-
-                        <View style={styles.footer}>
-                          <Text style={styles.phone}>Telefono:</Text>
-                          <Text>7023-2343</Text>
-                        </View>
-                      </View>
-                    </View>
+                    ))}
                   </View>
 
                   {/*Botones del modal*/}

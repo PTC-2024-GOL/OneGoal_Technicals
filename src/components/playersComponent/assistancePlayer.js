@@ -24,7 +24,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 
     const statusOptions = [
         { label: 'Asistencia', value: 'Asistencia' },
-        { label: 'Ausencia injustificada', value: 'Ausencia injustificada' },
+        { label: 'Ausencia injus...', value: 'Ausencia injustificada' },
         { label: 'Enfermedad', value: 'Enfermedad' },
         { label: 'Estudio', value: 'Estudio' },
         { label: 'Trabajo', value: 'Trabajo' },
@@ -454,19 +454,22 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         marginBottom: 16,
-        paddingStart: 25,
-        paddingEnd: 25,
+        paddingStart: 0,
+        paddingEnd: 0,
+        justifyContent: 'space-between'
     },
     tabActive: {
         flex: 1,
-        padding: 12,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#334195', // Active tab color
         alignItems: 'center',
         borderRadius: 8,
     },
     tabInactive: {
         flex: 1,
-        padding: 12,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#9A9A9A', // Inactive tab color
         alignItems: 'center',
         borderRadius: 8,
@@ -485,8 +488,8 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#3F51B5',
         padding: 15,
-        borderRadius: 30,
-        marginBottom: 20,
+        borderRadius: 16,
+        marginBottom: 15,
     },
     headerTextM: {
         color: '#fff',

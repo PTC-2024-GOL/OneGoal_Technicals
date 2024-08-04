@@ -350,19 +350,22 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         marginBottom: 16,
-        paddingStart: 25,
-        paddingEnd: 25,
+        paddingStart: 0,
+        paddingEnd: 0,
+        justifyContent: 'space-between'
     },
     tabActive: {
         flex: 1,
-        padding: 12,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#334195', // Active tab color
         alignItems: 'center',
         borderRadius: 8,
     },
     tabInactive: {
         flex: 1,
-        padding: 12,
+        padding: 10,
+        margin: 3,
         backgroundColor: '#9A9A9A', // Inactive tab color
         alignItems: 'center',
         borderRadius: 8,

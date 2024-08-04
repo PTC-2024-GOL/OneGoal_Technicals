@@ -124,12 +124,19 @@ const TestPlayerScreen = () => {
     }, []);
 
     const handleStatusChange = (name, status) => {
-        setPlayerStatuses((prevStatuses) =>
-            prevStatuses.map((player) =>
-                player.NOMBRE === name ? { ...player, nota: status } : player
-            )
-        );
+        // Convertir el texto a número, pero permite que el campo quede vacío
+        const value = status.trim() === '' ? '' : parseInt(status, 10);
+    
+        // Validar que el valor sea vacío o esté entre 0 y 10
+        if (value === '' || (!isNaN(value) && value >= 0 && value <= 10)) {
+            setPlayerStatuses((prevStatuses) =>
+                prevStatuses.map((player) =>
+                    player.NOMBRE === name ? { ...player, nota: status } : player
+                )
+            );
+        }
     };
+    
 
     const handleAlertClose = () => {
         setAlertVisible(false);

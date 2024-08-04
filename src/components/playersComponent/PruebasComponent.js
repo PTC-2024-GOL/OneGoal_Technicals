@@ -192,16 +192,17 @@ const styles = StyleSheet.create({
         maxWidth: 100,
     },
     playerTextPromedio: {
-        fontSize: 16,
+        fontSize: 14,
         color: 'white',
         fontWeight: 'bold',
         backgroundColor: 'black',
-        padding: 10, // Añade algo de padding para centrar mejor el texto
+        padding: 5, // Añade algo de padding para centrar mejor el texto
+        paddingTop: 15, // Añade algo de padding para centrar mejor el texto
         borderRadius: 50, // Un valor alto para hacerlo circular, ajusta según el tamaño
         textAlign: 'center', // Centra el texto
         overflow: 'hidden', // Asegura que el texto se mantenga dentro del círculo
-        width: 45, // Ajusta el ancho para que sea un círculo perfecto
-        height: 45, // Ajusta la altura para que sea un círculo perfecto
+        width: 50, // Ajusta el ancho para que sea un círculo perfecto
+        height: 50, // Ajusta la altura para que sea un círculo perfecto
         justifyContent: 'center',
         alignItems: 'center',
     },

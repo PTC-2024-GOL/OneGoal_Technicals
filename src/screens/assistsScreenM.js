@@ -72,10 +72,6 @@ const AssistsScreenM = () => {
     console.log('Id del entrenamiento pantalla de modificar: ' + idEntrenamiento);
     console.log('Id del equipo pantalla de modificar: ' + idEquipo);
 
-    const goToTest = () => {
-        navigation.navigate('Pruebas');
-    };
-
     const playersData = [
         { name: 'Tía paola', status: 'Asistencia', color: '#4CAF50' },
         { name: 'José Morán', status: 'Falta', color: '#F44336' },

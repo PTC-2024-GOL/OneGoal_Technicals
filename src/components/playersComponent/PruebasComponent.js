@@ -1,64 +1,131 @@
-// PruebasComponent.js
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from "react-native";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, RefreshControl, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import edit from '../../../assets/iconPlayersScreen/Edit.png';
+import fetchData from '../../../api/components';
 
-const players = [
-    { name: 'Juan Perez', promedio: '8', color: '#4CAF50' },
-    { name: 'José Morán', promedio: '6', color: '#F44336' },
-    { name: 'Maicol Leandro', promedio: '9', color: '#2196F3' },
-    { name: 'Eduardo Cubias', promedio: '7', color: '#2196F3' },
-];
-
-const PruebasComponent = ({idEntrenamiento}) => {
+const PruebasComponent = ({ idEntrenamiento }) => {
     const navigation = useNavigation();
-    console.log('Identificador del entrenamiento en el componente ' + idEntrenamiento)
+    const [players, setPlayers] = useState([]);
+    const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
+    const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
+    const API = 'services/technics/caracteristicas_analisis.php';
+
+    const fillCards = async () => {
+        try {
+            const form = new FormData();
+            form.append('idEntrenamiento', idEntrenamiento);
+            const DATA = await fetchData(API, 'readAll', form);
+
+            if (DATA.status) {
+                let data = DATA.dataset;
+                setPlayers(data);
+            } else {
+                console.log(DATA.error);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
     const goToTest = () => {
         navigation.navigate('Pruebas');
     };
 
+    const goToPlayersDetails = (id_jugador) => {
+        navigation.navigate('PlayersDetails', { id_jugador });
+    };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fillCards();
+    }, [idEntrenamiento]);
+
+    useEffect(() => {
+        fillCards();
+    }, [idEntrenamiento]);
+
+
+    const getColorByPromedio = (promedio) => {
+        if (promedio <= 3) return '#FF0000'; // Rojo
+        if (promedio <= 5) return '#FF69B4'; // Rosado
+        if (promedio <= 6) return '#FFFF00'; // Amarillo
+        if (promedio <= 8) return '#90EE90'; // Verde claro
+        if (promedio <= 9) return '#008000'; // Verde oscuro
+        return '#0000FF'; // Azul
+    };
+
     return (
-        <View>
-            <ScrollView>
-                <View style={styles.row}>
-                    <Text style={styles.leftText}>El promedio global del equipo es: </Text>
-                    <Text style={styles.rightText}>8.4</Text>
-                </View>
-                <View style={styles.header}>
-                    <Text style={styles.headerText}>Jugador</Text>
-                    <Text style={styles.headerText}>Promedio</Text>
-                    <Text style={styles.headerText}>Pruebas</Text>
-                </View>
-                {players.map((player, index) => (
-                    <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                        <Text style={styles.playerName}>{player.name}</Text>
-                        <Text style={styles.playerTextPromedio}>{player.promedio}</Text>
-                        <TouchableOpacity
-                            style={styles.observationButton}
-                            onPress={() => goToTest()}
-                        >
-                            <Image source={edit} style={{ width: 30, height: 30 }} />
-                        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    <View style={styles.row}>
+                        <Text style={styles.leftText}>El promedio global del equipo es: </Text>
+                        <Text style={styles.rightText}>8.4</Text>
                     </View>
-                ))}
-            </ScrollView>
+                    <View style={styles.header}>
+                        <Text style={styles.headerText}>Jugador</Text>
+                        <Text style={styles.headerText}>Promedio</Text>
+                        <Text style={styles.headerText}>Pruebas</Text>
+                    </View>
+                    {players.map((player, index) => (
+                        <TouchableOpacity key={index} style={[styles.playerCard, { borderLeftColor: getColorByPromedio(player.PROMEDIO) }]} onPress={() => goToPlayersDetails(player.IDJ)}>
+                            <Text style={styles.playerName}>{player.JUGADOR}</Text>
+                            <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
+                            <TouchableOpacity
+                                style={styles.observationButton}
+                                onPress={() => goToTest()}
+                            >
+                                <Image source={edit} style={{ width: 30, height: 30 }} />
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    ))}
+                    {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+                </ScrollView>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    scrollContainer: {
+        flex: 1,
+    },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 16,
+        alignItems: 'center',
+        width: '90%', // Ajusta esto según sea necesario
+        padding: 10, // Añade algo de padding para que no se vea tan pegado a los bordes
     },
     leftText: {
         fontSize: 16,
+        color: 'black',
     },
     rightText: {
         fontSize: 16,
+        color: 'white',
         fontWeight: 'bold',
+        backgroundColor: '#5AE107', // Green color
+        padding: 10, // Añade algo de padding para centrar mejor el texto
+        borderRadius: 50, // Un valor alto para hacerlo circular, ajusta según el tamaño
+        textAlign: 'center', // Centra el texto
+        overflow: 'hidden', // Asegura que el texto se mantenga dentro del círculo
+        width: 45, // Ajusta el ancho para que sea un círculo perfecto
+        height: 45, // Ajusta la altura para que sea un círculo perfecto
     },
     header: {
         flexDirection: 'row',
@@ -85,18 +152,19 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         fontWeight: 'bold',
+        maxWidth: 100,
     },
     playerTextPromedio: {
         fontSize: 16,
         color: 'white',
         fontWeight: 'bold',
         backgroundColor: 'black',
-        padding: 10,
-        borderRadius: 50,
-        textAlign: 'center',
-        overflow: 'hidden',
-        width: 45,
-        height: 45,
+        padding: 10, // Añade algo de padding para centrar mejor el texto
+        borderRadius: 50, // Un valor alto para hacerlo circular, ajusta según el tamaño
+        textAlign: 'center', // Centra el texto
+        overflow: 'hidden', // Asegura que el texto se mantenga dentro del círculo
+        width: 45, // Ajusta el ancho para que sea un círculo perfecto
+        height: 45, // Ajusta la altura para que sea un círculo perfecto
         justifyContent: 'center',
         alignItems: 'center',
     },

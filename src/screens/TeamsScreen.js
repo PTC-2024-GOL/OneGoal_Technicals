@@ -124,7 +124,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
             {/*Cartas*/}
 
             {teams.map((teams, index) => (
-                <View style={styles.cardsContainer}>
+                <View key={teams.id_equipo} style={styles.cardsContainer}>
                   <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
                     <Text style={styles.cardTitle}>{teams.nombre_equipo}</Text>
                   </LinearGradient>
@@ -200,7 +200,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                   <View style={styles.modalColumn}>
                     {/*Columna*/}
                     {technicals.map((technicals, index) => (
-                      <View key={technicals.id_equipo} style={styles.card}>
+                      <View key={technicals.id_tecnico} style={styles.card}>
                         <Image style={styles.cardImg} source={{uri:`${SERVER_URL}images/tecnicos/${technicals.foto_tecnico}`}}/>
                         <View style={styles.contentCard}>
                           <Text style={styles.type}>{technicals.nombre_rol_tecnico}</Text>

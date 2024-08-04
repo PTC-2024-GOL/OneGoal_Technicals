@@ -48,25 +48,37 @@ const TrainingsScreen = () => {
 
     const [trainings, setTrainings] = useState([]);
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
+    const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
+    const [response, setResponse] = useState(false); // Estado para controlar si hay datos
+
     const API = 'services/technics/entrenamientos.php';
 
     const fillCards = async () => {
-        const form = new FormData();
-        form.append('idEquipo', idEquipo);
-        const DATA = await fetchData(API, 'readAllMobile', form);
+        try {
+            const form = new FormData();
+            form.append('idEquipo', idEquipo);
+            const DATA = await fetchData(API, 'readAllMobile', form);
 
-        if (DATA.status) {
-            let data = DATA.dataset;
-            setTrainings(data);
-        } else {
-            console.log(DATA.error);
+            if (DATA.status) {
+                let data = DATA.dataset;
+                setTrainings(data);
+                setResponse(true);
+            } else {
+                console.log(DATA.error);
+                setTrainings([]);
+                setResponse(false);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
         }
     };
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
-        setRefreshing(false);
     }, [idEquipo]);
 
     useEffect(() => {
@@ -85,27 +97,46 @@ const TrainingsScreen = () => {
             <TouchableOpacity style={styles.button} onPress={goToAssists}>
                 <Text style={styles.buttonText}>Pasar asistencia</Text>
             </TouchableOpacity>
-            <ScrollView
-                style={styles.scrollContainer}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-            >
-                {trainings.map((item, index) => (
-                    <TrainingCard
-                        key={index}
-                        date={item.FECHA}
-                        time={item.HORARIO}
-                        playersPresent={item.JUGADORES_PRESENTES}
-                        idEntrenamiento={item.IDEN}
-                        onPress={goToAssistsM}
-                    />
-                ))}
-                {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
-            </ScrollView>
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+            ) : response ? (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    {trainings.map((item, index) => (
+                        <TrainingCard
+                            key={index}
+                            date={item.FECHA}
+                            time={item.HORARIO}
+                            playersPresent={item.JUGADORES_PRESENTES}
+                            idEntrenamiento={item.IDEN}
+                            onPress={goToAssistsM}
+                        />
+                    ))}
+                    {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+                </ScrollView>
+            ) : (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                    <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
+                </View>
+                </ScrollView>
+            )}
         </View>
     );
 };

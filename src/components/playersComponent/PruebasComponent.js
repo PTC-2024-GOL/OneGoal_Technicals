@@ -10,6 +10,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [globalAverage, setGlobalAverage] = useState(0); // Estado para el promedio global
+    const [response, setResponse] = useState(false);
     const API = 'services/technics/caracteristicas_analisis.php';
 
     const fillCards = async () => {
@@ -22,8 +23,11 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                 let data = DATA.dataset;
                 setPlayers(data);
                 calculateGlobalAverage(data);
+                setResponse(true);
             } else {
                 console.log(DATA.error);
+                setPlayers([]);
+                setResponse(false);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -70,44 +74,61 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     };
 
     return (
-        <View style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }}
+        refreshControl={
+            <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
+        }>
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : (
-                <ScrollView
-                    style={styles.scrollContainer}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                        />
-                    }
-                >
-                    <View style={styles.row}>
-                        <Text style={styles.leftText}>El promedio global del equipo es: </Text>
-                        <Text style={[styles.rightText, {backgroundColor: getColorByPromedio(globalAverage)}]}>{globalAverage}</Text>
-                    </View>
-                    <View style={styles.header}>
-                        <Text style={styles.headerText}>Jugador</Text>
-                        <Text style={styles.headerText}>Promedio</Text>
-                        <Text style={styles.headerText}>Pruebas</Text>
-                    </View>
-                    {players.map((player, index) => (
-                        <TouchableOpacity key={index} style={[styles.playerCard, { borderLeftColor: getColorByPromedio(player.PROMEDIO) }]} onPress={() => goToPlayersDetails(player.IDJ)}>
-                            <Text style={styles.playerName}>{player.JUGADOR}</Text>
-                            <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
-                            <TouchableOpacity
-                                style={styles.observationButton}
-                                onPress={() => goToTest(player.IDJ, player.JUGADOR)}
-                            >
-                                <Image source={edit} style={{ width: 30, height: 30 }} />
+                response ? (
+                    <ScrollView
+                        style={styles.scrollContainer}
+                    >
+                        <View style={styles.row}>
+                            <Text style={styles.leftText}>El promedio global del equipo es: </Text>
+                            <Text style={[styles.rightText, { backgroundColor: getColorByPromedio(globalAverage) }]}>{globalAverage}</Text>
+                        </View>
+                        <View style={styles.header}>
+                            <Text style={styles.headerText}>Jugador</Text>
+                            <Text style={styles.headerText}>Promedio</Text>
+                            <Text style={styles.headerText}>Pruebas</Text>
+                        </View>
+                        {players.map((player, index) => (
+                            <TouchableOpacity key={index} style={[styles.playerCard, { borderLeftColor: getColorByPromedio(player.PROMEDIO) }]} onPress={() => goToPlayersDetails(player.IDJ)}>
+                                <Text style={styles.playerName}>{player.JUGADOR}</Text>
+                                <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
+                                <TouchableOpacity
+                                    style={styles.observationButton}
+                                    onPress={() => goToTest(player.IDJ, player.JUGADOR)}
+                                >
+                                    <Image source={edit} style={{ width: 30, height: 30 }} />
+                                </TouchableOpacity>
                             </TouchableOpacity>
-                        </TouchableOpacity>
-                    ))}
-                    {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
-                </ScrollView>
+                        ))}
+                        {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+                    </ScrollView>
+                ) : (
+                    <ScrollView
+                        style={styles.scrollContainer}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    >
+                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../../assets/find.png')} />
+                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
+                    </View>
+                    </ScrollView>
+                )
             )}
-        </View>
+        </ScrollView>
     );
 };
 

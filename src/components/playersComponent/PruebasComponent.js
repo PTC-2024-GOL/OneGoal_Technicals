@@ -9,6 +9,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     const [players, setPlayers] = useState([]);
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
+    const [globalAverage, setGlobalAverage] = useState(0); // Estado para el promedio global
     const API = 'services/technics/caracteristicas_analisis.php';
 
     const fillCards = async () => {
@@ -20,6 +21,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
             if (DATA.status) {
                 let data = DATA.dataset;
                 setPlayers(data);
+                calculateGlobalAverage(data);
             } else {
                 console.log(DATA.error);
             }
@@ -31,8 +33,17 @@ const PruebasComponent = ({ idEntrenamiento }) => {
         }
     };
 
-    const goToTest = () => {
-        navigation.navigate('Pruebas');
+
+    const calculateGlobalAverage = (playersData) => {
+        if (playersData.length === 0) return 0;
+
+        const total = playersData.reduce((sum, player) => sum + parseFloat(player.PROMEDIO), 0);
+        const average = total / playersData.length;
+        setGlobalAverage(average.toFixed(1));
+    };
+
+    const goToTest = (id_jugador, jugador) => {
+        navigation.navigate('Pruebas', { id_jugador, jugador, idEntrenamiento});
     };
 
     const goToPlayersDetails = (id_jugador) => {
@@ -74,7 +85,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                 >
                     <View style={styles.row}>
                         <Text style={styles.leftText}>El promedio global del equipo es: </Text>
-                        <Text style={styles.rightText}>8.4</Text>
+                        <Text style={[styles.rightText, {backgroundColor: getColorByPromedio(globalAverage)}]}>{globalAverage}</Text>
                     </View>
                     <View style={styles.header}>
                         <Text style={styles.headerText}>Jugador</Text>
@@ -87,7 +98,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                             <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
                             <TouchableOpacity
                                 style={styles.observationButton}
-                                onPress={() => goToTest()}
+                                onPress={() => goToTest(player.IDJ, player.JUGADOR)}
                             >
                                 <Image source={edit} style={{ width: 30, height: 30 }} />
                             </TouchableOpacity>

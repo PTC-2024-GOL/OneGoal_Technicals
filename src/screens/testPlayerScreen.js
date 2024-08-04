@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView, TextInput } from "react-native";
+
+import { useRoute } from "@react-navigation/native"; // Importa useRoute
+import fetchData from '../../api/components';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
-
     return (
         <View style={[styles.textHorario, { borderLeftColor: color }]}>
             <Text style={styles.headTest}>{name}</Text>
-                <TextInput
-                  style={styles.infoText}
-                  //Quiero que por defecto tenga el texto de status pero que se pueda cambiar
-                    value={status}
-                  keyboardType='numeric'
-                />
+            <TextInput
+                style={styles.infoText}
+                value={status}
+                keyboardType='numeric'
+                onChangeText={(text) => onStatusChange(name, text)}
+            />
         </View>
     );
 };
 
-const testPlayerScreen = () => {
-
+const TestPlayerScreen = () => {
     const playersData = [
         { name: 'Resistencia', nota: '8', color: '#000' },
         { name: 'Coordinación', nota: '4', color: '#000' },
@@ -29,42 +29,120 @@ const testPlayerScreen = () => {
         { name: 'Control del balón', nota: '9', color: '#000' },
     ];
 
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
-    const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
-    const [playerStatuses, setPlayerStatuses] = useState(playersData);
+    const route = useRoute();
+    const { id_jugador, jugador, idEntrenamiento } = route.params;
+
+    const [playerStatuses, setPlayerStatuses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const CARACTERISTICAS_API = 'services/technics/caracteristicas.php';
+    const NOTAS_API = 'services/technics/caracteristicas_analisis.php';
+
+    const fetchCaracteristicas = async () => {
+        try {
+            const response = await fetchData(CARACTERISTICAS_API, 'readAll');
+            if (response.status) {
+                return response.dataset;
+            } else {
+                console.log(response.error);
+                return [];
+            }
+        } catch (error) {
+            console.error("Error fetching caracteristicas:", error);
+            return [];
+        }
+    };
+
+    const fetchNotas = async () => {
+        try {
+            const FORM = new FormData();
+            FORM.append('idJugador', id_jugador);
+            FORM.append('idEntrenamiento', idEntrenamiento);
+            const response = await fetchData(NOTAS_API, 'readOne', FORM);
+            if (response.status) {
+                return response.dataset;
+            } else {
+                console.log(response.error);
+                return [];
+            }
+        } catch (error) {
+            console.error("Error fetching notas:", error);
+            return [];
+        }
+    };
+
+    const fillCards = async () => {
+        try {
+            const caracteristicas = await fetchCaracteristicas();
+            const notas = await fetchNotas();
+    
+            if (caracteristicas.length > 0) {
+                // Crear un objeto para las características usando su nombre como clave
+                const caracteristicasMap = caracteristicas.reduce((acc, caracteristica) => {
+                    acc[caracteristica.NOMBRE] = caracteristica;
+                    return acc;
+                }, {});
+    
+                // Actualizar las características con las notas correspondientes
+                const updatedPlayerStatuses = caracteristicas.map(caracteristica => {
+                    const nota = notas.find(nota => nota.CARACTERISTICA === caracteristica.NOMBRE);
+                    return nota ? { ...caracteristica, nota: nota.NOTA } : { ...caracteristica };
+                });
+    
+                setPlayerStatuses(updatedPlayerStatuses);
+            }
+        } catch (error) {
+            console.error("Error filling cards:", error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+    
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fillCards();
+    }, []);
+
+    useEffect(() => {
+        fillCards();
+    }, []);
 
     const handleStatusChange = (name, status) => {
         setPlayerStatuses((prevStatuses) =>
             prevStatuses.map((player) =>
-                player.name === name ? { ...player, nota } : player
+                player.NOMBRE === name ? { ...player, nota: status } : player
             )
         );
     };
+    
 
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>Pruebas</Text>
             <Text style={styles.subHeaderText}>
-            Aquí podrás modificar o agregar calificaciones de este entrenamiento en especifico, ¡Recuerda guardar antes de salir!
+                Aquí podrás modificar o agregar calificaciones de este entrenamiento en especifico, ¡Recuerda guardar antes de salir!
             </Text>
             <Text style={styles.textHorario}>
-                <Text style={styles.horariotext}>Estas evaluando a Juan Pérez</Text>
+                <Text style={styles.horariotext}>Estas evaluando a {jugador}</Text>
             </Text>
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Guardar prueba</Text>
             </TouchableOpacity>
-            <ScrollView style={styles.scrollContainer}>
-                    <View>
-                        {playerStatuses.map((player, index) => (
-                            <PlayerCard
-                                key={index}
-                                name={player.name}
-                                status={player.nota}
-                                color={player.color}
-                                onStatusChange={handleStatusChange}
-                            />
-                        ))}
-                    </View>
+            <ScrollView style={styles.scrollContainer} refreshing={refreshing} onRefresh={onRefresh}>
+                <View>
+                    {playerStatuses.map((player, index) => (
+                        <PlayerCard
+                            key={index}
+                            name={player.NOMBRE}
+                            status={player.nota}
+                            color={player.color}
+                            onStatusChange={handleStatusChange}
+                        />
+                    ))}
+                </View>
             </ScrollView>
         </View>
     );
@@ -112,7 +190,7 @@ const styles = StyleSheet.create({
         textAlign: 'center', // Texto centrado
         flex: 1,
         justifyContent: 'center', // Alineación vertical centrada para TextInput
-      },
+    },
     selectScheduleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -184,7 +262,7 @@ const styles = StyleSheet.create({
     },
     headerTextM: {
         color: '#fff',
-        fontWeight: 'bold', 
+        fontWeight: 'bold',
         fontSize: 16,
         flex: 1,
         textAlign: 'center',
@@ -328,7 +406,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#D3D3D3',
         borderBottomWidth: 3,
     },
-    horariotext:{
+    horariotext: {
         color: '#000',
         fontSize: 16,
         fontWeight: 'bold',
@@ -345,8 +423,8 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 0, // Sin bordes redondeados en las esquinas inferiores
         borderBottomRightRadius: 0,
         padding: 10, // Espacio interior
-      },
+    },
 
 });
 
-export default testPlayerScreen;
+export default TestPlayerScreen;

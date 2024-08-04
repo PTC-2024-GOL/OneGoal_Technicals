@@ -74,10 +74,10 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
 
 
   //Accedemos al stack navigation(LoginNav) y luego a la screen a la que queremos ir (Jugadores).
-  const goToPlayersScreen = (idEquipo) => {
+  const goToPlayersScreen = (idEquipo, logo, nombreEquipo) => {
     navigation.navigate('LoginNav', {
       screen: 'Jugadores',
-      params: {idEquipo}
+      params: {idEquipo, logo, nombreEquipo}
     });
   }
 
@@ -160,7 +160,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                   </TouchableOpacity>
 
                   {/*REDIRIGIR A PANTALLA DE JUGADORES*/}
-                  <TouchableOpacity style={styles.buttonSecond} onPress={()=>{goToPlayersScreen(teams.id_equipo)}}>
+                  <TouchableOpacity style={styles.buttonSecond} onPress={()=>{goToPlayersScreen(teams.id_equipo, teams.logo_equipo, teams.nombre_equipo)}}>
                     <View style={styles.rowButton}>
                       <Image style={styles.imageCard} source={require('../../assets/soccer.png')}/>
                       <Text style={styles.text}>Ver jugadores</Text>

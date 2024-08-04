@@ -6,7 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
 import edit from '../../assets/iconPlayersScreen/Edit.png';
-
+import PruebasComponent from '../components/playersComponent/PruebasComponent'; // Importa el nuevo componente
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
@@ -216,34 +216,7 @@ const AssistsScreenM = () => {
                 ) : (
                     // Aquí va el contenido de Pruebas
                     // Aquí va el contenido de Observaciones
-                    <View>
-                        <ScrollView>
-                            <View style={styles.row}>
-                                <Text style={styles.leftText}>El promedio global del equipo es: </Text>
-                                <Text style={styles.rightText}>8.4</Text>
-                            </View>
-                            {/* Encabezado */}
-                            <View style={styles.headerM}>
-                                <Text style={styles.headerTextM}>Jugador</Text>
-                                <Text style={styles.headerTextM}>Promedio</Text>
-                                <Text style={styles.headerTextM}>Pruebas</Text>
-                            </View>
-
-                            {/* Lista de jugadores */}
-                            {players.map((player, index) => (
-                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerName}>{player.name}</Text>
-                                    <Text style={styles.playerTextPromedio}>{player.promedio}</Text>
-                                    <TouchableOpacity
-                                        style={styles.observationButtonM}
-                                        onPress={() => goToTest()}
-                                    >
-                                        <Image source={edit} style={{ width: 30, height: 30 }} />
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </ScrollView>
-                    </View>
+                    <PruebasComponent idEntrenamiento={idEntrenamiento} />
                 )}
             </ScrollView>
         </View>

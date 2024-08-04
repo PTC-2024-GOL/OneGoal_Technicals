@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, ScrollView, TextInput, ActivityIndicator, RefreshControl } from "react-native";
 
 import { useRoute } from "@react-navigation/native"; // Importa useRoute
 import fetchData from '../../api/components';
@@ -22,21 +22,15 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
     );
 };
 
-const TestPlayerScreen = () => {
-    const playersData = [
-        { name: 'Resistencia', nota: '8', color: '#000' },
-        { name: 'Coordinación', nota: '4', color: '#000' },
-        { name: 'Trabajo en equipo', nota: '7', color: '#000' },
-        { name: 'Control del balón', nota: '9', color: '#000' },
-    ];
 
+const TestPlayerScreen = () => {
     const route = useRoute();
     const { id_jugador, jugador, idEntrenamiento } = route.params;
 
     const [playerStatuses, setPlayerStatuses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
+    const [response, setResponse] = useState(false); // Nuevo estado para manejar la respuesta
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertType, setAlertType] = useState(1);
     const [alertMessage, setAlertMessage] = useState('');
@@ -97,9 +91,14 @@ const TestPlayerScreen = () => {
                 });
 
                 setPlayerStatuses(updatedPlayerStatuses);
+                setResponse(true); // Datos cargados correctamente
+            } else {
+                setPlayerStatuses([]);
+                setResponse(false); // No hay datos
             }
         } catch (error) {
             console.error("Error filling cards:", error);
+            setResponse(false); // Error al cargar datos
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -114,6 +113,7 @@ const TestPlayerScreen = () => {
         if (nota <= 9) return '#004000'; // Verde más oscuro
         return '#00008B'; // Azul oscuro
     };
+
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
@@ -124,10 +124,7 @@ const TestPlayerScreen = () => {
     }, []);
 
     const handleStatusChange = (name, status) => {
-        // Convertir el texto a número, pero permite que el campo quede vacío
         const value = status.trim() === '' ? '' : parseInt(status, 10);
-    
-        // Validar que el valor sea vacío o esté entre 0 y 10
         if (value === '' || (!isNaN(value) && value >= 0 && value <= 10)) {
             setPlayerStatuses((prevStatuses) =>
                 prevStatuses.map((player) =>
@@ -136,12 +133,11 @@ const TestPlayerScreen = () => {
             );
         }
     };
-    
 
     const handleAlertClose = () => {
         setAlertVisible(false);
         if (alertCallback) alertCallback();
-      };
+    };
 
     const handleSave = async () => {
         const formData = new FormData();
@@ -154,23 +150,14 @@ const TestPlayerScreen = () => {
         }));
 
         formData.append('caracteristicas', JSON.stringify(caracteristicas));
-        console.log(id_jugador);
-        console.log(idEntrenamiento);
-        console.log(JSON.stringify(caracteristicas));
-        console.log(formData);
-        let DATA;
-        try{
-            DATA = await fetchData(NOTAS_API, 'createRow', formData);
-            // Verifica y registra la respuesta completa antes de analizarla
-            console.log('Raw response:', DATA);
-    
+
+        try {
+            const DATA = await fetchData(NOTAS_API, 'createRow', formData);
             if (DATA.status) {
-                // Mostrar un mensaje de éxito
                 setAlertType(1);
                 setAlertMessage(`${DATA.message}`);
                 setAlertCallback(null);
                 setAlertVisible(true);
-                // Recargar la pantalla para visualizar los cambios
                 await fillCards();
             } else {
                 setAlertType(2);
@@ -179,7 +166,7 @@ const TestPlayerScreen = () => {
                 setAlertVisible(true);
                 console.error(DATA.exception);
             }
-        }catch(error){
+        } catch (error) {
             setAlertType(2);
             setAlertMessage(`Error: ${error}`);
             setAlertCallback(null);
@@ -192,7 +179,7 @@ const TestPlayerScreen = () => {
         <View style={styles.container}>
             <Text style={styles.headerText}>Pruebas</Text>
             <Text style={styles.subHeaderText}>
-                Aquí podrás modificar o agregar calificaciones de este entrenamiento en especifico, ¡Recuerda guardar antes de salir!
+                Aquí podrás modificar o agregar calificaciones de este entrenamiento en específico, ¡Recuerda guardar antes de salir!
             </Text>
             <Text style={styles.textHorario}>
                 <Text style={styles.horariotext}>Estas evaluando a {jugador}</Text>
@@ -200,19 +187,43 @@ const TestPlayerScreen = () => {
             <TouchableOpacity style={styles.button} onPress={handleSave}>
                 <Text style={styles.buttonText}>Guardar prueba</Text>
             </TouchableOpacity>
-            <ScrollView style={styles.scrollContainer} refreshing={refreshing} onRefresh={onRefresh}>
-                <View>
-                    {playerStatuses.map((player, index) => (
-                        <PlayerCard
-                            key={index}
-                            name={player.NOMBRE}
-                            status={player.nota}
-                            color={getColorByNota(player.nota)}
-                            onStatusChange={handleStatusChange}
-                        />
-                    ))}
-                </View>
-            </ScrollView>
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+            ) : (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                >
+                    <View>
+                        {response ? (
+                            playerStatuses.map((player, index) => (
+                                <PlayerCard
+                                    key={index}
+                                    name={player.NOMBRE}
+                                    status={player.nota}
+                                    color={getColorByNota(player.nota)}
+                                    onStatusChange={handleStatusChange}
+                                />
+                            ))
+                        ) : (
+                            <ScrollView
+                                style={styles.scrollContainer}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                    />
+                                }
+                            >
+                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron caracteristicas</Text>
+                            </View>
+                            </ScrollView>
+                        )}
+                    </View>
+                </ScrollView>
+            )}
             <AlertComponent
                 visible={alertVisible}
                 type={alertType}
@@ -222,7 +233,6 @@ const TestPlayerScreen = () => {
         </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {

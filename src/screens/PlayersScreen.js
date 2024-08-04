@@ -118,6 +118,16 @@ const PlayersScreen = () => {
                             let name = player.nombre_jugador.split(' ', 1);
                             let apellido = player.apellido_jugador.split(' ', 1);
 
+                            let styleEstatus;
+
+                            if(player.estatus_jugador === 'Baja temporal') {
+                                styleEstatus = styles.estatusText1;
+                            } else if (player.estatus_jugador === 'Baja definitiva') {
+                                styleEstatus = styles.estatusText2;
+                            } else {
+                                styleEstatus = styles.estatusText3
+                            }
+
                             return (
                                 <TouchableOpacity onPress={() => goToPlayersDetails(player.id_jugador)}>
                                     <View>
@@ -133,7 +143,7 @@ const PlayersScreen = () => {
                                                        style={{width: 15, height: 15}}></Image>
                                                 <Text style={styles.positionText}>{player.area_de_juego}</Text>
                                             </View>
-                                            <Text style={styles.estatusText}>{player.estatus_jugador}</Text>
+                                            <Text style={styleEstatus}>{player.estatus_jugador}</Text>
                                         </View>
                                     </View>
                                 </TouchableOpacity>
@@ -202,10 +212,30 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         resizeMode: "cover"
     },
-    estatusText: {
+    estatusText1: {
         padding: 5,
-        color: '#295ad5',
-        backgroundColor: '#e6efff',
+        color: '#cda705',
+        backgroundColor: '#fdfae2',
+        marginTop: 10,
+        fontSize: 12,
+        borderRadius: 10,
+        width: 100,
+        textAlign: "center"
+    },
+    estatusText2: {
+        padding: 5,
+        color: '#e60404',
+        backgroundColor: '#fae8e8',
+        marginTop: 10,
+        fontSize: 12,
+        borderRadius: 10,
+        width: 100,
+        textAlign: "center"
+    },
+    estatusText3: {
+        padding: 5,
+        color: '#08c50c',
+        backgroundColor: '#e7fbe2',
         marginTop: 10,
         fontSize: 12,
         borderRadius: 10,

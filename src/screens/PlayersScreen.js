@@ -131,7 +131,7 @@ const PlayersScreen = () => {
 
                             return (
                                 <TouchableOpacity onPress={() => goToPlayersDetails(player.id_jugador)}>
-                                    <View>
+                                    <View key={player.id_jugador} >
                                         <View>
                                             <Image style={styles.imageCard}
                                                    source={{uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}`}}></Image>

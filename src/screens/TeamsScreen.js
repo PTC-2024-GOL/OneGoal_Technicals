@@ -200,7 +200,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                   <View style={styles.modalColumn}>
                     {/*Columna*/}
                     {technicals.map((technicals, index) => (
-                      <View style={styles.card}>
+                      <View key={technicals.id_equipo} style={styles.card}>
                         <Image style={styles.cardImg} source={{uri:`${SERVER_URL}images/tecnicos/${technicals.foto_tecnico}`}}/>
                         <View style={styles.contentCard}>
                           <Text style={styles.type}>{technicals.nombre_rol_tecnico}</Text>

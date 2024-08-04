@@ -87,7 +87,7 @@ const TestPlayerScreen = () => {
                 // Actualizar las características con las notas correspondientes
                 const updatedPlayerStatuses = caracteristicas.map(caracteristica => {
                     const nota = notas.find(nota => nota.CARACTERISTICA === caracteristica.NOMBRE);
-                    return nota ? { ...caracteristica, nota: nota.NOTA } : { ...caracteristica };
+                    return nota ? { ...caracteristica, nota: nota.NOTA } : { ...caracteristica, nota: '0'  };
                 });
     
                 setPlayerStatuses(updatedPlayerStatuses);

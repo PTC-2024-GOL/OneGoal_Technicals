@@ -26,11 +26,12 @@ const AlertComponent = ({ visible, type, message, onClose, url = null }) => {
       icon = null;
   }
 
+  //Uso mas adelante
   const handleAccept = () => {
     onClose();
     if (url) {
-      // Maneja la navegación a la URL si es necesario
-      // Esto puede variar dependiendo de tu configuración de navegación
+      // Navegar a la pantalla especificada
+      navigation.navigate(url);
     }
   };
 

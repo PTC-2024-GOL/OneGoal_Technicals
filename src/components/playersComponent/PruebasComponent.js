@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, RefreshControl, ActivityIndicator } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect,  } from "@react-navigation/native";
 import edit from '../../../assets/iconPlayersScreen/Edit.png';
 import fetchData from '../../../api/components';
 
@@ -63,7 +63,12 @@ const PruebasComponent = ({ idEntrenamiento }) => {
         fillCards();
     }, [idEntrenamiento]);
 
-
+    useFocusEffect(
+        useCallback(()=>{
+          fillCards();
+        },[idEntrenamiento])
+    )
+  
     const getColorByPromedio = (promedio) => {
         if (promedio <= 3) return '#FF0000'; // Rojo
         if (promedio <= 5) return '#FF69B4'; // Rosado

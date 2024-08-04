@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView, TextI
 
 import { useRoute } from "@react-navigation/native"; // Importa useRoute
 import fetchData from '../../api/components';
+import AlertComponent from "../../src/components/AlertComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
     return (
-        <View style={[styles.textHorario, { borderLeftColor: color }]}>
-            <Text style={styles.headTest}>{name}</Text>
+        <View style={[styles.textHorario]}>
+            <Text style={[styles.headTest, { backgroundColor: color }]}>{name}</Text>
             <TextInput
                 style={styles.infoText}
                 value={status}
@@ -35,6 +36,11 @@ const TestPlayerScreen = () => {
     const [playerStatuses, setPlayerStatuses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertType, setAlertType] = useState(1);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertCallback, setAlertCallback] = useState(null);
 
     const CARACTERISTICAS_API = 'services/technics/caracteristicas.php';
     const NOTAS_API = 'services/technics/caracteristicas_analisis.php';
@@ -76,20 +82,20 @@ const TestPlayerScreen = () => {
         try {
             const caracteristicas = await fetchCaracteristicas();
             const notas = await fetchNotas();
-    
+
             if (caracteristicas.length > 0) {
                 // Crear un objeto para las características usando su nombre como clave
                 const caracteristicasMap = caracteristicas.reduce((acc, caracteristica) => {
                     acc[caracteristica.NOMBRE] = caracteristica;
                     return acc;
                 }, {});
-    
+
                 // Actualizar las características con las notas correspondientes
                 const updatedPlayerStatuses = caracteristicas.map(caracteristica => {
                     const nota = notas.find(nota => nota.CARACTERISTICA === caracteristica.NOMBRE);
-                    return nota ? { ...caracteristica, nota: nota.NOTA } : { ...caracteristica, nota: '0'  };
+                    return nota ? { ...caracteristica, nota: nota.NOTA } : { ...caracteristica, nota: '0' };
                 });
-    
+
                 setPlayerStatuses(updatedPlayerStatuses);
             }
         } catch (error) {
@@ -99,8 +105,15 @@ const TestPlayerScreen = () => {
             setRefreshing(false);
         }
     };
-    
 
+    const getColorByNota = (nota) => {
+        if (nota <= 3) return '#8B0000'; // Rojo oscuro
+        if (nota <= 5) return '#C71585'; // Rosado oscuro
+        if (nota <= 6) return '#FFD700'; // Amarillo oscuro
+        if (nota <= 8) return '#006400'; // Verde oscuro
+        if (nota <= 9) return '#004000'; // Verde más oscuro
+        return '#00008B'; // Azul oscuro
+    };
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
@@ -117,7 +130,56 @@ const TestPlayerScreen = () => {
             )
         );
     };
+
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+        if (alertCallback) alertCallback();
+      };
+
+    const handleSave = async () => {
+        const formData = new FormData();
+        formData.append('jugador', id_jugador);
+        formData.append('entrenamiento', idEntrenamiento);
+
+        const caracteristicas = playerStatuses.map(player => ({
+            id_caracteristica_jugador: player.ID,
+            nota_caracteristica_analisis: player.nota
+        }));
+
+        formData.append('caracteristicas', JSON.stringify(caracteristicas));
+        console.log(id_jugador);
+        console.log(idEntrenamiento);
+        console.log(JSON.stringify(caracteristicas));
+        console.log(formData);
+        let DATA;
+        try{
+            DATA = await fetchData(NOTAS_API, 'createRow', formData);
+            // Verifica y registra la respuesta completa antes de analizarla
+            console.log('Raw response:', DATA);
     
+            if (DATA.status) {
+                // Mostrar un mensaje de éxito
+                setAlertType(1);
+                setAlertMessage(`${DATA.message}`);
+                setAlertCallback(null);
+                setAlertVisible(true);
+                // Recargar la pantalla para visualizar los cambios
+                await fillCards();
+            } else {
+                setAlertType(2);
+                setAlertMessage(`Error: ${DATA.exception}`);
+                setAlertCallback(null);
+                setAlertVisible(true);
+                console.error(DATA.exception);
+            }
+        }catch(error){
+            setAlertType(2);
+            setAlertMessage(`Error: ${error}`);
+            setAlertCallback(null);
+            setAlertVisible(true);
+            console.log(error);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -128,7 +190,7 @@ const TestPlayerScreen = () => {
             <Text style={styles.textHorario}>
                 <Text style={styles.horariotext}>Estas evaluando a {jugador}</Text>
             </Text>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
                 <Text style={styles.buttonText}>Guardar prueba</Text>
             </TouchableOpacity>
             <ScrollView style={styles.scrollContainer} refreshing={refreshing} onRefresh={onRefresh}>
@@ -138,12 +200,18 @@ const TestPlayerScreen = () => {
                             key={index}
                             name={player.NOMBRE}
                             status={player.nota}
-                            color={player.color}
+                            color={getColorByNota(player.nota)}
                             onStatusChange={handleStatusChange}
                         />
                     ))}
                 </View>
             </ScrollView>
+            <AlertComponent
+                visible={alertVisible}
+                type={alertType}
+                message={alertMessage}
+                onClose={handleAlertClose}
+            />
         </View>
     );
 };

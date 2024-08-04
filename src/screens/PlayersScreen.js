@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView} from "react-native";
-import { Chip } from 'react-native-paper';
+import {Card, Chip, Searchbar} from 'react-native-paper';
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import fetchData from "../../api/components";
 import {SERVER_URL} from "../../api/constantes";
@@ -10,75 +10,144 @@ const windowWidth = Dimensions.get('window').width;
 
 const PlayersScreen = () => {
     //Estilos para los chips
-    const [style, setStyle] = useState({ borderColor: `#FBA200`, backgroundColor: `#0078B7`});
+    const [selectedChip, setSelectedChip] = useState('');
     const API = 'services/technics/participaciones_partidos.php';
     const [players, setPlayers] = useState([]);
     const navigation = useNavigation();
 
+    const [filter, setFilter] = useState('');
+    const [search, setSearch] = useState('');
+    const [data, setData] = useState(false);
+
     const goToPlayersDetails = (id_jugador) => {
-        console.log('Este es el jugador seleccionado ',id_jugador);
         navigation.navigate('PlayersDetails', { id_jugador });
     }
 
+    //Recibimos los parametros que se envian desde la pantalla de TeamScreen
     const route = useRoute();
-    const { idEquipo } = route.params;
+    const { idEquipo, logo, nombreEquipo } = route.params;
 
+    const fillByFilter = (area) => {
+        setFilter(area)
+        setSelectedChip(area)
+        console.log(area)
+    }
+
+    //Funcion para traer los jugadores de la api
     const fillPlayers = async () => {
+        setPlayers([]);
         const FORM = new FormData();
         FORM.append('idEquipo', idEquipo);
+        let action;
 
-        const DATA = await fetchData(API, 'readAllByIdEquipo', FORM);
+        if(filter){
+            action = 'readAllByAreaJuego';
+            FORM.append('areaJuego', filter);
+        }else if(search){
+            action = 'searchRows';
+            FORM.append('search', search)
+        }
+        else{
+            action = 'readAllByIdEquipo';
+        }
+
+        //Peticion a la API
+        const DATA = await fetchData(API, action, FORM);
         if(DATA.status){
             let data = DATA.dataset;
-            console.log(data);
             setPlayers(data);
+            setData(true)
         }else {
             console.log(DATA.error);
+            setPlayers([]);
+            setData(false)
         }
     }
 
+    // Permite que se llame a la funcion cada vez que cambie el idEquipo, filter o el search
     useFocusEffect(
         useCallback(()=>{
             fillPlayers();
-        },[idEquipo])
+        },[idEquipo, filter, search])
     )
 
     return(
         <View style={styles.container}>
             <View style={styles.row}>
-                <Image style={styles.img} source={require('../../assets/gol.png')}/>
+                <Image style={styles.img} source={{uri: `${SERVER_URL}images/equipos/${logo}`}}/>
                 <View style={styles.col}>
-                    <Text style={styles.title}>Gol</Text>
+                    <Text style={styles.title}>{nombreEquipo}</Text>
                     <Text style={styles.content}>Haz clíc en la tarjeta para obtener más información del jugador. </Text>
                 </View>
             </View>
-            <View style={styles.row}>
-                <Chip mode='outlined' selectedColor='#9A9595' onPress={() => console.log('Pressed')}>Baja temporal</Chip>
-                <Chip style={style} selectedColor ='white' onPress={() => console.log('Pressed')}>Activo</Chip>
-                <Chip mode='outlined' selectedColor='#9A9595' onPress={() => console.log('Pressed')}>Baja definitiva</Chip>
+            <Searchbar
+                placeholder='Buscar por nombre o apellido...'
+                style={{marginBottom: 15, backgroundColor: '#fff'}}
+                value={search}
+                onChangeText={setSearch}
+            />
+            <View style={{height: 35, marginBottom: 20}}>
+                <ScrollView horizontal={true}>
+                    <Chip mode={selectedChip === '' ? 'flat' : 'outlined'}
+                          selectedColor={selectedChip === '' ? 'white' : '#9A9595'}
+                          style={selectedChip === '' ? styles.selectedChip : styles.defaultChip}
+                          onPress={() => fillByFilter('')}>Todos</Chip>
+
+                    <Chip mode={selectedChip === 'Ofensiva' ? 'flat' : 'outlined'}
+                          selectedColor={selectedChip === 'Ofensiva' ? 'white' : '#9A9595'}
+                          style={selectedChip === 'Ofensiva' ? styles.selectedChip : styles.defaultChip}
+                          onPress={() => fillByFilter('Ofensiva')}>Ofensiva</Chip>
+
+                    <Chip mode={selectedChip === 'Defensiva' ? 'flat' : 'outlined'}
+                          selectedColor={selectedChip === 'Defensiva' ? 'white' : '#9A9595'}
+                          style={selectedChip === 'Defensiva' ? styles.selectedChip : styles.defaultChip}
+                          onPress={() => fillByFilter('Defensiva')}>Defensiva</Chip>
+
+                    <Chip mode={selectedChip === 'Ofensiva y defensiva' ? 'flat' : 'outlined'}
+                          selectedColor={selectedChip === 'Ofensiva y defensiva' ? 'white' : '#9A9595'}
+                          style={selectedChip === 'Ofensiva y defensiva' ? styles.selectedChip : styles.defaultChip}
+                          onPress={() => fillByFilter('Ofensiva y defensiva')}>Ofensiva y defensiva</Chip>
+                </ScrollView>
             </View>
             {/*Codigo para las cards*/}
-            <ScrollView>
-                {players.map((player, index)=> (
-                    <TouchableOpacity key={index} onPress={() => goToPlayersDetails(player.id_jugador)} style={styles.card}>
-                        <View style={styles.rowCard}>
-                            <View style={styles.dorsal}>
-                                <Text style={styles.subtitleDorsal}>Dorsal</Text>
-                                <Text style={styles.titleDorsal}>{player.dorsal_jugador}</Text>
-                            </View>
-                            <View style={styles.infoCard}>
-                                <View style={styles.status}>
-                                    <Text style={styles.statusText}>{player.estatus_jugador}</Text>
-                                </View>
+            {/*Si viene data de la api, entonces se mostraran los jugadores pero si no, mostrara un mensaje de error/advertencia*/}
+            {data ? (
+                <ScrollView>
+                    <View style={styles.rowCards}>
+                        {players.map((player, index)=> {
+                            let name = player.nombre_jugador.split(' ', 1);
+                            let apellido = player.apellido_jugador.split(' ', 1);
 
-                                <Text style={styles.subtitleCard}>{player.area_de_juego}</Text>
-                                <Text style={styles.titleCard}>{player.nombre_jugador + ' ' + player.apellido_jugador}</Text>
-                            </View>
-                            <Image style={styles.imgCard}  source={{uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}`}}></Image>
-                        </View>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+                            return (
+                                <TouchableOpacity onPress={() => goToPlayersDetails(player.id_jugador)}>
+                                    <View>
+                                        <View>
+                                            <Image style={styles.imageCard}
+                                                   source={{uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}`}}></Image>
+                                        </View>
+                                        <View style={styles.textCard}>
+                                            <Text
+                                                style={styles.nameText}>{name + ' ' + apellido}</Text>
+                                            <View style={styles.rowPosition}>
+                                                <Image source={require('../../assets/Soccer Ball.png')}
+                                                       style={{width: 15, height: 15}}></Image>
+                                                <Text style={styles.positionText}>{player.area_de_juego}</Text>
+                                            </View>
+                                            <Text style={styles.estatusText}>{player.estatus_jugador}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                </ScrollView>
+            ) : (
+                <View style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <Image style={{height: 80, width: 80, marginBottom: 10}} source={require('../../assets/find.png')}/>
+                    <Text style={{backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron jugadores</Text>
+                </View>
+            )}
+
         </View>
     );
 }
@@ -90,7 +159,7 @@ const styles = StyleSheet.create({
         marginBottom: windowHeight * 0.15,
         flex: 1,
     },
-    row: {
+     row: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -105,77 +174,63 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30
     },
     title: {
-        fontSize: 30,
+        fontSize: 25,
         fontWeight: 'bold',
     },
     content: {
         fontWeight: '300',
     },
-    //ESTILOS PARA LAS CARDS
-    card: {
+    rowCards: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between"
+    },
+    ////////////////////
+    textCard: {
         backgroundColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-        elevation: 5,
-        marginBottom: 20
+        borderRadius: 20,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        padding: 10,
+        marginTop: -15,
+        width: 150,
+        marginBottom: 15
     },
-    dorsal: {
-        backgroundColor: '#f2f7ff',
+    imageCard: {
+        height: 140,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        resizeMode: "cover"
+    },
+    estatusText: {
         padding: 5,
-        paddingTop: 20,
-        paddingEnd: 10
-    },
-    rowCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-    },
-    infoCard: {
-        padding: 20
-    },
-    imgCard: {
-        marginTop: 25,
-        marginRight: 20,
-        width: 50,
-        height: 50,
-        borderRadius: 100/2
-    },
-    status: {
-        borderColor: '#3E8F0C',
-        borderWidth: 1,
-        width: 70,
+        color: '#295ad5',
+        backgroundColor: '#e6efff',
+        marginTop: 10,
+        fontSize: 12,
         borderRadius: 10,
-        marginBottom: 10
+        width: 100,
+        textAlign: "center"
     },
-    statusText: {
-        color: '#3E8F0C',
-        textAlign: 'center',
-        fontSize: 10
-    },
-    titleCard: {
-        fontWeight: 'bold',
+    nameText: {
+        fontWeight: "bold",
         fontSize: 15
     },
-    subtitleCard: {
-        fontSize: 12,
-        fontWeight: '400'
+    positionText: {
+        marginTop: 3,
+        fontSize: 13
     },
-    titleDorsal: {
-        fontWeight: 'bold',
-        fontSize: 20,
-        marginTop: 10,
-        textAlign: 'center',
-        color: '#020887',
-        marginStart: 15
+    rowPosition: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5
     },
-    subtitleDorsal: {
-        fontSize: 12,
-        textAlign: 'center',
-        marginStart: 15
-    }
+    selectedChip: {
+        backgroundColor: '#0078B7',
+        marginHorizontal: 5,
+    },
+    defaultChip: {
+        marginHorizontal: 5,
+    },
 });
 export default PlayersScreen;

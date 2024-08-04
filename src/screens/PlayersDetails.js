@@ -1,17 +1,21 @@
 import {StyleSheet, View, Text, SafeAreaView} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
 import {Avatar, Chip} from "react-native-paper";
-import {useState} from "react";
-import {useRoute} from "@react-navigation/native"; // Importa useRoute
+import {useCallback, useState} from "react";
+import {useFocusEffect, useRoute} from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
 import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
 import AssistancePlayer from "../components/playersComponent/assistancePlayer";
+import fetchData from "../../api/components";
+import {SERVER_URL} from "../../api/constantes";
 
 const PlayersDetails = () => {
     // Manejo del cambio de pantallas.
     const [activeSection, setActiveSection] = useState('informacion');
     // Manejo para el estilo de los botones.
     const [activeChip, setActiveChip] = useState('informacion');
+    const [players, setPlayers] = useState([]);
+    const API = 'services/technics/jugadores.php';
 
     // Obtén el parámetro de la ruta
     const route = useRoute();
@@ -25,12 +29,32 @@ const PlayersDetails = () => {
         setActiveChip(section);
     };
 
+    const fillPlayers = async (idJugador) => {
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API, 'readOneMobile', FORM);
+        if(DATA.status){
+            let data = DATA.dataset;
+            setPlayers(data)
+        }else{
+            console.log(DATA.error)
+        }
+    }
+
+    // Permite que se llame a la funcion cada vez que cambie el idEquipo, filter o el search
+    useFocusEffect(
+        useCallback(()=>{
+            fillPlayers(id_jugador);
+        },[id_jugador, activeSection])
+    )
+
     // Variable que guardará el contenido que se mostrará en la pantalla
     let contentComponent;
     // Evaluamos la opción que se ha elegido y dependiendo de ello inyectará el componente de la información requerida a contentComponent.
     switch (activeSection) {
         case 'informacion':
-            contentComponent = <InfoPlayers/>;
+            contentComponent = <InfoPlayers informationPlayer={players}/>;
             break;
         case 'rendimiento':
             contentComponent = <TrainingPlayer/>;
@@ -45,10 +69,11 @@ const PlayersDetails = () => {
     return (
         <View style={styles.container}>
             {/*HEADER*/}
+
             <LinearGradient style={styles.linearGradient} colors={['#03045E', '#0608C4']}>
-                <Avatar.Image size={120} source={require('../../assets/man.png')}/>
-                <Text style={styles.namePlayer}>José López</Text>
-                <Text style={styles.positionPlayer}>Delantero</Text>
+                <Avatar.Image size={120} source={{uri: `${SERVER_URL}images/jugadores/${players.foto_jugador}`}}/>
+                <Text style={styles.namePlayer}>{players.nombre_jugador + ' ' + players.apellido_jugador}</Text>
+                <Text style={styles.positionPlayer}>{players.posicionPrincipal}</Text>
             </LinearGradient>
 
             {/*BUTTONS*/}
@@ -92,7 +117,8 @@ const styles = StyleSheet.create({
     namePlayer: {
         fontSize: 30,
         fontWeight: "bold",
-        color: 'white'
+        color: 'white',
+        textAlign: "center"
     },
     positionPlayer: {
         color: 'white',

@@ -4,54 +4,82 @@ import { Avatar, Button, Card, Text } from 'react-native-paper';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const InfoPlayers = () => {
+const InfoPlayers = ({informationPlayer}) => {
+
+    let imc = informationPlayer.indice_masa_corporal;
+    let color;
+    let estado;
+
+    if(imc <= 18.5) {
+        estado = 'Peso bajo';
+        color = '#1141a8';
+    } else if (imc >= 18.5 && imc <=24.9) {
+        estado = 'Saludabe';
+        color = '#10d1a1'
+    } else if (imc >= 25.0 && imc <= 29.9) {
+        estado = 'Sobrepeso';
+        color = '#0acc31'
+    } else if (imc >= 30.0 && imc <= 34.9) {
+        estado = 'Obesidad grado 1';
+        color = '#c0ea2e'
+    }else if (imc >= 35.0 && imc <= 39.9) {
+        estado = 'Obesidad grado 2';
+        color = '#ed8812'
+    }else if (imc >= 40) {
+        estado = 'Obesidad grado 3';
+        color = '#e60404'
+    }
+
+
     return(
         <ScrollView>
             <View style={styles.container}>
                 <View style={styles.row}>
                     <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Edit.png')}/>
                     <Text style={styles.bold}>Nombre:</Text>
-                    <Text>José Daniel López Alfaro</Text>
+                    <Text>{informationPlayer.NOMBRE_COMPLETO}</Text>
                 </View>
                 <View style={styles.row}>
                     <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Soccer Ball.png')}/>
                     <Text style={styles.bold}>Alias:</Text>
-                    <Text>Chepe López</Text>
+                    <Text>{informationPlayer.alias_jugador}</Text>
                 </View>
                 <View style={styles.row}>
                     <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Schedule.png')}/>
                     <Text style={styles.bold}>Fecha de nacimiento:</Text>
-                    <Text>25 de diciembre de 2005</Text>
+                    <Text>{informationPlayer.nacimiento}</Text>
                 </View>
 
                 {/*Primeras cartas*/}
-                <View style={styles.rowCard}>
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Text style={styles.center}  variant="bodySmall">Posición</Text>
-                            <Text style={styles.center}  variant="bodySmall">principal</Text>
-                            <Text style={styles.centerName} variant="titleMedium">Delantero</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Text style={styles.center}  variant="bodySmall">Posición</Text>
-                            <Text style={styles.center}  variant="bodySmall">secundaria</Text>
-                            <Text style={styles.centerName} variant="titleMedium">Defensa</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Text style={styles.center}  variant="bodySmall">Dorsal</Text>
-                            <Text style={styles.centerName} variant="headlineMedium">10</Text>
-                        </Card.Content>
-                    </Card>
-                </View>
+                <ScrollView horizontal={true}>
+                    <View style={styles.rowCard}>
+                        <Card style={styles.card}>
+                            <Card.Content>
+                                <Text style={styles.center}  variant="bodySmall">Posición</Text>
+                                <Text style={styles.center}  variant="bodySmall">principal</Text>
+                                <Text style={styles.centerName} variant="titleMedium">{informationPlayer.posicionPrincipal}</Text>
+                            </Card.Content>
+                        </Card>
+                        <Card style={styles.card}>
+                            <Card.Content>
+                                <Text style={styles.center}  variant="bodySmall">Posición</Text>
+                                <Text style={styles.center}  variant="bodySmall">secundaria</Text>
+                                <Text style={styles.centerName} variant="titleMedium">{informationPlayer.posicionSecundaria}</Text>
+                            </Card.Content>
+                        </Card>
+                        <Card style={styles.card}>
+                            <Card.Content>
+                                <Text style={styles.center}  variant="bodySmall">Dorsal</Text>
+                                <Text style={styles.centerName} variant="headlineMedium">{informationPlayer.dorsal_jugador}</Text>
+                            </Card.Content>
+                        </Card>
+                    </View>
+                </ScrollView>
 
                 <Text style={styles.bold}>Activo desde</Text>
                 <View style={styles.row}>
                     <View style={styles.status}></View>
-                    <Text>18 de mayo de 2019</Text>
+                    <Text>{informationPlayer.registoJugador}</Text>
                 </View>
 
                 {/*Titulo de estado fisico*/}
@@ -65,18 +93,20 @@ const InfoPlayers = () => {
                     <View style={styles.rowHealthCard}>
                         <View style={styles.col}>
                             <Text style={styles.bold}>Altura</Text>
-                            <Text>1.60 mts</Text>
+                            <Text>{informationPlayer.altura_jugador} cm</Text>
                         </View>
                         <View style={styles.col}>
                             <Text style={styles.bold}>Peso</Text>
-                            <Text>120 lbs</Text>
+                            <Text>{informationPlayer.peso_jugador} lbs</Text>
                         </View>
                         <View style={styles.col}>
                             <Text style={styles.bold}>Masa corporal</Text>
-                            <Text>18.5</Text>
-                            <Text style={styles.color} variant='bodySmall'>Saludable</Text>
+                            <Text style={{color: color}}>{informationPlayer.indice_masa_corporal}</Text>
+                            <Text style={{color: color, fontWeight: 'bold'}} variant='bodySmall'>{estado}</Text>
                         </View>
                     </View>
+                    <Text style={{fontWeight: 'bold', marginTop: -8, marginBottom: 2}}>Último registro:</Text>
+                    <Text style={{marginBottom: 12}}>{informationPlayer.registroFisico}</Text>
                 </Card>
             </View>
         </ScrollView>
@@ -122,7 +152,9 @@ const styles = StyleSheet.create({
     },
     card: {
         height: 100,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        marginRight: 10,
+        width: 150
     },
     center: {
         textAlign: "center",
@@ -155,9 +187,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginBottom: 20,
         marginTop: 15
-    },
-    color: {
-        color: 'green'
     }
 })
 export default InfoPlayers;

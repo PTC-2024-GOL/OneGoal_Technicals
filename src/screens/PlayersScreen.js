@@ -120,6 +120,7 @@ const PlayersScreen = () => {
 
                             let styleEstatus;
 
+                            //Dependiendo del estado del jugador, asi se coloca el color del estilo
                             if(player.estatus_jugador === 'Baja temporal') {
                                 styleEstatus = styles.estatusText1;
                             } else if (player.estatus_jugador === 'Baja definitiva') {

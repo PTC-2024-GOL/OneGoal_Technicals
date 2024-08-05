@@ -1,16 +1,88 @@
 import {View,StyleSheet, Dimensions, ScrollView, Image} from "react-native";
 import {Card, Text} from "react-native-paper";
 import PieChart from "react-native-pie-chart";
-import React from "react";
+import React, {useCallback, useState} from "react";
+import {useFocusEffect} from "@react-navigation/native";
+import fetchData from "../../../api/components";
+import {BarChart} from "react-native-chart-kit";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
-const widthAndHeight = 180;
-const series = [8, 5, 10, 10];
-const sliceColor = ['#AE99FA', '#FF8DAD', '#4AFDF3', '#354AC8'];
 
+const TrainingPlayer = ({idJugador}) => {
 
-const TrainingPlayer = () => {
+    const API_PLAYERS = 'services/technics/jugadores.php';
+    const [prom, setProm] = useState(0.0);
+    const [matches, setMatches] =  useState(0);
+    const [notes, setNotes] = useState([]);
+
+    const getProm = async () => {
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API_PLAYERS, 'promByPlayer', FORM);
+
+        if(DATA.status){
+            setProm(DATA.dataset);
+        }else{
+            console.log(DATA.error)
+        }
+    };
+
+    const getMatches = async () => {
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API_PLAYERS, 'matchesByPlayer', FORM);
+
+        if(DATA.status){
+            setMatches(DATA.dataset);
+        }else{
+            console.log(DATA.error)
+        }
+    };
+
+    const getNotes = async ()=>{
+        const FORM = new FormData();
+        FORM.append('idJugador', idJugador);
+
+        const DATA = await fetchData(API_PLAYERS, 'notesByPlayer', FORM);
+
+        if(DATA.status){
+            setNotes(DATA.dataset);
+        }else{
+            console.log(DATA.error)
+        }
+    }
+
+    useFocusEffect(
+        useCallback(()=>{
+            getMatches();
+            getNotes();
+            getProm()
+        },[idJugador])
+    )
+
+    const data = {
+        labels: notes.map(note => note.clasificacion_caracteristica_jugador),
+        datasets: [
+            {
+                data: notes.map(note => note.nota_por_area)
+            }
+        ]
+    };
+
+    console.log(notes);
+
+    const chartConfig = {
+        backgroundGradientFrom: "#F2F7FF",
+        backgroundGradientTo: "#F2F7FF",
+        color: (opacity = 1) => `rgba(56, 0, 146, ${opacity})`,
+        strokeWidth: 2, // optional, default 3
+        barPercentage: 1.5,
+        useShadowColorFromDataset: false // optional
+    };
+
     return(
         <ScrollView>
             <View style={styles.container}>
@@ -21,7 +93,7 @@ const TrainingPlayer = () => {
                             <Text variant='titleMedium'>Nota global</Text>
                         </View>
                         <Card style={styles.cardCyan}>
-                            <Text style={styles.textColor} variant='displayMedium'>9.5</Text>
+                            <Text style={styles.textColor} variant='displayMedium'>{prom.notaGlobal}</Text>
                         </Card>
                         <View style={styles.rowContent}>
                             <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Info.png')}/>
@@ -35,7 +107,7 @@ const TrainingPlayer = () => {
                             <Text variant='titleMedium'>Partidos jugados</Text>
                         </View>
                         <Card style={styles.cardBlue}>
-                            <Text style={styles.textColor} variant='displayMedium'>5</Text>
+                            <Text style={styles.textColor} variant='displayMedium'>{matches.partidos}</Text>
                         </Card>
                     </View>
                 </View>
@@ -43,40 +115,15 @@ const TrainingPlayer = () => {
                 <Text style={styles.title}>Promedio de las áreas evaluadas</Text>
                 <Text style={styles.subtitle}>En la gráfica podrás observar el promedio de notas por cada una de las áreas que se le han evaluado</Text>
 
-                <View style={styles.rowGraphics}>
-                    <PieChart
-                        widthAndHeight={widthAndHeight}
-                        series={series}
-                        sliceColor={sliceColor}
-                        doughnut={true}
-                        coverRadius={0.45}
-                        coverFill={'#FFF'}
+                <ScrollView horizontal={true}>
+                    <BarChart
+                        data={data}
+                        width={windowWidth}
+                        height={220}
+                        chartConfig={chartConfig}
+                        verticalLabelRotation={20}
                     />
-                </View>
-                <View style={styles.rowContentGraphic}>
-                    <View style={styles.rowTextGraphic}>
-                        <View style={styles.status1}></View>
-                        <Text style={styles.bold}>Físicos:</Text>
-                        <Text>50%</Text>
-                    </View>
-                    <View style={styles.rowTextGraphic}>
-                        <View style={styles.status3}></View>
-                        <Text style={styles.bold}>Tácticos:</Text>
-                        <Text>40%</Text>
-                    </View>
-                </View>
-                <View style={styles.rowContentGraphic}>
-                    <View style={styles.rowTextGraphic}>
-                        <View style={styles.status2}></View>
-                        <Text style={styles.bold}>Técnicos::</Text>
-                        <Text>50%</Text>
-                    </View>
-                    <View style={styles.rowTextGraphic}>
-                        <View style={styles.status4}></View>
-                        <Text style={styles.bold}>Psicológicos: </Text>
-                        <Text>45%</Text>
-                    </View>
-                </View>
+                </ScrollView>
             </View>
         </ScrollView>
     );
@@ -107,8 +154,8 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     icon: {
-        width: 15,
-        height: 15
+        width: 20,
+        height: 20
     },
     bold: {
         fontWeight: "bold"
@@ -128,7 +175,7 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     info: {
-        fontSize: 9,
+        fontSize: 12,
         fontWeight: "100",
         width: 160,
     },

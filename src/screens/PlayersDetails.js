@@ -15,7 +15,9 @@ const PlayersDetails = () => {
     // Manejo para el estilo de los botones.
     const [activeChip, setActiveChip] = useState('informacion');
     const [players, setPlayers] = useState([]);
-    const API = 'services/technics/jugadores.php';
+    const API_PLAYERS = 'services/technics/jugadores.php';
+    const API_ESTADO_FISICO = 'services/technics/estado_fisico_jugador.php';
+    const [estadoFisico, setEstadoFisico] = useState([]);
 
     // Obtén el parámetro de la ruta
     const route = useRoute();
@@ -29,11 +31,28 @@ const PlayersDetails = () => {
         setActiveChip(section);
     };
 
+    //Peticion a la api para traerme informacion sobre el estado fisico del jugador
+    const fillEstadoFisico = async () => {
+        const FORM = new FormData();
+        FORM.append('idJugador', id_jugador);
+
+        const DATA = await fetchData(API_ESTADO_FISICO, 'readAllMobile', FORM);
+
+        if(DATA.status){
+            let data = DATA.dataset;
+            setEstadoFisico(data);
+            console.log(estadoFisico);
+        }else {
+            console.log(DATA.error);
+        }
+    }
+
+    //Peticion a la api para traerme informacion sobre el jugador
     const fillPlayers = async (idJugador) => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
 
-        const DATA = await fetchData(API, 'readOneMobile', FORM);
+        const DATA = await fetchData(API_PLAYERS, 'readOne', FORM);
         if(DATA.status){
             let data = DATA.dataset;
             setPlayers(data)
@@ -46,6 +65,7 @@ const PlayersDetails = () => {
     useFocusEffect(
         useCallback(()=>{
             fillPlayers(id_jugador);
+            fillEstadoFisico();
         },[id_jugador, activeSection])
     )
 
@@ -54,10 +74,10 @@ const PlayersDetails = () => {
     // Evaluamos la opción que se ha elegido y dependiendo de ello inyectará el componente de la información requerida a contentComponent.
     switch (activeSection) {
         case 'informacion':
-            contentComponent = <InfoPlayers informationPlayer={players}/>;
+            contentComponent = <InfoPlayers informationPlayer={players} estadoFisico={estadoFisico}/>;
             break;
         case 'rendimiento':
-            contentComponent = <TrainingPlayer/>;
+            contentComponent = <TrainingPlayer idJugador={id_jugador}/>;
             break;
             case 'asistencias':
                 contentComponent = <AssistancePlayer idJugador={id_jugador} />;

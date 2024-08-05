@@ -4,9 +4,9 @@ import { Avatar, Button, Card, Text } from 'react-native-paper';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const InfoPlayers = ({informationPlayer}) => {
+const InfoPlayers = ({informationPlayer, estadoFisico}) => {
 
-    let imc = informationPlayer.indice_masa_corporal;
+    let imc = estadoFisico.indice_masa_corporal;
     let color;
     let estado;
 
@@ -89,25 +89,25 @@ const InfoPlayers = ({informationPlayer}) => {
                 </View>
 
                 {/*Segundas cartas*/}
-                <Card style={styles.healthCard}>
-                    <View style={styles.rowHealthCard}>
-                        <View style={styles.col}>
-                            <Text style={styles.bold}>Altura</Text>
-                            <Text>{informationPlayer.altura_jugador} cm</Text>
+                    <Card style={styles.healthCard}>
+                        <View style={styles.rowHealthCard}>
+                            <View style={styles.col}>
+                                <Text style={styles.bold}>Altura</Text>
+                                <Text>{estadoFisico.altura_jugador} cm</Text>
+                            </View>
+                            <View style={styles.col}>
+                                <Text style={styles.bold}>Peso</Text>
+                                <Text>{estadoFisico.peso_jugador} lbs</Text>
+                            </View>
+                            <View style={styles.col}>
+                                <Text style={styles.bold}>Masa corporal</Text>
+                                <Text style={{color: color}}>{estadoFisico.indice_masa_corporal}</Text>
+                                <Text style={{color: color, fontWeight: 'bold'}} variant='bodySmall'>{estado}</Text>
+                            </View>
                         </View>
-                        <View style={styles.col}>
-                            <Text style={styles.bold}>Peso</Text>
-                            <Text>{informationPlayer.peso_jugador} lbs</Text>
-                        </View>
-                        <View style={styles.col}>
-                            <Text style={styles.bold}>Masa corporal</Text>
-                            <Text style={{color: color}}>{informationPlayer.indice_masa_corporal}</Text>
-                            <Text style={{color: color, fontWeight: 'bold'}} variant='bodySmall'>{estado}</Text>
-                        </View>
-                    </View>
-                    <Text style={{fontWeight: 'bold', marginTop: -8, marginBottom: 2}}>Último registro:</Text>
-                    <Text style={{marginBottom: 12}}>{informationPlayer.registroFisico}</Text>
-                </Card>
+                        <Text style={{fontWeight: 'bold', marginTop: -8, marginBottom: 2}}>Último registro:</Text>
+                        <Text style={{marginBottom: 12}}>{estadoFisico.fecha_creacion_format}</Text>
+                    </Card>
             </View>
         </ScrollView>
     );

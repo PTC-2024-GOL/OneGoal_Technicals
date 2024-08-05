@@ -9,6 +9,7 @@ import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
 import foto from "../../assets/chepe.jpg";
+import { TextInputMask } from "react-native-masked-text";
 
 const windowHeight = Dimensions.get("window").height;
 
@@ -320,8 +321,10 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                   <Text style={styles.label}>DUI:</Text>
                   <View style={styles.rowContent}>
                     <AntDesign name="idcard" size={24} />
-                    <TextInput
-                      style={styles.infoText}
+                    <TextInputMask
+                      type={"custom"}
+                      options={{ mask: "99999999-9" }}
+                      style={[styles.infoText, !isEditing && styles.inputNotEditable]}
                       value={profile.dui}
                       editable={isEditing}
                       onChangeText={(text) => handleChange("dui", text)}
@@ -334,8 +337,10 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                   <Text style={styles.label}>Teléfono</Text>
                   <View style={styles.rowContent}>
                     <AntDesign name="phone" size={24} />
-                    <TextInput
-                      style={styles.infoText}
+                    <TextInputMask
+                      type={"custom"}
+                      options={{ mask: "9999-9999" }}
+                      style={[styles.infoText, !isEditing && styles.inputNotEditable]}
                       value={profile.phone}
                       editable={isEditing}
                       onChangeText={(text) => handleChange("phone", text)}
@@ -542,6 +547,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 5,
     width: "80%",
+  },
+  inputNotEditable: {
+    color: "#000",
+    backgroundColor: "transparent",
   },
 });
 

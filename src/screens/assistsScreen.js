@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, Scro
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation,useRoute } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
+import ObservacionComponent from '../components/playersComponent/ObservacionComponent'; // Importa el nuevo componente
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
 
@@ -67,7 +68,6 @@ const AssistsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { idEquipo } = route.params;
-    console.log('Id del equipo pantalla de crear: ' + idEquipo);
 
     const playersData = [
         { name: 'Juan Perez', status: 'Asistencia', color: '#4CAF50' },
@@ -151,63 +151,7 @@ const AssistsScreen = () => {
                     </View>
                 ) : (
                     // Aquí va el contenido de Observaciones
-                    <View>
-                        <ScrollView>
-                            {/* Encabezado */}
-                            <View style={styles.headerM}>
-                                <Text style={styles.headerTextM}>Jugadores</Text>
-                                <Text style={styles.headerTextM}>Observación</Text>
-                            </View>
-
-                            {/* Lista de jugadores */}
-                            {players.map((player, index) => (
-                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerName}>{player.name}</Text>
-                                    <TouchableOpacity
-                                        style={styles.observationButtonM}
-                                        onPress={() => setModalVisible(true)}
-                                    >
-                                        <Image source={soccer}></Image>
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </ScrollView>
-                        <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible}
-                            onRequestClose={() => { setModalVisible(!modalVisible); }}
-                        >
-                            <View style={styles.modalCenterM}>
-                                <View style={styles.modalContainerM}>
-                                    <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
-                                        <View style={styles.modalRowM}>
-                                            <Image style={styles.imagesM} source={require('../../assets/gol_blanco 2.png')} />
-                                            <Text style={styles.modalTitleM}>Observación</Text>
-                                        </View>
-                                    </LinearGradient>
-
-                                    <ScrollView>
-                                        <View style={styles.contentM}>
-                                            <Text style={styles.fw}>Escribe la observación del jugador</Text>
-                                            <View style={styles.observationBoxM}>
-                                                <View style={styles.blueLineM}></View>
-                                                <TextInput style={styles.observationTextM} multiline={true}/>
-                                            </View>
-                                            <View style={styles.justifyContentM}>
-                                                <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Guardar</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Cerrar</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    </ScrollView>
-                                </View>
-                            </View>
-                        </Modal>
-                    </View>
+                    <ObservacionComponent idEquipo={idEquipo} />
                 )}
             </ScrollView>
         </View>

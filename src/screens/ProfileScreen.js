@@ -90,11 +90,17 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       } else {
         Alert.alert("Error", "Solo se permiten números y guiones.");
       }
+    } else if (name === "email") {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value === "" || emailPattern.test(value)) {
+        setProfile({ ...profile, [name]: value });
+      } else {
+        Alert.alert("Error", "Correo electrónico no válido.");
+      }
     } else {
       setProfile({ ...profile, [name]: value });
     }
-  };
-  
+  };  
 
   const handlePasswordChange = async () => {
     try {

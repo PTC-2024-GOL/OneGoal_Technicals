@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  ScrollView,
+  Image,
+} from "react-native";
 import { TextInput, Card, Avatar, Button, Chip } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
 import { AntDesign } from "@expo/vector-icons";
-import Entypo from '@expo/vector-icons/Entypo';
-import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import Entypo from "@expo/vector-icons/Entypo";
+import * as ImagePicker from "expo-image-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
-import foto from '../../assets/chepe.jpg';
+import foto from "../../assets/chepe.jpg";
 
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
@@ -30,6 +39,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   const [activeChip, setActiveChip] = useState("perfil");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleEditPress = () => {
     setIsEditing(!isEditing);
@@ -43,14 +53,17 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       formData.append("correoPerfil", profile.email);
       formData.append("duiPerfil", profile.dui);
       if (profile.birthday instanceof Date) {
-        formData.append("fechanacimientoPerfil", profile.birthday.toISOString().split('T')[0]);
+        formData.append(
+          "fechanacimientoPerfil",
+          profile.birthday.toISOString().split("T")[0]
+        );
       } else {
         Alert.alert("Error", "Fecha de nacimiento no válida");
         return;
       }
       formData.append("telefonoPerfil", profile.phone);
       if (profile.image) {
-        const uriParts = profile.image.split('.');
+        const uriParts = profile.image.split(".");
         const fileType = uriParts[uriParts.length - 1];
         formData.append("imagen", {
           uri: profile.image,
@@ -78,8 +91,31 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   };
 
   const handlePasswordChange = async () => {
-    // Lógica para cambiar la contraseña
-    Alert.alert("Cambiar contraseña", "Contraseña cambiada exitosamente.");
+    try {
+      if (newPassword !== confirmPassword) {
+        Alert.alert("Error", "La confirmación de la contraseña no coincide.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("claveActual", password);
+      formData.append("claveCliente", newPassword);
+      formData.append("repetirclaveCliente", confirmPassword);
+
+      const response = await fetchData(USER_API, "changePassword", formData);
+
+      if (response.status) {
+        Alert.alert("Éxito", response.message);
+        setPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        Alert.alert("Error", response.error);
+      }
+    } catch (error) {
+      Alert.alert("No se pudo acceder a la API", error.message);
+      console.log(error.message);
+    }
   };
 
   // Manejo de cierre de sesión
@@ -120,9 +156,11 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
 
   const readProfile = async () => {
     try {
-      const data = await fetchData(USER_API, 'readProfile');
+      const data = await fetchData(USER_API, "readProfile");
       const profileData = data.dataset;
-      const imageUrl = profileData.IMAGEN ? await imageData('tecnicos', profileData.IMAGEN) : Image.resolveAssetSource(foto).uri;
+      const imageUrl = profileData.IMAGEN
+        ? await imageData("tecnicos", profileData.IMAGEN)
+        : Image.resolveAssetSource(foto).uri;
 
       setProfile({
         name: profileData.NOMBRETEC,
@@ -138,7 +176,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     } catch (error) {
       console.error(error);
     } finally {
-      console.log('Petición hecha');
+      console.log("Petición hecha");
     }
   };
 
@@ -155,16 +193,17 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       <View style={styles.container}>
         <LinearGradient colors={["#03045E", "#647AA3"]} style={styles.header}>
           <TouchableOpacity onPress={pickImage}>
-            <Avatar.Image
-              size={100}
-              source={{ uri: profile.image }}
-            />
+            <Avatar.Image size={100} source={{ uri: profile.image }} />
           </TouchableOpacity>
           <Text style={styles.name}>{profile.name}</Text>
           <Text style={styles.email}>{profile.email}</Text>
           {activeChip !== "password" && (
             <TouchableOpacity onPress={handleEditPress} style={styles.editIcon}>
-              <AntDesign name={isEditing ? "leftcircle" : "edit"} size={30} color="#FFF" />
+              <AntDesign
+                name={isEditing ? "leftcircle" : "edit"}
+                size={30}
+                color="#FFF"
+              />
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={handleLogOut} style={styles.logoutIcon}>
@@ -174,16 +213,23 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
 
         <View style={styles.rowButton}>
           <Chip
-            style={{backgroundColor: activeChip === 'perfil' ? '#03045E' : '#F2EEEF'}}
+            style={{
+              backgroundColor: activeChip === "perfil" ? "#03045E" : "#F2EEEF",
+            }}
             onPress={() => changeScreen("perfil")}
-            textStyle={{color: activeChip === 'perfil' ? 'white' : '#9A9A9A'}}
+            textStyle={{ color: activeChip === "perfil" ? "white" : "#9A9A9A" }}
           >
             Perfil
           </Chip>
           <Chip
-            style={{backgroundColor: activeChip === 'password' ? '#03045E' : '#F2EEEF'}}
+            style={{
+              backgroundColor:
+                activeChip === "password" ? "#03045E" : "#F2EEEF",
+            }}
             onPress={() => changeScreen("password")}
-            textStyle={{color: activeChip === 'password' ? 'white' : '#9A9A9A'}}
+            textStyle={{
+              color: activeChip === "password" ? "white" : "#9A9A9A",
+            }}
           >
             Cambiar Contraseña
           </Chip>
@@ -239,7 +285,9 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                   <Text style={styles.label}>Fecha de nacimiento:</Text>
                   <View style={styles.rowContent}>
                     <Entypo name="calendar" size={24} />
-                    <TouchableOpacity onPress={() => isEditing && setShowDatePicker(true)}>
+                    <TouchableOpacity
+                      onPress={() => isEditing && setShowDatePicker(true)}
+                    >
                       <Text style={styles.infoText}>
                         {profile.birthday.toLocaleDateString()}
                       </Text>
@@ -327,14 +375,14 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
               </View>
               <View style={styles.inputContainer}>
                 <View style={styles.infoRow}>
-                  <Text style={styles.label}>Nueva Contraseña:</Text>
+                  <Text style={styles.label}>Confirmar Nueva Contraseña:</Text>
                   <View style={styles.rowContent}>
                     <Entypo name="lock" size={24} />
                     <TextInput
                       style={styles.infoText}
-                      value={newPassword}
+                      value={confirmPassword}
                       secureTextEntry
-                      onChangeText={(text) => setNewPassword(text)}
+                      onChangeText={(text) => setConfirmPassword(text)}
                     />
                   </View>
                 </View>
@@ -464,10 +512,10 @@ const styles = StyleSheet.create({
     left: 200,
   },
   status: {
-    backgroundColor: '#558D32',
+    backgroundColor: "#558D32",
     width: 10,
     height: 10,
-    borderRadius: 100 / 2
+    borderRadius: 100 / 2,
   },
   email: {
     fontSize: 20,
@@ -476,13 +524,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   rowButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginVertical: 5,
     paddingHorizontal: 20,
     paddingTop: 5,
-    width: '80%',
-  }
+    width: "80%",
+  },
 });
 
 export default ProfileScreen;

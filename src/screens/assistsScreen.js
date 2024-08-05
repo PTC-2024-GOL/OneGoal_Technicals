@@ -1,32 +1,19 @@
-import React, { useState } from 'react';
-import {View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView, TextInput} from "react-native";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation,useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
-import ObservacionComponent from '../components/playersComponent/ObservacionComponent'; // Importa el nuevo componente
-import { LinearGradient } from 'expo-linear-gradient';
-import soccer from '../../assets/icon-observacion.png';
+import ObservacionComponent from '../components/playersComponent/ObservacionComponent';
+import fetchData from '../../api/components';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const players = [
-    { name: 'Juan Perez', color: '#4CAF50' },
-    { name: 'José Morán', color: '#F44336' },
-    { name: 'Maicol Leandro', color: '#2196F3' },
-    { name: 'Eduardo Cubias', color: '#2196F3' },
-];
-
-
-
-const PlayerCard = ({ name, status, color, onStatusChange }) => {
-
-
+const PlayerCard = ({ name, status, color }) => {
     const [selectedStatus, setSelectedStatus] = useState(status);
 
     const handleStatusChange = (value) => {
         setSelectedStatus(value);
-        onStatusChange(name, value);
     };
 
     const statusOptions = [
@@ -64,10 +51,60 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 };
 
 const AssistsScreen = () => {
+    const API = 'services/technics/asistencias.php';
     const [modalVisible, setModalVisible] = useState(false);
+    const [scheduleOptions, setScheduleOptions] = useState([]);
+    const [jugadores, setJugadores] = useState([]);
+    const [selectedSchedule, setSelectedSchedule] = useState(null);
     const navigation = useNavigation();
     const route = useRoute();
     const { idEquipo } = route.params;
+
+    const fillHorarios = async () => {
+        const FORM = new FormData();
+        FORM.append('idEquipo', idEquipo);
+        const DATA = await fetchData(API, 'readOneHorarioMovil', FORM);
+        if (DATA.status) {
+            const horarios = DATA.dataset.map((item) => ({
+                label: item.horario,
+                value: item.id_entrenamiento,
+            }));
+            setScheduleOptions(horarios);
+        } else {
+            console.log(DATA.error);
+        }
+    };
+
+    const fillJugadores = async (id_entrenamiento) => {
+        const FORM = new FormData();
+        FORM.append('idEntrenamiento', id_entrenamiento);
+        const DATA = await fetchData(API, 'readAlldefault', FORM);
+        if (DATA.status) {
+            const registros = DATA.dataset.map((item) => ({
+                id_asistencia: item.id_asistencia,
+                observacion: item.observacion,
+                id: item.id,
+                jugador: item.jugador,
+                asistencia: item.asistencia,
+                id_entrenamiento: item.id_entrenamiento,
+                color: '#4CAF50',
+            }));
+            setJugadores(registros);
+            console.log(jugadores);
+        } else {
+            console.log(DATA.error);
+        }
+    };
+
+    useEffect(() => {
+        fillHorarios();
+    }, []);
+
+    const handleScheduleChange = (value) => {
+        fillJugadores(value);
+        setSelectedSchedule(value);
+        console.log('Horario seleccionado:', value);
+    };
 
     const playersData = [
         { name: 'Juan Perez', status: 'Asistencia', color: '#4CAF50' },
@@ -76,24 +113,7 @@ const AssistsScreen = () => {
         { name: 'Eduardo Cubias', status: 'Asistencia', color: '#2196F3' },
     ];
 
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
-    const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
-    const [playerStatuses, setPlayerStatuses] = useState(playersData);
-
-    const handleStatusChange = (name, status) => {
-        setPlayerStatuses((prevStatuses) =>
-            prevStatuses.map((player) =>
-                player.name === name ? { ...player, status } : player
-            )
-        );
-    };
-
-    const scheduleOptions = [
-        { label: '8:00 AM - 10:00 AM', value: '8-10' },
-        { label: '10:00 AM - 12:00 PM', value: '10-12' },
-        { label: '2:00 PM - 4:00 PM', value: '2-4' },
-        { label: '4:00 PM - 6:00 PM', value: '4-6' },
-    ];
+    const [activeTab, setActiveTab] = useState('historial');
 
     return (
         <View style={styles.container}>
@@ -104,19 +124,19 @@ const AssistsScreen = () => {
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Guardar asistencia</Text>
             </TouchableOpacity>
-                <RNPickerSelect
-                    onValueChange={(value) => setSelectedSchedule(value)}
-                    items={scheduleOptions}
-                    style={pickerSelectScheduleStyles}
-                    useNativeAndroidPickerStyle={false}
-                    placeholder={{
-                        label: 'Selecciona un horario...',
-                        value: null,
-                    }}
-                    Icon={() => {
-                        return <Ionicons name="chevron-up" size={32} color="#5AE107" />;
-                    }}
-                />
+            <RNPickerSelect
+                onValueChange={handleScheduleChange}
+                items={scheduleOptions}
+                style={pickerSelectScheduleStyles}
+                useNativeAndroidPickerStyle={false}
+                placeholder={{
+                    label: 'Selecciona un horario...',
+                    value: 0,
+                }}
+                Icon={() => {
+                    return <Ionicons name="chevron-up" size={32} color="#5AE107" />;
+                }}
+            />
             <View style={styles.tabContainer}>
                 <TouchableOpacity
                     style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
@@ -133,24 +153,21 @@ const AssistsScreen = () => {
             </View>
             <ScrollView style={styles.scrollContainer}>
                 {activeTab === 'historial' ? (
-                    
                     <View>
                         <View style={styles.headerM}>
                             <Text style={styles.headerTextM}>Jugadores</Text>
                             <Text style={styles.headerTextM}>Asistencias</Text>
                         </View>
-                        {playerStatuses.map((player, index) => (
+                        {jugadores.map((player, index) => (
                             <PlayerCard
                                 key={index}
-                                name={player.name}
-                                status={player.status}
+                                name={player.jugador}
+                                status={player.asistencia}
                                 color={player.color}
-                                onStatusChange={handleStatusChange}
                             />
                         ))}
                     </View>
                 ) : (
-                    // Aquí va el contenido de Observaciones
                     <ObservacionComponent idEquipo={idEquipo} />
                 )}
             </ScrollView>

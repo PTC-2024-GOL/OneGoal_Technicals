@@ -9,6 +9,7 @@ import TrainingsScreen from "../screens/trainingsScreen";
 import AssistsScreen from "../screens/assistsScreen";
 import AssistsScreenM from "../screens/assistsScreenM";
 import TestPlayerScreen from "../screens/testPlayerScreen";
+import PlayerAnalysis from "../screens/PlayerAnalysis";
 
 const Stack = createStackNavigator();
 
@@ -99,6 +100,19 @@ export default function LoginNav({ logueado, setLogueado }) {
          }}
       >
         {props => <TestPlayerScreen{...props} setLogueado={setLogueado} logueado={logueado} />}
+      </Stack.Screen>
+      <Stack.Screen
+         name='Analisis del jugador'
+         options={{
+            headerShown: true,
+            headerStyle: {
+                backgroundColor: '#0078B7', // Nuevo color de fondo para la pantalla de asistencias
+                borderBottomRightRadius: 35,
+                borderBottomLeftRadius: 35,
+            },
+         }}
+      >
+        {props => <PlayerAnalysis{...props} setLogueado={setLogueado} logueado={logueado} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

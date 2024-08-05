@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  Dimensions,
-  ScrollView,
-  Image,
-} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image} from "react-native";
 import { TextInput, Card, Avatar, Button, Chip } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
@@ -87,8 +78,23 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   };
 
   const handleChange = (name, value) => {
-    setProfile({ ...profile, [name]: value });
+    if (name === "name" || name === "fullname") {
+      if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
+        setProfile({ ...profile, [name]: value });
+      } else {
+        Alert.alert("Error", "Solo se permiten letras y espacios.");
+      }
+    } else if (name === "dui" || name === "phone") {
+      if (/^[\d-]*$/.test(value)) {
+        setProfile({ ...profile, [name]: value });
+      } else {
+        Alert.alert("Error", "Solo se permiten números y guiones.");
+      }
+    } else {
+      setProfile({ ...profile, [name]: value });
+    }
   };
+  
 
   const handlePasswordChange = async () => {
     try {

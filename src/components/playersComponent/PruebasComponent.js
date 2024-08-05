@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, RefreshControl, ActivityIndicator } from "react-native";
-import { useNavigation, useFocusEffect,  } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, } from "@react-navigation/native";
 import edit from '../../../assets/iconPlayersScreen/Edit.png';
 import fetchData from '../../../api/components';
+import AlertComponent from "../../../src/components/AlertComponent";
 
 const PruebasComponent = ({ idEntrenamiento }) => {
     const navigation = useNavigation();
@@ -12,6 +13,11 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     const [globalAverage, setGlobalAverage] = useState(0); // Estado para el promedio global
     const [response, setResponse] = useState(false);
     const API = 'services/technics/caracteristicas_analisis.php';
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertType, setAlertType] = useState(1);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertCallback, setAlertCallback] = useState(null);
+    const [url, setUrl] = useState('');
 
     const fillCards = async () => {
         try {
@@ -47,7 +53,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     };
 
     const goToTest = (id_jugador, jugador) => {
-        navigation.navigate('Pruebas', { id_jugador, jugador, idEntrenamiento});
+        navigation.navigate('Pruebas', { id_jugador, jugador, idEntrenamiento });
     };
 
     const goToPlayersDetails = (id_jugador) => {
@@ -64,11 +70,33 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     }, [idEntrenamiento]);
 
     useFocusEffect(
-        useCallback(()=>{
-          fillCards();
-        },[idEntrenamiento])
+        useCallback(() => {
+            fillCards();
+        }, [idEntrenamiento])
     )
-  
+
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+        if (alertCallback) alertCallback();
+        if (url) {
+            // Extraer parámetros de la URL
+            const params = new URLSearchParams(url.split('?')[1]);
+            const id_jugador = params.get('id_jugador');
+            const jugador = params.get('jugador');
+            const idEntrenamiento = params.get('idEntrenamiento');
+    
+            // Navegar a la pantalla con los parámetros
+            navigation.navigate('Analisis del jugador', { id_jugador, jugador, idEntrenamiento });
+        }
+    };
+
+    const showPlayerAverage = (id_jugador, average, jugador) => {
+        setAlertMessage(`Promedio del jugador: ${average}`);
+        setAlertVisible(true);
+        setAlertType(4);
+        setUrl(`Analisis del jugador?id_jugador=${id_jugador}&jugador=${jugador}&idEntrenamiento=${idEntrenamiento}`);
+    };
+
     const getColorByPromedio = (promedio) => {
         if (promedio <= 3) return '#FF0000'; // Rojo
         if (promedio <= 5) return '#FF69B4'; // Rosado
@@ -80,12 +108,12 @@ const PruebasComponent = ({ idEntrenamiento }) => {
 
     return (
         <ScrollView style={{ flex: 1 }}
-        refreshControl={
-            <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-            />
-        }>
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }>
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : (
@@ -105,7 +133,9 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                         {players.map((player, index) => (
                             <TouchableOpacity key={index} style={[styles.playerCard, { borderLeftColor: getColorByPromedio(player.PROMEDIO) }]} onPress={() => goToPlayersDetails(player.IDJ)}>
                                 <Text style={styles.playerName}>{player.JUGADOR}</Text>
-                                <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
+                                <TouchableOpacity onLongPress={() => showPlayerAverage(player.IDJ, player.PROMEDIO, player.JUGADOR)}>
+                                    <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.observationButton}
                                     onPress={() => goToTest(player.IDJ, player.JUGADOR)}
@@ -126,13 +156,19 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                             />
                         }
                     >
-                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../../assets/find.png')} />
-                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
-                    </View>
+                        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../../assets/find.png')} />
+                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
+                        </View>
                     </ScrollView>
                 )
             )}
+            <AlertComponent
+                visible={alertVisible}
+                type={alertType}
+                message={alertMessage}
+                onClose={handleAlertClose}
+            />
         </ScrollView>
     );
 };

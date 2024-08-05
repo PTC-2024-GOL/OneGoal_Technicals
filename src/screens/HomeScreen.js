@@ -1,28 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
 import { Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import PieChart from 'react-native-pie-chart';
+import fetchData from '../../api/components';
 
 import gol from '../../assets/gol.png';
 import monaco from '../../assets/image 56.png';
+import { useFocusEffect } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 const HomeScreen = ({ logueado, setLogueado }) => {
+  // URL de la API para el usuario
+  const USER_API = "services/technics/tecnicos.php";
+  const [username, setUsername] = useState('');
   const [selectedTeam, setSelectedTeam] = useState();
 
   const widthAndHeight = 150;
   const series = [5, 2, 1, 3];
   const sliceColor = ['#4CAF50', '#F44336', '#FFC107', '#00BCD4'];
 
+  const getUser = async () => {
+    try {
+      const data = await fetchData(USER_API, 'getUserMobile');
+      if (data.session) {
+        setUsername(data.username);
+        console.log(data.nombre);
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      await getUser();
+    };
+    initializeApp();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const initializeApp = async () => {
+        await getUser();
+      };
+      initializeApp()
+    },[])
+  )
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Bienvenido José Gonzáles</Text>
+      <Text style={styles.welcomeText}>Bienvenido {username}</Text>
         <Text style={styles.subText}>Ponte al día sobre las nuevas actualizaciones</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>

@@ -40,8 +40,10 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
         { label: 'Otro', value: 'Otro' },
     ];
 
+    const borderColor = asistenciaColors(selectedStatus);
+
     return (
-        <View style={[styles.playerCard, { borderLeftColor: color }]}>
+        <View style={[styles.playerCard, { borderLeftColor: borderColor }]}>
             <Text style={styles.playerName}>{name}</Text>
             <RNPickerSelect
                 onValueChange={handleStatusChange}
@@ -54,12 +56,40 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
                     value: null,
                 }}
                 Icon={() => {
-                    return <Ionicons name="chevron-up" size={16} color="#5AE107" />;
+                    return <Ionicons name="chevron-up" size={16} color="fff" />;
                 }}
             />
         </View>
     );
 };
+
+const asistenciaColors = (asistencia) => {
+    switch (asistencia) {
+        case 'Asistencia':
+            return '#4CAF50'; // Verde
+        case 'Ausencia injustificada':
+            return '#F44336'; // Rojo
+        case 'Enfermedad':
+            return '#FF9800'; // Naranja
+        case 'Estudio':
+            return '#2196F3'; // Azul
+        case 'Trabajo':
+            return '#009688'; // Teal
+        case 'Viaje':
+            return '#3F51B5'; // Índigo
+        case 'Permiso':
+            return '#FFC107'; // Amarillo
+        case 'Falta':
+            return '#9E9E9E'; // Gris
+        case 'Lesion':
+            return '#E91E63'; // Rosa
+        case 'Otro':
+            return '#673AB7'; // Púrpura
+        default:
+            return '#B0BEC5'; // Color por defecto
+    }
+};
+
 
 
 // Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectiva observación, se le pasan las siguientes cosas:
@@ -68,7 +98,7 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
 // id: Identificador del jugador
 // openObservationModal: Función para abrir el modal de observación
 const PlayerCardObservation = ({ index, name, color, id, openObservationModal }) => {
-
+    //const hola = asistenciaColors(asistencia);
     return (
         <View key={index} style={[styles.playerCard, { borderLeftColor: color }]}>
             <Text style={styles.playerName}>{name}</Text>
@@ -182,7 +212,7 @@ const AssistsScreenM = () => {
                     asistencia: item.asistencia,
                     id_entrenamiento: item.id_entrenamiento,
                     //En mi caso el color es #4CAF50 porque todos tienen asistencia por defecto, en caso de que se quiera cambiar ese color se puede manejar dependiendo de item.asistencia.
-                    color: '#4CAF50',
+                    color: asistenciaColors(item.asistencia),
                 }));
                 setJugadores(registros);
                 setResponse(true);
@@ -237,6 +267,7 @@ const AssistsScreenM = () => {
         });
     };
 
+    
     // Función que se encarga de abrir el modal de observación, esta función se ejecuta al presionar el botón de observación.
     // Esta función espera el id del jugador.
     // Esta función busca el jugador en el arreglo de jugadores y obtiene la observación del jugador.
@@ -534,7 +565,7 @@ const pickerSelectCardStyles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 10,
         borderWidth: 1,
-        borderColor: '#5AE107',
+        borderColor: 'black',
         borderRadius: 4,
         color: 'black',
         paddingRight: 30, // to ensure the text is never behind the icon
@@ -544,7 +575,7 @@ const pickerSelectCardStyles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 8,
         borderWidth: 1,
-        borderColor: '#5AE107',
+        borderColor: 'black',
         borderRadius: 8,
         color: 'black',
         paddingRight: 30, // to ensure the text is never behind the icon

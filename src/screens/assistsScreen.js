@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, RefreshControl, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
-import ObservacionComponent from '../components/playersComponent/ObservacionComponent';
+import { LinearGradient } from 'expo-linear-gradient';
+import soccer from '../../assets/icon-observacion.png';
 import fetchData from '../../api/components';
+import AlertComponent from '../components/AlertComponent';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const PlayerCard = ({ name, status, color }) => {
+// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
+// name: Nombre del jugador
+// status: Estado de asistencia del jugador
+// color: Color de la tarjeta
+// id: Identificador del jugador
+// updateStatus: Función para actualizar el estado de asistencia del jugador
+const PlayerCard = ({ name, status, color, id, updateStatus }) => {
     const [selectedStatus, setSelectedStatus] = useState(status);
 
     const handleStatusChange = (value) => {
         setSelectedStatus(value);
+        updateStatus(id, value);
     };
 
     const statusOptions = [
@@ -50,31 +59,122 @@ const PlayerCard = ({ name, status, color }) => {
     );
 };
 
+// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectiva observación, se le pasan las siguientes cosas:
+// name: Nombre del jugador
+// color: Color de la tarjeta
+// id: Identificador del jugador
+// openObservationModal: Función para abrir el modal de observación
+const PlayerCardObservation = ({ index, name, color, id, openObservationModal }) => {
+
+    return (
+        <View key={index} style={[styles.playerCard, { borderLeftColor: color }]}>
+            <Text style={styles.playerName}>{name}</Text>
+            <TouchableOpacity
+                style={styles.observationButtonM}
+                onPress={() => openObservationModal(id)}
+            >
+                <Image source={soccer} style={styles.observationIconM} />
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+// Este componente es el encargado de mostrar la pantalla de asistencias, se encarga de mostrar los horarios disponibles y los jugadores que asistieron a cada horario.
 const AssistsScreen = () => {
     const API = 'services/technics/asistencias.php';
     const [modalVisible, setModalVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false); 
     const [scheduleOptions, setScheduleOptions] = useState([]);
     const [jugadores, setJugadores] = useState([]);
+    // Esta variable contiene el IDENTRENAMIENTO seleccionado
+    const [boolAsistance, setBoolAsistance] = useState(0);
+    const [idHorario, setIdHorario] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+    const [observationText, setObservationText] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertMessage2, setAlertMessage2] = useState('');
     const navigation = useNavigation();
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertCallback, setAlertCallback] = useState(null);
+  const [alertType, setAlertType] = useState(1);
     const route = useRoute();
     const { idEquipo } = route.params;
 
+    // Función que se encarga de llenar los horarios disponibles, esta función se ejecuta al cargar la pantalla.
+    // Esta función tiene más de una función, aunque en este caso solo se utiliza para llenar los horarios.
     const fillHorarios = async () => {
         const FORM = new FormData();
         FORM.append('idEquipo', idEquipo);
         const DATA = await fetchData(API, 'readOneHorarioMovil', FORM);
         if (DATA.status) {
+            setAlertMessage2('Selecciona un horario para iniciar.');
+            console.log('Horarios :', DATA.dataset);
             const horarios = DATA.dataset.map((item) => ({
                 label: item.horario,
                 value: item.id_entrenamiento,
+                id_horario: item.id_horario,
             }));
             setScheduleOptions(horarios);
+        } else {
+            console.log(DATA.error);
+            setAlertMessage2('No hay entrenamientos disponibles.');
+        }
+    };
+
+    // Función que se encarga de guardar la asistencia de los jugadores, esta función se ejecuta al presionar el botón de guardar.
+    // Esta función se puede usar para crear y actualizar la asistencia de los jugadores, debido a que es compatible con todo.
+    const guardarAsistencia = async () => {
+        if (!idHorario) {
+            setAlertCallback(null);
+            setAlertMessage('Selecciona un horario antes de guardar.');
+        setAlertVisible(true);
+        setAlertType(3);
+            return;
+        }
+        const FORM = new FormData();
+        //El idHorario en mi caso lo saco desde el inicio del combobox de horarios, 
+        //pero en caso de que se quiera usar para actualizar se puede obtener de esta forma:
+        /*
+        const FORM = new FormData();
+        FORM.append('idEntrenamiento', ID_ENTRENAMIENTO_url);
+        Petición para guardar los datos del formulario.
+        const DATA = await fetchData(ASISTENCIAS_API_2, 'readOne', FORM);
+        if (DATA.status) {
+        idHorario = DATA.dataset.id_horario;
+        }   
+        */
+        FORM.append('idHorario', idHorario);
+       //El boolAsistance es un booleano que inidica si vas a agregar o actualizar la asistencia, en mi caso lo manejo con un 0 por defecto.
+       //En caso de que se quiera usar para actualizar solo se le da el valor de 1 o true
+        FORM.append('idAsistenciaBool', boolAsistance);
+        //El arreglo de jugadores es el arreglo de objetos que se obtiene de readAll o readAllDefault, en mi caso lo manejo con el arreglo de jugadores.
+        //Recuerda pasarlo a JSON.stringify para que se pueda enviar por POST.
+        FORM.append('arregloAsistencia', JSON.stringify(jugadores));
+        console.log('FORM:', idHorario, boolAsistance, jugadores);
+        //Se usa el action de createRow para guardar la asistencia de los jugadores, independientemente que se agregue o se actualice.
+        const DATA = await fetchData(API, 'createRow', FORM);
+        if (DATA.status) {
+            setAlertCallback(null);
+            setAlertMessage('Asistencia guardada correctamente.');
+        setAlertVisible(true);
+        setAlertType(1);
+            navigation.goBack();
         } else {
             console.log(DATA.error);
         }
     };
 
+    // Función que se encarga de manejar el cierre de la alerta, esta función se ejecuta al presionar el botón de cerrar.
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+        if (alertCallback) alertCallback();
+      };
+
+    // Función que se encarga de llenar los jugadores que asistieron a un entrenamiento, esta función se ejecuta al seleccionar un horario.
+    // Esta función se puede usar para llenar update, el único detalle es que se debe cambiar el action de la petición. a "readAll" en vez del que esta "readAlldefault".
+    // A esta función solo se le pasa el id_entrenamiento, en mi caso para llenar fillJugadores necesito primero el entrenamiento seleccionado.
+    // Pero en casois como actualizar se puede pasar directamente el id_entrenamiento debido a que viene como parametro de la pantalla.
     const fillJugadores = async (id_entrenamiento) => {
         const FORM = new FormData();
         FORM.append('idEntrenamiento', id_entrenamiento);
@@ -87,33 +187,76 @@ const AssistsScreen = () => {
                 jugador: item.jugador,
                 asistencia: item.asistencia,
                 id_entrenamiento: item.id_entrenamiento,
+                //En mi caso el color es #4CAF50 porque todos tienen asistencia por defecto, en caso de que se quiera cambiar ese color se puede manejar dependiendo de item.asistencia.
                 color: '#4CAF50',
             }));
             setJugadores(registros);
-            console.log(jugadores);
         } else {
             console.log(DATA.error);
         }
     };
 
+    // Función para cargar los horarios disponibles, esta función se ejecuta al cargar la pantalla. en el caso de actualizar no se cargan los horarios, de un solo los jugadores.
     useEffect(() => {
         fillHorarios();
     }, []);
 
+    // Función que se encarga de manejar el cambio de horario, esta función se ejecuta al seleccionar un horario.
     const handleScheduleChange = (value) => {
+        const selectedOption = scheduleOptions.find(option => option.value === value);
+        const id_horario = selectedOption ? selectedOption.id_horario : null;
+    
         fillJugadores(value);
         setSelectedSchedule(value);
-        console.log('Horario seleccionado:', value);
+        setIdHorario(id_horario);
+        console.log('Entrenamiento seleccionado:', value, ' Horario: ', id_horario);
     };
 
-    const playersData = [
-        { name: 'Juan Perez', status: 'Asistencia', color: '#4CAF50' },
-        { name: 'José Morán', status: 'Asistencia', color: '#F44336' },
-        { name: 'Maicol Leandro', status: 'Asistencia', color: '#2196F3' },
-        { name: 'Eduardo Cubias', status: 'Asistencia', color: '#2196F3' },
-    ];
-
+    // Función que se encarga de decidir qué página se mostrará primero
     const [activeTab, setActiveTab] = useState('historial');
+
+    // Función que se encarga de actualizar el arreglo de objetos obtenido de readAll o readAllDefault, esta función se ejecuta al cambiar el estado de asistencia de un jugador.
+    // Esta función espera el id del jugador y el nuevo estado de asistencia.
+    // Esta función mapea el arreglo de objetos para actulizar registros en base a los id de los jugadores.
+    const updateStatus = (id, newStatus) => {
+        setJugadores((prevJugadores) => {
+            const updatedJugadores = prevJugadores.map((jugador) => {
+                if (jugador.id === id) {
+                    return { ...jugador, asistencia: newStatus };
+                }
+                return jugador;
+            });
+            console.log('Jugadores actualizados:', jugadores);
+            return updatedJugadores;
+        });
+    };
+
+    // Función que se encarga de abrir el modal de observación, esta función se ejecuta al presionar el botón de observación.
+    // Esta función espera el id del jugador.
+    // Esta función busca el jugador en el arreglo de jugadores y obtiene la observación del jugador.
+    const openObservationModal = (id) => {
+        const jugador = jugadores.find((jugador) => jugador.id === id);
+        setObservationText(jugador.observacion);
+        setSelectedPlayerId(id);
+        setModalVisible(true);
+    };
+
+    // Función que se encarga de actualizar el arreglo de objetos obtenido de readAll o readAllDefault, esta función se ejecuta al cambiar la observación de un jugador.
+    // Esta función mapea el arreglo de objetos para actulizar registros en base a los id de los jugadores.
+    // Esta función obtiene el id del jugador y la nueva observación solito (la verdad no sé ni cómo funciona lol, pero funciona).
+    const saveObservation = () => {
+        setJugadores((prevJugadores) => {
+            const updatedJugadores = prevJugadores.map((jugador) => {
+                if (jugador.id === selectedPlayerId) {
+                    return { ...jugador, observacion: observationText };
+                }
+                return jugador;
+            });
+            console.log('Jugadores actualizados observacion:', jugadores);
+            return updatedJugadores;
+        });
+        setModalVisible(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -121,9 +264,21 @@ const AssistsScreen = () => {
             <Text style={styles.subHeaderText}>
                 Aquí puedes pasar asistencia, cuando guardes la asistencia, podrás realizar pruebas a cada jugador (tú decides si haces pruebas o no).
             </Text>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={guardarAsistencia}>
                 <Text style={styles.buttonText}>Guardar asistencia</Text>
             </TouchableOpacity>
+            <AlertComponent
+        visible={alertVisible}
+        type={alertType}
+        message={alertMessage}
+        onClose={handleAlertClose}
+      />
+      <AlertComponent
+        visible={alertVisible}
+        type={alertType}
+        message={alertMessage2}
+        onClose={handleAlertClose}
+      />
             <RNPickerSelect
                 onValueChange={handleScheduleChange}
                 items={scheduleOptions}
@@ -152,35 +307,103 @@ const AssistsScreen = () => {
                 </TouchableOpacity>
             </View>
             <ScrollView style={styles.scrollContainer}>
-                {activeTab === 'historial' ? (
-                    <View>
-                        <View style={styles.headerM}>
-                            <Text style={styles.headerTextM}>Jugadores</Text>
-                            <Text style={styles.headerTextM}>Asistencias</Text>
-                        </View>
-                        {jugadores.map((player, index) => (
-                            <PlayerCard
-                                key={index}
-                                name={player.jugador}
-                                status={player.asistencia}
-                                color={player.color}
-                            />
-                        ))}
+                {(selectedSchedule == 0 || selectedSchedule == null) ? (
+                    <ScrollView
+                        style={styles.scrollContainer}
+                    >
+                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>{alertMessage2}</Text>
                     </View>
+                    </ScrollView>
                 ) : (
-                    <ObservacionComponent idEquipo={idEquipo} />
+                    activeTab === 'historial' ? (
+                        <View>
+                            <View style={styles.headerM}>
+                                <Text style={styles.headerTextM}>Jugadores</Text>
+                                <Text style={styles.headerTextM}>Asistencias</Text>
+                            </View>
+                            {jugadores.map((player, index) => (
+                                <PlayerCard
+                                    key={index}
+                                    name={player.jugador}
+                                    status={player.asistencia}
+                                    color={player.color}
+                                    id={player.id}
+                                    updateStatus={updateStatus}
+                                />
+                            ))}
+                        </View>
+                    ) : (
+                        <View>
+                            <View style={styles.headerM}>
+                                <Text style={styles.headerTextM}>Jugadores</Text>
+                                <Text style={styles.headerTextM}>Observaciones</Text>
+                            </View>
+                            {jugadores.map((player, index) => (
+                                <PlayerCardObservation
+                                    key={index}
+                                    name={player.jugador}
+                                    color={player.color}
+                                    id={player.id}
+                                    openObservationModal={openObservationModal}
+                                />
+                            ))}
+                        </View>
+                    )
                 )}
             </ScrollView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalCenterM}>
+                    <View style={styles.modalContainerM}>
+                        <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
+                            <View style={styles.modalRowM}>
+                                <Text style={styles.modalTitleM}>Observación</Text>
+                            </View>
+                        </LinearGradient>
+    
+                        <ScrollView>
+                            <View style={styles.contentM}>
+                                <View style={styles.observationBoxM}>
+                                    <View style={styles.blueLineM}></View>
+                                    <TextInput
+                                        style={styles.textInput}
+                                        multiline
+                                        numberOfLines={4}
+                                        onChangeText={setObservationText}
+                                        value={observationText}
+                                    />
+                                </View>
+                                <View style={styles.justifyContentM}>
+                                    <TouchableOpacity style={styles.saveButtonM} onPress={saveObservation}>
+                                        <Text style={styles.buttonTextM}>Guardar</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.buttonTextM}>Cerrar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
+    
 };
+
 
 const pickerSelectScheduleStyles = StyleSheet.create({
     inputIOS: {
         fontSize: 16,
         paddingVertical: 12,
         paddingHorizontal: 10,
-        borderTopWidth:5,
+        borderTopWidth: 5,
         borderTopColor: '#5209B0',
         borderRadius: 4,
         color: 'black',
@@ -194,7 +417,7 @@ const pickerSelectScheduleStyles = StyleSheet.create({
         fontSize: 16,
         paddingHorizontal: 10,
         paddingVertical: 8,
-        borderTopWidth:5,
+        borderTopWidth: 5,
         borderTopColor: '#5209B0',
         borderRadius: 4,
         color: 'black',
@@ -266,6 +489,18 @@ const pickerSelectCardStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+    observationTextM: {
+        fontSize: 16,
+        color: '#333',
+        textAlign: 'center',
+        marginLeft: 10,
+    },
+    noScheduleText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+        color: 'gray',
+    },
     container: {
         flex: 1,
         padding: 15,
@@ -369,7 +604,7 @@ const styles = StyleSheet.create({
     },
     headerTextM: {
         color: '#fff',
-        fontWeight: 'bold', 
+        fontWeight: 'bold',
         fontSize: 16,
         flex: 1,
         textAlign: 'center',
@@ -438,6 +673,7 @@ const styles = StyleSheet.create({
     },
     contentM: {
         padding: 20,
+        alignItems: 'center',
     },
     observationBoxM: {
         backgroundColor: '#f0f4f8',
@@ -498,7 +734,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     }
 
-    
+
 });
 
 export default AssistsScreen;

@@ -1,32 +1,30 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Modal, Image, Dimensions, TouchableOpacity, RefreshControl, ScrollView, TextInput, ActivityIndicator } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation,useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
 import edit from '../../assets/iconPlayersScreen/Edit.png';
 import PruebasComponent from '../components/playersComponent/PruebasComponent'; // Importa el nuevo componente
+import fetchData from '../../api/components';
+import AlertComponent from '../components/AlertComponent';
+
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-const players = [
-    { name: 'Juan Perez', promedio: '8', color: '#4CAF50' },
-    { name: 'José Morán', promedio: '6', color: '#F44336' },
-    { name: 'Maicol Leandro', promedio: '9', color: '#2196F3' },
-    { name: 'Eduardo Cubias', promedio: '7', color: '#2196F3' },
-];
-
-
-
-const PlayerCard = ({ name, status, color, onStatusChange }) => {
-
-
+// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
+// name: Nombre del jugador
+// status: Estado de asistencia del jugador
+// color: Color de la tarjeta
+// id: Identificador del jugador
+// updateStatus: Función para actualizar el estado de asistencia del jugador
+const PlayerCard = ({ name, status, color, id, updateStatus }) => {
     const [selectedStatus, setSelectedStatus] = useState(status);
 
     const handleStatusChange = (value) => {
         setSelectedStatus(value);
-        onStatusChange(name, value);
+        updateStatus(id, value);
     };
 
     const statusOptions = [
@@ -63,8 +61,43 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
     );
 };
 
+
+// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectiva observación, se le pasan las siguientes cosas:
+// name: Nombre del jugador
+// color: Color de la tarjeta
+// id: Identificador del jugador
+// openObservationModal: Función para abrir el modal de observación
+const PlayerCardObservation = ({ index, name, color, id, openObservationModal }) => {
+
+    return (
+        <View key={index} style={[styles.playerCard, { borderLeftColor: color }]}>
+            <Text style={styles.playerName}>{name}</Text>
+            <TouchableOpacity
+                style={styles.observationButtonM}
+                onPress={() => openObservationModal(id)}
+            >
+                <Image source={soccer} style={styles.observationIconM} />
+            </TouchableOpacity>
+        </View>
+    );
+};
+
 const AssistsScreenM = () => {
+    const API = 'services/technics/asistencias.php';
+    const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
+    const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [modalVisible, setModalVisible] = useState(false);
+    const [jugadores, setJugadores] = useState([]);
+    const [hora, setHora] = useState([]);
+    const [boolAsistance, setBoolAsistance] = useState(1);
+    const [idHorario, setIdHorario] = useState([]);
+    const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+    const [observationText, setObservationText] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [response, setResponse] = useState(false);
+    const [alertCallback, setAlertCallback] = useState(null);
+    const [alertType, setAlertType] = useState(1);
 
     const navigation = useNavigation();
     const route = useRoute();
@@ -72,33 +105,169 @@ const AssistsScreenM = () => {
     console.log('Id del entrenamiento pantalla de modificar: ' + idEntrenamiento);
     console.log('Id del equipo pantalla de modificar: ' + idEquipo);
 
-    const playersData = [
-        { name: 'Tía paola', status: 'Asistencia', color: '#4CAF50' },
-        { name: 'José Morán', status: 'Falta', color: '#F44336' },
-        { name: 'Maicol Leandro', status: 'Otro', color: '#2196F3' },
-        { name: 'Eduardo Cubias', status: 'Otro', color: '#2196F3' },
-    ];
+    // Función que se encarga de guardar la asistencia de los jugadores, esta función se ejecuta al presionar el botón de guardar.
+    // Esta función se puede usar para crear y actualizar la asistencia de los jugadores, debido a que es compatible con todo.
 
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
-    const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
-    const [playerStatuses, setPlayerStatuses] = useState(playersData);
+    const guardarAsistencia = async () => {
+        const FORMHORA = new FormData();
+        const FORM = new FormData();
+        FORMHORA.append('idEntrenamiento', idEntrenamiento);
+        const DATAHORA = await fetchData(API, 'readOne', FORMHORA);
 
-    const handleStatusChange = (name, status) => {
-        setPlayerStatuses((prevStatuses) =>
-            prevStatuses.map((player) =>
-                player.name === name ? { ...player, status } : player
-            )
-        );
+        if (DATAHORA.status) {
+            
+            let IdHorarioNew = DATAHORA.dataset.id_horario;
+            console.log('esta es la hora zorra ' + IdHorarioNew);
+
+            FORM.append('idHorario', IdHorarioNew);
+            //El boolAsistance es un booleano que inidica si vas a agregar o actualizar la asistencia, en mi caso lo manejo con un 0 por defecto.
+            //En caso de que se quiera usar para actualizar solo se le da el valor de 1 o true
+            FORM.append('idAsistenciaBool', boolAsistance);
+            //El arreglo de jugadores es el arreglo de objetos que se obtiene de readAll o readAllDefault, en mi caso lo manejo con el arreglo de jugadores.
+            //Recuerda pasarlo a JSON.stringify para que se pueda enviar por POST.
+            FORM.append('arregloAsistencia', JSON.stringify(jugadores));
+            console.log('FORM:', IdHorarioNew, boolAsistance, jugadores);
+            //Se usa el action de createRow para guardar la asistencia de los jugadores, independientemente que se agregue o se actualice.
+            const DATA = await fetchData(API, 'createRow', FORM);
+            if (DATA.status) {
+                setAlertCallback(null);
+                setAlertMessage('Asistencia guardada correctamente.');
+                setAlertVisible(true);
+                setAlertType(1);
+                navigation.goBack();
+            } else {
+                console.log(DATA.error);
+            }
+        }
+        else {
+            console.log(DATA.error);
+        }
+        
+
+
     };
 
-    const scheduleOptions = [
-        { label: '8:00 AM - 10:00 AM', value: '8-10' },
-        { label: '10:00 AM - 12:00 PM', value: '10-12' },
-        { label: '2:00 PM - 4:00 PM', value: '2-4' },
-        { label: '4:00 PM - 6:00 PM', value: '4-6' },
-    ];
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fillJugadores();
+    }, [idEntrenamiento]);
+
+    useEffect(() => {
+        fillJugadores();
+        fillHorario();
+    }, [idEntrenamiento]);
+
+
+    // Función que se encarga de manejar el cierre de la alerta, esta función se ejecuta al presionar el botón de cerrar.
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+        if (alertCallback) alertCallback();
+    };
+
+    // Función que se encarga de llenar los jugadores que asistieron a un entrenamiento, esta función se ejecuta al seleccionar un horario.
+    // Esta función se puede usar para llenar update, el único detalle es que se debe cambiar el action de la petición. a "readAll" en vez del que esta "readAlldefault".
+    // A esta función solo se le pasa el id_entrenamiento, en mi caso para llenar fillJugadores necesito primero el entrenamiento seleccionado.
+    // Pero en casois como actualizar se puede pasar directamente el id_entrenamiento debido a que viene como parametro de la pantalla.
+    const fillJugadores = async () => {
+        try {
+            const FORM = new FormData();
+            FORM.append('idEntrenamiento', idEntrenamiento);
+            const DATA = await fetchData(API, 'readAll', FORM);
+            if (DATA.status) {
+                const registros = DATA.dataset.map((item) => ({
+                    id_asistencia: item.id_asistencia,
+                    observacion: item.observacion,
+                    id: item.id,
+                    jugador: item.jugador,
+                    asistencia: item.asistencia,
+                    id_entrenamiento: item.id_entrenamiento,
+                    //En mi caso el color es #4CAF50 porque todos tienen asistencia por defecto, en caso de que se quiera cambiar ese color se puede manejar dependiendo de item.asistencia.
+                    color: '#4CAF50',
+                }));
+                setJugadores(registros);
+                setResponse(true);
+            } else {
+                console.log(DATA.error);
+                setResponse(false);
+            }
+        }
+        catch (error) {
+            console.error("Error fetching data:", error);
+        }
+        finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+
+    };
+
+    const fillHorario = async () => {
+        try {
+            const FORM = new FormData();
+            FORM.append('idEntrenamiento', idEntrenamiento);
+            const DATA = await fetchData(API, 'readOneHorarioMostrar', FORM);
+            console.log(DATA);
+            if (DATA.status) {
+                let data = DATA.dataset;
+                console.log('Horario recibido: ', data);
+                setHora(data);
+            } else {
+                console.log(DATA.error);
+                setHora('');
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+
+    // Función que se encarga de actualizar el arreglo de objetos obtenido de readAll o readAllDefault, esta función se ejecuta al cambiar el estado de asistencia de un jugador.
+    // Esta función espera el id del jugador y el nuevo estado de asistencia.
+    // Esta función mapea el arreglo de objetos para actulizar registros en base a los id de los jugadores.
+    const updateStatus = (id, newStatus) => {
+        setJugadores((prevJugadores) => {
+            const updatedJugadores = prevJugadores.map((jugador) => {
+                if (jugador.id === id) {
+                    return { ...jugador, asistencia: newStatus };
+                }
+                return jugador;
+            });
+            console.log('Jugadores actualizados:', jugadores);
+            return updatedJugadores;
+        });
+    };
+
+    // Función que se encarga de abrir el modal de observación, esta función se ejecuta al presionar el botón de observación.
+    // Esta función espera el id del jugador.
+    // Esta función busca el jugador en el arreglo de jugadores y obtiene la observación del jugador.
+    const openObservationModal = (id) => {
+        const jugador = jugadores.find((jugador) => jugador.id === id);
+        setObservationText(jugador.observacion);
+        setSelectedPlayerId(id);
+        setModalVisible(true);
+    };
+
+    // Función que se encarga de actualizar el arreglo de objetos obtenido de readAll o readAllDefault, esta función se ejecuta al cambiar la observación de un jugador.
+    // Esta función mapea el arreglo de objetos para actulizar registros en base a los id de los jugadores.
+    // Esta función obtiene el id del jugador y la nueva observación solito (la verdad no sé ni cómo funciona lol, pero funciona).
+    const saveObservation = () => {
+        setJugadores((prevJugadores) => {
+            const updatedJugadores = prevJugadores.map((jugador) => {
+                if (jugador.id === selectedPlayerId) {
+                    return { ...jugador, observacion: observationText };
+                }
+                return jugador;
+            });
+            console.log('Jugadores actualizados observacion:', jugadores);
+            return updatedJugadores;
+        });
+        setModalVisible(false);
+    };
+
+    const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
 
     return (
+
         <View style={styles.container}>
             <Text style={styles.headerText}>Entrenamientos</Text>
             <Text style={styles.subHeaderText}>
@@ -106,116 +275,193 @@ const AssistsScreenM = () => {
                 Y ver información de este entrenamiento
             </Text>
             <Text style={styles.textHorario}>
-                <Text style={styles.horariotext}>Horario de 13:00 pm a 15:00 pm</Text>
+                {hora.map((hora, index) => (
+                    <View key={index}>
+                        <Text style={styles.horariotext}>{hora.horario}</Text>
+                    </View>
+                ))}
             </Text>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Guardar asistencia</Text>
+            <TouchableOpacity style={styles.button} onPress={guardarAsistencia}>
+                <Text style={styles.buttonText}>Modificar asistencia</Text>
             </TouchableOpacity>
+            <AlertComponent
+                visible={alertVisible}
+                type={alertType}
+                message={alertMessage}
+                onClose={handleAlertClose}
+            />
             <View style={styles.tabContainer}>
-                    <TouchableOpacity
-                        style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
-                        onPress={() => setActiveTab('historial')}
-                    >
-                        <Text style={styles.tabText}>Historial</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
-                        onPress={() => setActiveTab('observaciones')}
-                    >
-                        <Text style={styles.tabText}>Observaciones</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
-                        onPress={() => setActiveTab('pruebas')}
-                    >
-                        <Text style={styles.tabText}>pruebas</Text>
-                    </TouchableOpacity>
+                <TouchableOpacity
+                    style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
+                    onPress={() => setActiveTab('historial')}
+                >
+                    <Text style={styles.tabText}>Historial</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
+                    onPress={() => setActiveTab('observaciones')}
+                >
+                    <Text style={styles.tabText}>Observaciones</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
+                    onPress={() => setActiveTab('pruebas')}
+                >
+                    <Text style={styles.tabText}>pruebas</Text>
+                </TouchableOpacity>
             </View>
-            <ScrollView style={styles.scrollContainer}>
-                {activeTab === 'historial' ? (
+            {activeTab === 'historial' ? (
+                <ScrollView style={{ flex: 1 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
 
+                    }>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    ) : (
+                        response ? (
+                            < ScrollView
+                                style={styles.scrollContainer}
+                            >
+                                <View style={styles.headerM}>
+                                    <Text style={styles.headerTextM}>Jugadores</Text>
+                                    <Text style={styles.headerTextM}>Asistencias</Text>
+                                </View>
+                                {jugadores.map((player, index) => (
+                                    <PlayerCard
+                                        key={index}
+                                        name={player.jugador}
+                                        status={player.asistencia}
+                                        color={player.color}
+                                        id={player.id}
+                                        updateStatus={updateStatus}
+                                    />
+                                ))}
+                                {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+
+                            </ScrollView>
+                        ) : (
+                            <ScrollView
+                                style={styles.scrollContainer}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                    />
+                                }
+                            >
+                                <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                    <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron jugadores</Text>
+                                </View>
+                            </ScrollView>
+                        )
+                    )}
+                </ScrollView>
+            ) : activeTab === 'observaciones' ? (
+                // Aquí va el contenido de Observaciones
+
+                <ScrollView style={{ flex: 1 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+
+                    }>
                     <View>
-                        <View style={styles.headerM}>
-                            <Text style={styles.headerTextM}>Jugadores</Text>
-                            <Text style={styles.headerTextM}>Asistencias</Text>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            response ? (
+                                < ScrollView
+                                    style={styles.scrollContainer}
+                                >
+                                    <View style={styles.headerM}>
+                                        <Text style={styles.headerTextM}>Jugadores</Text>
+                                        <Text style={styles.headerTextM}>Observaciones</Text>
+                                    </View>
+                                    {jugadores.map((player, index) => (
+                                        <PlayerCardObservation
+                                            key={index}
+                                            name={player.jugador}
+                                            color={player.color}
+                                            id={player.id}
+                                            openObservationModal={openObservationModal}
+                                        />
+                                    ))}
+                                    {refreshing && <ActivityIndicator size="large" color="#0000ff" />}
+                                </ScrollView>
+                            ) : (
+                                <ScrollView
+                                    style={styles.scrollContainer}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                        />
+                                    }
+                                >
+                                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron jugadores</Text>
+                                    </View>
+                                </ScrollView>
+                            )
+                        )}
+                    </View>
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View style={styles.modalCenterM}>
+                            <View style={styles.modalContainerM}>
+                                <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
+                                    <View style={styles.modalRowM}>
+                                        <Text style={styles.modalTitleM}>Observación</Text>
+                                    </View>
+                                </LinearGradient>
+
+                                <ScrollView>
+                                    <View style={styles.contentM}>
+                                        <View style={styles.observationBoxM}>
+                                            <View style={styles.blueLineM}></View>
+                                            <TextInput
+                                                style={styles.textInput}
+                                                multiline
+                                                numberOfLines={4}
+                                                onChangeText={setObservationText}
+                                                value={observationText}
+                                            />
+                                        </View>
+                                        <View style={styles.justifyContentM}>
+                                            <TouchableOpacity style={styles.saveButtonM} onPress={saveObservation}>
+                                                <Text style={styles.buttonTextM}>Guardar</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
+                                                <Text style={styles.buttonTextM}>Cerrar</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </ScrollView>
+                            </View>
                         </View>
-                        {playerStatuses.map((player, index) => (
-                            <PlayerCard
-                                key={index}
-                                name={player.name}
-                                status={player.status}
-                                color={player.color}
-                                onStatusChange={handleStatusChange}
-                            />
-                        ))}
-                    </View>
-                ) : activeTab === 'observaciones' ? (
-                    // Aquí va el contenido de Observaciones
-                    <View>
-                        <ScrollView>
-                            {/* Encabezado */}
-                            <View style={styles.headerM}>
-                                <Text style={styles.headerTextM}>Jugadores</Text>
-                                <Text style={styles.headerTextM}>Observación</Text>
-                            </View>
+                    </Modal>
+                </ScrollView>
 
-                            {/* Lista de jugadores */}
-                            {players.map((player, index) => (
-                                <View key={index} style={[styles.playerCard, { borderLeftColor: player.color }]}>
-                                    <Text style={styles.playerName}>{player.name}</Text>
-                                    <TouchableOpacity
-                                        style={styles.observationButtonM}
-                                        onPress={() => setModalVisible(true)}
-                                    >
-                                        <Image source={soccer}></Image>
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </ScrollView>
-                        <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible}
-                            onRequestClose={() => { setModalVisible(!modalVisible); }}
-                        >
-                            <View style={styles.modalCenterM}>
-                                <View style={styles.modalContainerM}>
-                                    <LinearGradient colors={['#020887', '#13071E']} style={styles.headerModalM}>
-                                        <View style={styles.modalRowM}>
-                                            <Image style={styles.imagesM} source={require('../../assets/gol_blanco 2.png')} />
-                                            <Text style={styles.modalTitleM}>Observación</Text>
-                                        </View>
-                                    </LinearGradient>
 
-                                    <ScrollView>
-                                        <View style={styles.contentM}>
-                                            <View style={styles.observationBoxM}>
-                                                <View style={styles.blueLineM}></View>
-                                                <Text style={styles.observationTextM}>
-                                                    Juan presentó molestias en su pie derecho por lo que se despachó y se fue a su casa. Dependiendo de cómo siga, si pondrá como lesionado.
-                                                </Text>
-                                            </View>
-                                            <View style={styles.justifyContentM}>
-                                                <TouchableOpacity style={styles.saveButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Guardar</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.closeButtonM} onPress={() => setModalVisible(false)}>
-                                                    <Text style={styles.buttonTextM}>Cerrar</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    </ScrollView>
-                                </View>
-                            </View>
-                        </Modal>
-                    </View>
-                ) : (
-                    // Aquí va el contenido de Pruebas
-                    // Aquí va el contenido de Observaciones
-                    <PruebasComponent idEntrenamiento={idEntrenamiento} />
-                )}
-            </ScrollView>
-        </View>
+            ) : (
+                // Aquí va el contenido de Pruebas
+                // Aquí va el contenido de Observaciones
+                <PruebasComponent idEntrenamiento={idEntrenamiento} />
+            )}
+        </View >
+
     );
 };
 
@@ -382,6 +628,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#334195', // Active tab color
         alignItems: 'center',
         borderRadius: 8,
+    },
+    scrollContainer: {
+        flex: 1,
     },
     tabInactive: {
         flex: 1,

@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import LoginNav from './src/navigation/LoginNav';
 import BottomTab from './src/navigation/BottomTab';
 import fetchData from './api/components';
+import LoadingScreen from "./src/screens/LoadingScreen";
 
 //Componente principal
 export default function App() {
@@ -14,15 +15,21 @@ export default function App() {
   const API = 'services/technics/tecnicos.php';
   // logueado: Variable para indicar si la sesion ya está lista
   // setLogueado: Función para actualizar la variable logueado
-  const [logueado, setLogueado] = useState(false);
+  const [logueado, setLogueado] = useState(false)
+  const [load, setLoad] = useState();
 
   // Función que ayuda a verificar si existe previamente una sesión abierta
   const verifyLogged = async () => {
+    setLoad(true);
     try {
       const data = await fetchData(API, 'getUser');
       if (data.session) {
         setLogueado(true)
         console.log(data.nombre);
+
+        setTimeout(()=>{
+          setLoad(false)
+        }, 1500)
       } else {
         setLogueado(false)
       }
@@ -33,6 +40,11 @@ export default function App() {
   useEffect(() => {
     verifyLogged();
   }, [])
+
+  //Verifica si load esta en true, de ser asi entonces moestrar la pantalla de carga
+  if(load) {
+    return <LoadingScreen/>
+  }
 
   // Retorna el contenedor de navegación
   return (

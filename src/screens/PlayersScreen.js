@@ -194,7 +194,8 @@ const styles = StyleSheet.create({
     rowCards: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        marginHorizontal: 12
     },
     ////////////////////
     textCard: {

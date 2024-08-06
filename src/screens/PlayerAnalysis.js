@@ -322,15 +322,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    chartContainer: {
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    chartTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
     chartWrapper: {
         backgroundColor: '#03045E',
         padding: 20,

@@ -20,6 +20,7 @@
     "expo-linear-gradient": "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "gifted-charts-core": "^0.1.28",
+    "lottie-react-native": "^6.7.2",
     "react": "18.2.0",
     "react-native": "0.74.2",
     "react-native-chart-kit": "^6.12.0",

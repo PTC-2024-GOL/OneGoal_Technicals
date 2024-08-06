@@ -27,10 +27,12 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const getUser = async () => {
     try {
       const data = await fetchData(USER_API, 'getUserMobile');
-      if (data.session) {
-        setUsername(data.username);
-        console.log(data.nombre);
+      if (data.status) {
+        const [firstName] = data.username.split(' ');
+        const [firstSurname] = data.apellido.split(' ');
+        setUsername(`${firstName} ${firstSurname}`);
       } else {
+        console.log('Error: Nombre de Tecnico indefinido');
       }
     } catch (error) {
       console.log(error);
@@ -49,9 +51,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       const initializeApp = async () => {
         await getUser();
       };
-      initializeApp()
-    },[])
-  )
+      initializeApp();
+    }, [])
+  );
 
   return (
     <ScrollView style={styles.container}>

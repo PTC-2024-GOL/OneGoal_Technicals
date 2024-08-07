@@ -139,38 +139,37 @@ const AssistsScreenM = () => {
     // Esta función se puede usar para crear y actualizar la asistencia de los jugadores, debido a que es compatible con todo.
 
     const guardarAsistencia = async () => {
-        const FORMHORA = new FormData();
-        const FORM = new FormData();
-        FORMHORA.append('idEntrenamiento', idEntrenamiento);
-        const DATAHORA = await fetchData(API, 'readOne', FORMHORA);
+        const formHora = new FormData();
+        const form = new FormData();
+        formHora.append('idEntrenamiento', idEntrenamiento);
+        const dataHora = await fetchData(API, 'readOne', formHora);
 
-        if (DATAHORA.status) {
+        if (dataHora.status) {
             
-            let IdHorarioNew = DATAHORA.dataset.id_horario;
-            console.log('esta es la hora zorra ' + IdHorarioNew);
+            let IdHorarioNew = dataHora.dataset.id_horario;
 
-            FORM.append('idHorario', IdHorarioNew);
+            form.append('idHorario', IdHorarioNew);
             //El boolAsistance es un booleano que inidica si vas a agregar o actualizar la asistencia, en mi caso lo manejo con un 0 por defecto.
             //En caso de que se quiera usar para actualizar solo se le da el valor de 1 o true
-            FORM.append('idAsistenciaBool', boolAsistance);
+            form.append('idAsistenciaBool', boolAsistance);
             //El arreglo de jugadores es el arreglo de objetos que se obtiene de readAll o readAllDefault, en mi caso lo manejo con el arreglo de jugadores.
             //Recuerda pasarlo a JSON.stringify para que se pueda enviar por POST.
-            FORM.append('arregloAsistencia', JSON.stringify(jugadores));
+            form.append('arregloAsistencia', JSON.stringify(jugadores));
             console.log('FORM:', IdHorarioNew, boolAsistance, jugadores);
             //Se usa el action de createRow para guardar la asistencia de los jugadores, independientemente que se agregue o se actualice.
-            const DATA = await fetchData(API, 'createRow', FORM);
-            if (DATA.status) {
+            const data = await fetchData(API, 'createRow', form);
+            if (data.status) {
                 setAlertCallback(null);
                 setAlertMessage('Asistencia guardada correctamente.');
                 setAlertVisible(true);
                 setAlertType(1);
                 navigation.goBack();
             } else {
-                console.log(DATA.error);
+                console.log(data.error);
             }
         }
         else {
-            console.log(DATA.error);
+            console.log(data.error);
         }
         
 
@@ -200,11 +199,11 @@ const AssistsScreenM = () => {
     // Pero en casois como actualizar se puede pasar directamente el id_entrenamiento debido a que viene como parametro de la pantalla.
     const fillJugadores = async () => {
         try {
-            const FORM = new FormData();
-            FORM.append('idEntrenamiento', idEntrenamiento);
-            const DATA = await fetchData(API, 'readAll', FORM);
-            if (DATA.status) {
-                const registros = DATA.dataset.map((item) => ({
+            const formData = new FormData();
+            formData.append('idEntrenamiento', idEntrenamiento);
+            const data = await fetchData(API, 'readAll', formData);
+            if (data.status) {
+                const registros = data.dataset.map((item) => ({
                     id_asistencia: item.id_asistencia,
                     observacion: item.observacion,
                     id: item.id,
@@ -217,7 +216,7 @@ const AssistsScreenM = () => {
                 setJugadores(registros);
                 setResponse(true);
             } else {
-                console.log(DATA.error);
+                console.log(data.error);
                 setResponse(false);
             }
         }
@@ -233,16 +232,16 @@ const AssistsScreenM = () => {
 
     const fillHorario = async () => {
         try {
-            const FORM = new FormData();
-            FORM.append('idEntrenamiento', idEntrenamiento);
-            const DATA = await fetchData(API, 'readOneHorarioMostrar', FORM);
-            console.log(DATA);
-            if (DATA.status) {
-                let data = DATA.dataset;
-                console.log('Horario recibido: ', data);
-                setHora(data);
+            const formData = new FormData();
+            formData.append('idEntrenamiento', idEntrenamiento);
+            const data = await fetchData(API, 'readOneHorarioMostrar', formData);
+            console.log(data);
+            if (data.status) {
+                let dataSet = data.dataset;
+                console.log('Horario recibido: ', dataSet);
+                setHora(dataSet);
             } else {
-                console.log(DATA.error);
+                console.log(data.error);
                 setHora('');
             }
         } catch (error) {
@@ -690,6 +689,7 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         fontWeight: 'bold',
+        maxWidth: 100,
     },
     observationsContainer: {
         padding: 16,

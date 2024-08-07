@@ -27,16 +27,16 @@ const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
     }
 
     const fechaActualUTC = new Date();
-    const form = new FormData();
-    form.append('correo', email);
-    form.append('nivel', 2);
-    form.append('fecha', fechaActualUTC.toISOString());
+    const formData = new FormData();
+    formData.append('correo', email);
+    formData.append('nivel', 2);
+    formData.append('fecha', fechaActualUTC.toISOString());
 
     console.log('Esto contiene el correo: ' + email);
     console.log('Esto contiene la fecha actual en UTC: ' + fechaActualUTC.toISOString());
 
     try {
-      const data = await fetchData(API, 'envioCorreo', form);
+      const data = await fetchData(API, 'envioCorreo', formData);
       if (data.status) {
         setAlertType(1);
         setAlertMessage(`${data.message}`);

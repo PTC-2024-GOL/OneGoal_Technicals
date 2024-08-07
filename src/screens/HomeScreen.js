@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image , RefreshControl} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Image, RefreshControl } from 'react-native';
 import { Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import {PieChart} from 'react-native-gifted-charts';
+import { PieChart } from 'react-native-gifted-charts';
 import fetchData from '../../api/components';
 
 import gol from '../../assets/gol.png';
@@ -19,7 +19,14 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const USER_API = "services/technics/tecnicos.php";
   const MATCHES_API = "services/technics/partidos.php";
   const API_SOCCER = "services/technics/equipos.php";
-
+  const [results, setResults] = useState({
+    ganados: " ",
+    perdidos: " ",
+    empatados: " ",
+    contra: " ",
+    favor: " ",
+    diferencia: " ",
+  });
   const [username, setUsername] = useState('');
   const [selectedTeam, setSelectedTeam] = useState();
 
@@ -57,17 +64,18 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       const FORM = new FormData();
       FORM.append('idEquipo', idEquipo);
       const response = await fetchData(MATCHES_API, 'trainingAnylsis', FORM);
-      
+
       if (response.status) {
         let data = response.dataset.map(item => ({
-            value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
-            color: getRandomColor(), // Asigna colores aleatorios
-            label: item.caracteristica,
+          value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
+          color: getRandomColor(), // Asigna colores aleatorios
+          label: item.caracteristica,
+          text: `${item.caracteristica}: ${parseInt(item.promedio, 10)}`
         }));
         setDataPie(data);
         setResponse(true);
         // RETORNA "CARACTERISTICA Y LA NOTA"
-    } else {
+      } else {
         setDataPie([]);
         setResponse(false);
         console.error("La respuesta no contiene datos válidos:", response);
@@ -94,10 +102,34 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  const readProfile = async () => {
+    try {
+      const FORM = new FormData();
+      FORM.append('idEquipo', idEquipo);
+      const data = await fetchData(MATCHES_API, "matchesResult", FORM);
+      const profileData = data.dataset;
+      setResults({
+        ganados: profileData.victorias,
+        perdidos: profileData.derrotas,
+        empatados: profileData.empates,
+        contra: profileData.golesEnContra,
+        favor: profileData.golesAFavor,
+        diferencia: profileData.diferencia,
+      });
+
+      console.log(data.dataset);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log("Petición hecha");
+    }
+  };
+
   useEffect(() => {
     const initializeApp = async () => {
       await getUser();
       await fillGraphicDoughnut();
+      await readProfile();         
     };
     initializeApp();
   }, []);
@@ -106,6 +138,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     useCallback(() => {
       const initializeApp = async () => {
         await getUser();
+        await fillGraphicDoughnut();
+        await readProfile(); 
       };
       initializeApp();
     }, [])
@@ -113,7 +147,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fillGraphicDoughnut();
+        await getUser();
+        await fillGraphicDoughnut();
+        await readProfile();
     setRefreshing(false);
   }, []);
 
@@ -124,70 +160,61 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         <Text style={styles.subText}>Ponte al día sobre las nuevas actualizaciones</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{results.ganados}</Text>
             <Text style={styles.statLabel}>Partidos ganados</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statNumber}>{results.perdidos}</Text>
             <Text style={styles.statLabel}>Partidos perdidos</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>1</Text>
+            <Text style={styles.statNumber}>{results.empatados}</Text>
             <Text style={styles.statLabel}>Partidos empatados</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statNumber}>{results.contra}</Text>
             <Text style={styles.statLabel}>Goles en contra</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statNumber}>{results.favor}</Text>
             <Text style={styles.statLabel}>Goles a favor</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{results.diferencia}</Text>
             <Text style={styles.statLabel}>Diferencia</Text>
           </View>
         </View>
       </View>
-      {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
-          <View style={styles.chartWrapper}>
-            <PieChart
-              data={dataPie}
-              donut
-              showGradient
-              sectionAutoFocus
-              radius={90}
-              innerRadius={60}
-              innerCircleColor={'#03045E'}
-            />
-          </View>
-        </View>
-      ) : (
-        <ScrollView
-        style={styles.scrollContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
-      >
-        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron datos para la gráfica</Text>
-        </View>
-      </ScrollView>
-    )}
       <View style={styles.chartTextContainer}>
-   {/*      <PieChart
-          widthAndHeight={widthAndHeight}
-          series={series}
-          sliceColor={sliceColor}
-          doughnut={true}
-          coverRadius={0.45}
-          coverFill={'#FFF'}
-        /> */}
+        {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
+          <PieChart
+            data={dataPie}
+            donut
+            showGradient
+            sectionAutoFocus
+            showText
+            textColor='black'
+            radius={90}
+            innerRadius={60}
+            textSize={12}
+            showTextBackground
+            textBackgroundRadius={0.1}
+          />
+        ) : (
+          <ScrollView
+            style={styles.scrollContainer}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+              />
+            }
+          >
+            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron datos para la gráfica</Text>
+            </View>
+          </ScrollView>
+        )}
         <View style={styles.textContainer}>
           <Text style={styles.chartTitle}>Estadísticas generales del equipo</Text>
           <Text style={styles.chartDescription}>

@@ -10,6 +10,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
 import foto from "../../assets/chepe.jpg";
 import { TextInputMask } from "react-native-masked-text";
+import { PieChart, LineChart } from 'react-native-gifted-charts'; // Cambia PieChart a DonutChart
 
 const windowHeight = Dimensions.get("window").height;
 
@@ -18,12 +19,12 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   const USER_API = "services/technics/tecnicos.php";
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: "José Orlando",
-    fullname: "Martínez Peña",
-    email: "chepe@gmail.com",
-    phone: "1212-1212",
-    dui: "12345678-9",
-    birthday: new Date("2005-09-26"),
+    name: " ",
+    fullname: " ",
+    email: " ",
+    phone: " ",
+    dui: " ",
+    birthday: new Date(" "),
     image: Image.resolveAssetSource(foto).uri,
   });
 
@@ -35,6 +36,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
 
   const handleEditPress = () => {
     setIsEditing(!isEditing);
+    readProfile();
   };
 
   const handleSavePress = async () => {

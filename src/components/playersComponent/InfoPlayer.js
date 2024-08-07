@@ -1,10 +1,28 @@
 import {View, StyleSheet, Image, ScrollView, Dimensions} from "react-native";
 import { Avatar, Button, Card, Text } from 'react-native-paper';
+import LoadingComponent from "../LoadingComponent";
+import React, {useCallback, useEffect, useState} from "react";
+import {useFocusEffect} from "@react-navigation/native";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 const InfoPlayers = ({informationPlayer, estadoFisico}) => {
+
+    const [load, setLoading] = useState(true); // Estado de carga inicializado en true
+
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                }, 1000);
+            };
+            fetchData();
+        }, [informationPlayer, estadoFisico])
+    );
+
 
     let imc = estadoFisico.indice_masa_corporal;
     let color;
@@ -33,6 +51,9 @@ const InfoPlayers = ({informationPlayer, estadoFisico}) => {
 
     return(
         <ScrollView>
+            {load ? (
+                <LoadingComponent/>
+            ) : (
             <View style={styles.container}>
                 <View style={styles.row}>
                     <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Edit.png')}/>
@@ -109,6 +130,7 @@ const InfoPlayers = ({informationPlayer, estadoFisico}) => {
                         <Text style={{marginBottom: 12}}>{estadoFisico.fecha_creacion_format}</Text>
                     </Card>
             </View>
+                )}
         </ScrollView>
     );
 }

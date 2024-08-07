@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView} from "react-native";
+import {View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView, ActivityIndicator} from "react-native";
 import {Card, Chip, Searchbar} from 'react-native-paper';
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import fetchData from "../../api/components";
 import {SERVER_URL} from "../../api/constantes";
+import LottieView from "lottie-react-native";
+import LoadingComponent from "../components/LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -14,6 +16,7 @@ const PlayersScreen = () => {
     const API = 'services/technics/participaciones_partidos.php';
     const [players, setPlayers] = useState([]);
     const navigation = useNavigation();
+    const [load, setLoad] = useState();
 
     const [filter, setFilter] = useState('');
     const [search, setSearch] = useState('');
@@ -36,6 +39,7 @@ const PlayersScreen = () => {
     //Funcion para traer los jugadores de la api
     const fillPlayers = async () => {
         setPlayers([]);
+        setLoad(true);
         const form = new FormData();
         form.append('idEquipo', idEquipo);
         let action;
@@ -57,10 +61,12 @@ const PlayersScreen = () => {
             let dataPlayer = data.dataset;
             setPlayers(dataPlayer);
             setData(true)
+            setLoad(false);
         }else {
             console.log(data.error);
             setPlayers([]);
             setData(false)
+            setLoad(false);
         }
     }
 
@@ -111,37 +117,38 @@ const PlayersScreen = () => {
             </View>
             {/*Codigo para las cards*/}
             {/*Si viene data de la api, entonces se mostraran los jugadores pero si no, mostrara un mensaje de error/advertencia*/}
-            {data ? (
+            {load ? (
+                <LoadingComponent/>
+            ) : data ? (
                 <ScrollView>
                     <View style={styles.rowCards}>
-                        {players.map((player, index)=> {
+                        {players.map((player, index) => {
                             let name = player.nombre_jugador.split(' ', 1);
                             let apellido = player.apellido_jugador.split(' ', 1);
 
                             let styleEstatus;
 
-                            //Dependiendo del estado del jugador, asi se coloca el color del estilo
-                            if(player.estatus_jugador === 'Baja temporal') {
+                            if (player.estatus_jugador === 'Baja temporal') {
                                 styleEstatus = styles.estatusText1;
                             } else if (player.estatus_jugador === 'Baja definitiva') {
                                 styleEstatus = styles.estatusText2;
                             } else {
-                                styleEstatus = styles.estatusText3
+                                styleEstatus = styles.estatusText3;
                             }
 
                             return (
                                 <TouchableOpacity key={player.id_jugador} onPress={() => goToPlayersDetails(player.id_jugador)}>
-                                    <View >
+                                    <View>
                                         <View>
                                             <Image style={styles.imageCard}
-                                                   source={{uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}`}}></Image>
+                                                   source={{ uri: `${SERVER_URL}images/jugadores/${player.foto_jugador}` }}></Image>
                                         </View>
                                         <View style={styles.textCard}>
                                             <Text
                                                 style={styles.nameText}>{name + ' ' + apellido}</Text>
                                             <View style={styles.rowPosition}>
                                                 <Image source={require('../../assets/Soccer Ball.png')}
-                                                       style={{width: 15, height: 15}}></Image>
+                                                       style={{ width: 15, height: 15 }}></Image>
                                                 <Text style={styles.positionText}>{player.area_de_juego}</Text>
                                             </View>
                                             <Text style={styleEstatus}>{player.estatus_jugador}</Text>
@@ -153,9 +160,9 @@ const PlayersScreen = () => {
                     </View>
                 </ScrollView>
             ) : (
-                <View style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Image style={{height: 80, width: 80, marginBottom: 10}} source={require('../../assets/find.png')}/>
-                    <Text style={{backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron jugadores</Text>
+                <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                    <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron jugadores</Text>
                 </View>
             )}
 
@@ -170,7 +177,7 @@ const styles = StyleSheet.create({
         marginBottom: windowHeight * 0.15,
         flex: 1,
     },
-     row: {
+    row: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',

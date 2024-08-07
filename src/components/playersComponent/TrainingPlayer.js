@@ -1,10 +1,10 @@
-import {View,StyleSheet, Dimensions, ScrollView, Image} from "react-native";
+import {View, StyleSheet, Dimensions, ScrollView, Image, ActivityIndicator} from "react-native";
 import {Card, Text} from "react-native-paper";
-import PieChart from "react-native-pie-chart";
 import React, {useCallback, useState} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 import fetchData from "../../../api/components";
 import {BarChart} from "react-native-chart-kit";
+import LoadingComponent from "../LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -13,8 +13,9 @@ const TrainingPlayer = ({idJugador}) => {
 
     const API_PLAYERS = 'services/technics/jugadores.php';
     const [prom, setProm] = useState(0.0);
-    const [matches, setMatches] =  useState(0);
+    const [matches, setMatches] = useState(0);
     const [notes, setNotes] = useState([]);
+    const [load, setLoading] = useState(true); // Estado de carga inicializado en true
 
     const getProm = async () => {
         const FORM = new FormData();
@@ -56,12 +57,20 @@ const TrainingPlayer = ({idJugador}) => {
     }
 
     useFocusEffect(
-        useCallback(()=>{
-            getMatches();
-            getNotes();
-            getProm()
-        },[idJugador])
-    )
+        useCallback(() => {
+            //Espera a que todas las peticiones se terminen.
+            const fetchData = async () => {
+                //Empieza a mostrarse el icono de carga
+                setLoading(true);
+                await getMatches();
+                await getNotes();
+                await getProm();
+                //Termina de mostrarse el icono de carga
+                setLoading(false);
+            };
+            fetchData();
+        }, [idJugador])
+    );
 
     const data = {
         labels: notes.map(note => note.clasificacion_caracteristica_jugador),
@@ -72,8 +81,6 @@ const TrainingPlayer = ({idJugador}) => {
         ]
     };
 
-    console.log(notes);
-
     const chartConfig = {
         backgroundGradientFrom: "#F2F7FF",
         backgroundGradientTo: "#F2F7FF",
@@ -83,47 +90,53 @@ const TrainingPlayer = ({idJugador}) => {
         useShadowColorFromDataset: false // optional
     };
 
-    return(
+    return (
         <ScrollView>
             <View style={styles.container}>
-                <View style={styles.rowCards}>
-                    <View style={styles.col}>
-                        <View style={styles.rowContent}>
-                            <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/table.png')}/>
-                            <Text variant='titleMedium'>Nota global</Text>
-                        </View>
-                        <Card style={styles.cardCyan}>
-                            <Text style={styles.textColor} variant='displayMedium'>{prom.notaGlobal}</Text>
-                        </Card>
-                        <View style={styles.rowContent}>
-                            <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Info.png')}/>
-                            <Text style={styles.info}>Incluye todas las áreas evaluadas (Físicas, técnicas, tácticos y psicológicas)</Text>
-                        </View>
-                    </View>
+                {load ? (
+                    <LoadingComponent/>
+                ) : (
+                    <>
+                        <View style={styles.rowCards}>
+                            <View style={styles.col}>
+                                <View style={styles.rowContent}>
+                                    <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/table.png')}/>
+                                    <Text variant='titleMedium'>Nota global</Text>
+                                </View>
+                                <Card style={styles.cardCyan}>
+                                    <Text style={styles.textColor} variant='displayMedium'>{prom.notaGlobal}</Text>
+                                </Card>
+                                <View style={styles.rowContent}>
+                                    <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Info.png')}/>
+                                    <Text style={styles.info}>Incluye todas las áreas evaluadas (Físicas, técnicas, tácticos y psicológicas)</Text>
+                                </View>
+                            </View>
 
-                    <View style={styles.col}>
-                        <View style={styles.rowContent}>
-                            <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Soccer Ball.png')}/>
-                            <Text variant='titleMedium'>Partidos jugados</Text>
+                            <View style={styles.col}>
+                                <View style={styles.rowContent}>
+                                    <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Soccer Ball.png')}/>
+                                    <Text variant='titleMedium'>Partidos jugados</Text>
+                                </View>
+                                <Card style={styles.cardBlue}>
+                                    <Text style={styles.textColor} variant='displayMedium'>{matches.partidos}</Text>
+                                </Card>
+                            </View>
                         </View>
-                        <Card style={styles.cardBlue}>
-                            <Text style={styles.textColor} variant='displayMedium'>{matches.partidos}</Text>
-                        </Card>
-                    </View>
-                </View>
 
-                <Text style={styles.title}>Promedio de las áreas evaluadas</Text>
-                <Text style={styles.subtitle}>En la gráfica podrás observar el promedio de notas por cada una de las áreas que se le han evaluado</Text>
+                        <Text style={styles.title}>Promedio de las áreas evaluadas</Text>
+                        <Text style={styles.subtitle}>En la gráfica podrás observar el promedio de notas por cada una de las áreas que se le han evaluado</Text>
 
-                <ScrollView horizontal={true}>
-                    <BarChart
-                        data={data}
-                        width={windowWidth}
-                        height={220}
-                        chartConfig={chartConfig}
-                        verticalLabelRotation={20}
-                    />
-                </ScrollView>
+                        <ScrollView horizontal={true}>
+                            <BarChart
+                                data={data}
+                                width={windowWidth}
+                                height={220}
+                                chartConfig={chartConfig}
+                                verticalLabelRotation={20}
+                            />
+                        </ScrollView>
+                    </>
+                )}
             </View>
         </ScrollView>
     );
@@ -191,47 +204,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         fontSize: 12,
         marginHorizontal: 15
-    },
-    //ESTILO PARA LAS GRAFICAS
-    rowGraphics: {
-        flexDirection: "row",
-        justifyContent: "center",
-        marginTop: 10,
-        marginBottom: 15
-    },
-    status1: {
-        backgroundColor: '#354AC8',
-        width: 10,
-        height: 10,
-        borderRadius: 100.2
-    },
-    status2: {
-        backgroundColor: '#4AFDF3',
-        width: 10,
-        height: 10,
-        borderRadius: 100.2
-    },
-    status3: {
-        backgroundColor: '#FF8DAD',
-        width: 10,
-        height: 10,
-        borderRadius: 100.2
-    },
-    status4: {
-        backgroundColor: '#AE99FA',
-        width: 10,
-        height: 10,
-        borderRadius: 100.2
-    },
-    rowTextGraphic: {
-        flexDirection: "row",
-        gap: 5,
-        alignItems: "center"
-    },
-    rowContentGraphic: {
-        marginBottom: 5,
-        flexDirection: "row",
-        justifyContent: "space-evenly"
     }
 });
 export default TrainingPlayer;

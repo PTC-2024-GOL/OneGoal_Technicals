@@ -123,7 +123,16 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
           <ScrollView>
             {/*Cartas*/}
 
-            {teams.map((teams, index) => (
+            {teams.map((teams, index) => {
+
+              let style;
+
+              if(teams.genero_equipo === 'Femenino'){
+                style = styles.genero1;
+              } else {
+                style = styles.genero2;
+              }
+               return(
                 <View key={teams.id_equipo} style={styles.cardsContainer}>
                   <LinearGradient colors={['#354AC8', '#1A2462']} style={styles.containerTitle}>
                     <Text style={styles.cardTitle}>{teams.nombre_equipo}</Text>
@@ -144,7 +153,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                       <Text style={styles.fontWeight}>Genéro</Text>
                       {/*Fila*/}
                       <View style={styles.rowGenero}>
-                        <View style={styles.status}></View>
+                        <View style={style}></View>
                         <Text>{teams.genero_equipo}</Text>
                       </View>
                     </View>
@@ -175,7 +184,8 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
                     </View>
                   </TouchableOpacity>
                 </View>
-            ))}
+               )
+            })}
           </ScrollView>
         </View>
 
@@ -237,6 +247,18 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     paddingTop: 40,
+  },
+  genero1: {
+    backgroundColor: '#ff2ce4',
+    width: 10,
+    height: 10,
+    borderRadius: 100/2
+  },
+  genero2: {
+    backgroundColor: '#2c0fec',
+    width: 10,
+    height: 10,
+    borderRadius: 100/2
   },
   row: {
     flexDirection: 'row',
@@ -306,12 +328,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     borderRadius: 10
-  },
-  status: {
-    backgroundColor: '#354AC8',
-    width: 10,
-    height: 10,
-    borderRadius: 100/2
   },
   teamImage: {
     width: 60,

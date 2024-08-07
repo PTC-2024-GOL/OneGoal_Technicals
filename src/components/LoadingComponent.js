@@ -3,31 +3,34 @@ import React from 'react';
 import LottieView from 'lottie-react-native';
 import {LinearGradient} from "expo-linear-gradient";
 
-const LoadingScreen = ()=> {
+const LoadingComponent = ()=> {
 
     return(
-        <LinearGradient colors={['#090BA0', '#03043A']} style={styles.container}>
-            {/*Cargamos la animacion*/}
+        <View style={styles.container}>
             <LottieView
-                source={require('../../assets/animations/loadScreen.json')}
+                source={require('../../assets/animations/loading.json')}
                 autoPlay
                 loop
                 style={styles.lottie}
             />
-        </LinearGradient>
+            <Text style={styles.text}>Cargando...</Text>
+        </View>
     )
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     lottie: {
-        width: 230,
-        height: 230,
+        width: 110,
+        height: 110,
+    },
+    text: {
+        color: '#19037e',
+        marginTop: -15
     }
 });
 
-export default LoadingScreen;
+export default LoadingComponent;

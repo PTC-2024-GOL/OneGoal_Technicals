@@ -689,6 +689,7 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         fontWeight: 'bold',
+        maxWidth: 100,
     },
     observationsContainer: {
         padding: 16,

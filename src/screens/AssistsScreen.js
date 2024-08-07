@@ -698,12 +698,6 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 10,
         borderBottomLeftRadius: 10,
     },
-    observationTextM: {
-        fontSize: 16,
-        color: '#333',
-        marginLeft: 10,
-        height: 50
-    },
     closeButtonM: {
         padding: 10,
         backgroundColor: '#F44262',

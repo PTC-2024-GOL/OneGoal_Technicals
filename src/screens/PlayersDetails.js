@@ -5,7 +5,7 @@ import {useCallback, useState} from "react";
 import {useFocusEffect, useRoute} from "@react-navigation/native"; // Importa useRoute
 import InfoPlayers from "../components/playersComponent/InfoPlayer";
 import TrainingPlayer from "../components/playersComponent/TrainingPlayer";
-import AssistancePlayer from "../components/playersComponent/assistancePlayer";
+import AssistancePlayer from "../components/playersComponent/AssistancePlayer";
 import fetchData from "../../api/components";
 import {SERVER_URL} from "../../api/constantes";
 

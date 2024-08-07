@@ -2,13 +2,13 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
-import RecoverPasswordScreen from '../screens/changePasswordsScreen';
+import RecoverPasswordScreen from '../screens/ChangePasswordsScreen';
 import PlayersScreen from '../screens/PlayersScreen';
 import PlayersDetails from "../screens/PlayersDetails";
-import TrainingsScreen from "../screens/trainingsScreen";
-import AssistsScreen from "../screens/assistsScreen";
-import AssistsScreenM from "../screens/assistsScreenM";
-import TestPlayerScreen from "../screens/testPlayerScreen";
+import TrainingsScreen from "../screens/TrainingsScreen";
+import AssistsScreen from "../screens/AssistsScreen";
+import AssistsScreenM from "../screens/AssistsScreenM";
+import TestPlayerScreen from "../screens/TestPlayerScreen";
 import PlayerAnalysis from "../screens/PlayerAnalysis";
 
 const Stack = createStackNavigator();

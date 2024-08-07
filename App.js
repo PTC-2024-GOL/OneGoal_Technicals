@@ -32,6 +32,9 @@ export default function App() {
         }, 1500)
       } else {
         setLogueado(false)
+        setTimeout(()=>{
+          setLoad(false)
+        }, 1500)
       }
     } catch (error) {
       console.log(error);

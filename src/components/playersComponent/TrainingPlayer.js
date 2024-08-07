@@ -3,7 +3,7 @@ import {Card, Text} from "react-native-paper";
 import React, {useCallback, useState} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 import fetchData from "../../../api/components";
-import {BarChart} from "react-native-chart-kit";
+import { BarChart, LineChart, PieChart, PopulationPyramid } from "react-native-gifted-charts";
 import LoadingComponent from "../LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
@@ -72,23 +72,10 @@ const TrainingPlayer = ({idJugador}) => {
         }, [idJugador])
     );
 
-    const data = {
-        labels: notes.map(note => note.clasificacion_caracteristica_jugador),
-        datasets: [
-            {
-                data: notes.map(note => note.nota_por_area)
-            }
-        ]
-    };
-
-    const chartConfig = {
-        backgroundGradientFrom: "#F2F7FF",
-        backgroundGradientTo: "#F2F7FF",
-        color: (opacity = 1) => `rgba(56, 0, 146, ${opacity})`,
-        strokeWidth: 2, // optional, default 3
-        barPercentage: 1.5,
-        useShadowColorFromDataset: false // optional
-    };
+    const data = notes.map(note => ({
+        value: note.nota_por_area,
+        label: note.clasificacion_caracteristica_jugador
+    }));
 
     return (
         <ScrollView>
@@ -128,11 +115,14 @@ const TrainingPlayer = ({idJugador}) => {
 
                         <ScrollView horizontal={true}>
                             <BarChart
+                                barWidth={50}
+                                noOfSections={3}
+                                barBorderRadius={4}
+                                frontColor="#46317e"
                                 data={data}
-                                width={windowWidth}
-                                height={220}
-                                chartConfig={chartConfig}
-                                verticalLabelRotation={20}
+                                yAxisThickness={0}
+                                xAxisThickness={0}
+                                isAnimated
                             />
                         </ScrollView>
                     </>
@@ -201,7 +191,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         justifyContent: "center",
-        marginBottom: 15,
+        marginBottom: 20,
         fontSize: 12,
         marginHorizontal: 15
     }

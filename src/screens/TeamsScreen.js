@@ -32,36 +32,36 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
 
   const fillCards = async () => {
     let action;
-    let FORM = new FormData();
+    let form = new FormData();
     if(search){
-      FORM.append('search', search);
+      form.append('search', search);
       action = 'searchRows';
     }else{
       action = 'readAll';
-      FORM = null
+      form = null
     }
 
-    const DATA = await fetchData(API, action, FORM);
+    const data = await fetchData(API, action, form);
 
-    if(DATA.status){
-      let data = DATA.dataset;
-      setTeams(data);
+    if(data.status){
+      let dataTeam = data.dataset;
+      setTeams(dataTeam);
     }else{
-      console.log(DATA.error);
+      console.log(data.error);
     }
   }
 
   const seeModal = async (id) => {
     setModalVisible(true);
-    const FORM = new FormData();
-    FORM.append('idEquipo', id);
-    const DATA = await fetchData(API, 'readAllStaff', FORM);
+    const form = new FormData();
+    form.append('idEquipo', id);
+    const data = await fetchData(API, 'readAllStaff', form);
 
-    if(DATA.status){
-      let data = DATA.dataset;
-      setTechnicals(data);
+    if(data.status){
+      let dataModal = data.dataset;
+      setTechnicals(dataModal);
     }else{
-      console.log(DATA.error);
+      console.log(data.error);
     }
 
   };

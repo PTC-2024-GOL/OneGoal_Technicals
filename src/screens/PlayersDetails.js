@@ -33,31 +33,29 @@ const PlayersDetails = () => {
 
     //Peticion a la api para traerme informacion sobre el estado fisico del jugador
     const fillEstadoFisico = async () => {
-        const FORM = new FormData();
-        FORM.append('idJugador', id_jugador);
+        const form = new FormData();
+        form.append('idJugador', id_jugador);
 
-        const DATA = await fetchData(API_ESTADO_FISICO, 'readAllMobile', FORM);
-
-        if(DATA.status){
-            let data = DATA.dataset;
-            setEstadoFisico(data);
+        const data = await fetchData(API_ESTADO_FISICO, 'readAllMobile', form)
+        if(data.status){
+            let dataEstate = data.dataset;
+            setEstadoFisico(dataEstate);
             console.log(estadoFisico);
         }else {
-            console.log(DATA.error);
+            console.log(data.error);
         }
     }
 
     //Peticion a la api para traerme informacion sobre el jugador
     const fillPlayers = async (idJugador) => {
-        const FORM = new FormData();
-        FORM.append('idJugador', idJugador);
-
-        const DATA = await fetchData(API_PLAYERS, 'readOne', FORM);
-        if(DATA.status){
-            let data = DATA.dataset;
-            setPlayers(data)
+        const form = new FormData();
+        form.append('idJugador', idJugador);
+        const data = await fetchData(API_PLAYERS, 'readOne', form);
+        if(data.status){
+            let dataPlayers = data.dataset;
+            setPlayers(dataPlayers)
         }else{
-            console.log(DATA.error)
+            console.log(data.error)
         }
     }
 

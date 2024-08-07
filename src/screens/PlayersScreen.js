@@ -36,29 +36,29 @@ const PlayersScreen = () => {
     //Funcion para traer los jugadores de la api
     const fillPlayers = async () => {
         setPlayers([]);
-        const FORM = new FormData();
-        FORM.append('idEquipo', idEquipo);
+        const form = new FormData();
+        form.append('idEquipo', idEquipo);
         let action;
 
         if(filter){
             action = 'readAllByAreaJuego';
-            FORM.append('areaJuego', filter);
+            form.append('areaJuego', filter);
         }else if(search){
             action = 'searchRows';
-            FORM.append('search', search)
+            form.append('search', search)
         }
         else{
             action = 'readAllByIdEquipo';
         }
 
         //Peticion a la API
-        const DATA = await fetchData(API, action, FORM);
-        if(DATA.status){
-            let data = DATA.dataset;
-            setPlayers(data);
+        const data = await fetchData(API, action, form);
+        if(data.status){
+            let dataPlayer = data.dataset;
+            setPlayers(dataPlayer);
             setData(true)
         }else {
-            console.log(DATA.error);
+            console.log(data.error);
             setPlayers([]);
             setData(false)
         }

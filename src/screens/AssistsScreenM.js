@@ -404,7 +404,7 @@ const AssistsScreenM = () => {
 
                     }>
                     <View>
-                        {loading ? (
+                        {LoadingComponent ? (
                             <ActivityIndicator size="large" color="#0000ff" />
                         ) : (
                             response ? (

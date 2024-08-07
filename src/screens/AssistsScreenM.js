@@ -9,6 +9,7 @@ import edit from '../../assets/iconPlayersScreen/Edit.png';
 import PruebasComponent from '../components/playersComponent/PruebasComponent'; // Importa el nuevo componente
 import fetchData from '../../api/components';
 import AlertComponent from '../components/AlertComponent';
+import LoadingComponent from "../components/LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -349,7 +350,7 @@ const AssistsScreenM = () => {
                         />
 
                     }>
-                    {loading ? (
+                    {LoadingComponent ? (
                         <ActivityIndicator size="large" color="#0000ff" />
                     ) : (
                         response ? (
@@ -403,7 +404,7 @@ const AssistsScreenM = () => {
 
                     }>
                     <View>
-                        {loading ? (
+                        {LoadingComponent ? (
                             <ActivityIndicator size="large" color="#0000ff" />
                         ) : (
                             response ? (

@@ -1,5 +1,5 @@
-import React, { useState,useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, Text, View, ScrollView, Image , RefreshControl} from 'react-native';
 import { Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
@@ -17,12 +17,66 @@ const windowWidth = Dimensions.get('window').width;
 const HomeScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
   const USER_API = "services/technics/tecnicos.php";
+  const MATCHES_API = "services/technics/partidos.php";
+  const API_SOCCER = "services/technics/equipos.php";
+
   const [username, setUsername] = useState('');
   const [selectedTeam, setSelectedTeam] = useState();
 
+  const [playerStatuses, setPlayerStatuses] = useState([]);
   const widthAndHeight = 150;
   const series = [5, 2, 1, 3];
   const sliceColor = ['#4CAF50', '#F44336', '#FFC107', '#00BCD4'];
+  const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+  const [dataPie, setDataPie] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [response, setResponse] = useState(false);
+  const [idEquipo, setIdEquipo] = useState(1);
+  // Datos estáticos para pruebas
+  const staticCaracteristicas = [
+    { NOMBRE: 'Velocidad', NOTA: '8' },
+    { NOMBRE: 'Resistencia', NOTA: '7' },
+    { NOMBRE: 'Técnica', NOTA: '9' },
+    { NOMBRE: 'Estrategia', NOTA: '6' },
+    { NOMBRE: 'Trabajo en equipo', NOTA: '8' },
+  ];
+
+  const getRandomColor = () => {
+    // Genera un color hexadecimal aleatorio
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const fillGraphicDoughnut = async () => {
+    try {
+      const FORM = new FormData();
+      FORM.append('idEquipo', idEquipo);
+      const response = await fetchData(MATCHES_API, 'trainingAnylsis', FORM);
+      
+      if (response.status && response.dataset) {
+        let data = response.dataset.map(item => ({
+          value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
+          color: getRandomColor(), // Asigna colores aleatorios
+          label: item.caracteristica,
+        }));
+        setDataPie(data);
+        setResponse(true);
+      } else {
+        setDataPie([]);
+        setResponse(false);
+        console.error("La respuesta no contiene datos válidos:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching datos de la gráfica:", error);
+      setDataPie([]);
+      setResponse(false);
+    }
+  };
 
   const getUser = async () => {
     try {
@@ -44,6 +98,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       await getUser();
     };
     initializeApp();
+    fillGraphicDoughnut();
+    setPlayerStatuses(staticCaracteristicas);
+    setTimeout(() => {
+    }, 1000);
   }, []);
 
   useFocusEffect(
@@ -55,10 +113,28 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }, [])
   );
 
+  const onRefresh = useCallback(async () => {
+      setRefreshing(true);
+      await fillCards();
+  }, []);
+
+  const renderLegendComponent = () => {
+    return (
+      <View style={styles.legendContainer}>
+        {dataPie.map((item, index) => (
+          <View key={index} style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: getRandomColor() }]} />
+            <Text style={styles.legendText}>{item.label}: {item.value}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.welcomeContainer}>
-      <Text style={styles.welcomeText}>Bienvenido {username}</Text>
+        <Text style={styles.welcomeText}>Bienvenido {username}</Text>
         <Text style={styles.subText}>Ponte al día sobre las nuevas actualizaciones</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
@@ -87,6 +163,38 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           </View>
         </View>
       </View>
+      {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
+        <View style={styles.chartWrapper}>
+          <PieChart
+            data={dataPie}
+            donut
+            showGradient
+            sectionAutoFocus
+            radius={90}
+            innerRadius={60}
+            innerCircleColor={'#03045E'}
+          />
+        </View>
+        {renderLegendComponent()}
+      </View>
+    ) : (
+      <ScrollView
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+          <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron datos para la gráfica</Text>
+        </View>
+      </ScrollView>
+    )}
       <View style={styles.chartTextContainer}>
         <PieChart
           widthAndHeight={widthAndHeight}
@@ -145,7 +253,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: windowWidth * 0.02, 
+    paddingHorizontal: windowWidth * 0.02,
     marginBottom: windowHeight * 0.16
   },
   header: {
@@ -160,7 +268,7 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     padding: 20,
     margin: 10,
-    elevation: 10, 
+    elevation: 10,
     borderRadius: 11,
     backgroundColor: '#fff',
     shadowColor: "#000",
@@ -208,7 +316,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     margin: 10,
-    elevation: 10, 
+    elevation: 10,
     borderRadius: 30,
     backgroundColor: '#fff',
     shadowColor: "#000",
@@ -240,7 +348,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     margin: 10,
-    elevation: 10, 
+    elevation: 10,
     borderRadius: 30,
     backgroundColor: '#fff',
     shadowColor: "#000",
@@ -297,6 +405,31 @@ const styles = StyleSheet.create({
   },
   ancho: {
     maxWidth: 100,
+  },
+  chartContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  chartStyle: {
+    backgroundColor: '#f5f5f5',
+    padding: 10,
+    borderRadius: 10,
+    color: 'white',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chartWrapper: {
+    backgroundColor: '#03045E',
+    padding: 20,
+    borderRadius: 20,
   },
 });
 

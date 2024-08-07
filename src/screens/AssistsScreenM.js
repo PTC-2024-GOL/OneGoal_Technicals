@@ -147,7 +147,6 @@ const AssistsScreenM = () => {
         if (dataHora.status) {
             
             let IdHorarioNew = dataHora.dataset.id_horario;
-            console.log('esta es la hora zorra ' + IdHorarioNew);
 
             form.append('idHorario', IdHorarioNew);
             //El boolAsistance es un booleano que inidica si vas a agregar o actualizar la asistencia, en mi caso lo manejo con un 0 por defecto.

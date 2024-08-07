@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Image , RefreshControl} from 'react
 import { Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import PieChart from 'react-native-pie-chart';
+import {PieChart} from 'react-native-gifted-charts';
 import fetchData from '../../api/components';
 
 import gol from '../../assets/gol.png';
@@ -58,15 +58,16 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       FORM.append('idEquipo', idEquipo);
       const response = await fetchData(MATCHES_API, 'trainingAnylsis', FORM);
       
-      if (response.status && response.dataset) {
+      if (response.status) {
         let data = response.dataset.map(item => ({
-          value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
-          color: getRandomColor(), // Asigna colores aleatorios
-          label: item.caracteristica,
+            value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
+            color: getRandomColor(), // Asigna colores aleatorios
+            label: item.caracteristica,
         }));
         setDataPie(data);
         setResponse(true);
-      } else {
+        // RETORNA "CARACTERISTICA Y LA NOTA"
+    } else {
         setDataPie([]);
         setResponse(false);
         console.error("La respuesta no contiene datos válidos:", response);
@@ -96,12 +97,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   useEffect(() => {
     const initializeApp = async () => {
       await getUser();
+      await fillGraphicDoughnut();
     };
     initializeApp();
-    fillGraphicDoughnut();
-    setPlayerStatuses(staticCaracteristicas);
-    setTimeout(() => {
-    }, 1000);
   }, []);
 
   useFocusEffect(
@@ -114,22 +112,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   );
 
   const onRefresh = useCallback(async () => {
-      setRefreshing(true);
-      await fillCards();
+    setRefreshing(true);
+    await fillGraphicDoughnut();
+    setRefreshing(false);
   }, []);
-
-  const renderLegendComponent = () => {
-    return (
-      <View style={styles.legendContainer}>
-        {dataPie.map((item, index) => (
-          <View key={index} style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: getRandomColor() }]} />
-            <Text style={styles.legendText}>{item.label}: {item.value}</Text>
-          </View>
-        ))}
-      </View>
-    );
-  };
 
   return (
     <ScrollView style={styles.container}>
@@ -164,23 +150,22 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         </View>
       </View>
       {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
-        <View style={styles.chartWrapper}>
-          <PieChart
-            data={dataPie}
-            donut
-            showGradient
-            sectionAutoFocus
-            radius={90}
-            innerRadius={60}
-            innerCircleColor={'#03045E'}
-          />
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
+          <View style={styles.chartWrapper}>
+            <PieChart
+              data={dataPie}
+              donut
+              showGradient
+              sectionAutoFocus
+              radius={90}
+              innerRadius={60}
+              innerCircleColor={'#03045E'}
+            />
+          </View>
         </View>
-        {renderLegendComponent()}
-      </View>
-    ) : (
-      <ScrollView
+      ) : (
+        <ScrollView
         style={styles.scrollContainer}
         refreshControl={
           <RefreshControl
@@ -190,20 +175,19 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         }
       >
         <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
           <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron datos para la gráfica</Text>
         </View>
       </ScrollView>
     )}
       <View style={styles.chartTextContainer}>
-        <PieChart
+   {/*      <PieChart
           widthAndHeight={widthAndHeight}
           series={series}
           sliceColor={sliceColor}
           doughnut={true}
           coverRadius={0.45}
           coverFill={'#FFF'}
-        />
+        /> */}
         <View style={styles.textContainer}>
           <Text style={styles.chartTitle}>Estadísticas generales del equipo</Text>
           <Text style={styles.chartDescription}>

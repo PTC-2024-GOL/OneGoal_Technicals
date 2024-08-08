@@ -5,7 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { PieChart } from 'react-native-gifted-charts';
 import fetchData from '../../api/components';
-
+import imageData from "../../api/images";
 import gol from '../../assets/gol.png';
 import monaco from '../../assets/image 56.png';
 import { useFocusEffect } from '@react-navigation/native';
@@ -27,9 +27,12 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     favor: " ",
     diferencia: " ",
   });
+  const [images, setImages] = useState({
+    equipo: Image.resolveAssetSource(gol).uri,
+    rival: Image.resolveAssetSource(monaco).uri,
+  })
   const [username, setUsername] = useState('');
   const [selectedTeam, setSelectedTeam] = useState();
-
   const [playerStatuses, setPlayerStatuses] = useState([]);
   const widthAndHeight = 150;
   const series = [5, 2, 1, 3];
@@ -40,14 +43,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [response, setResponse] = useState(false);
   const [idEquipo, setIdEquipo] = useState(1);
-  // Datos estáticos para pruebas
-  const staticCaracteristicas = [
-    { NOMBRE: 'Velocidad', NOTA: '8' },
-    { NOMBRE: 'Resistencia', NOTA: '7' },
-    { NOMBRE: 'Técnica', NOTA: '9' },
-    { NOMBRE: 'Estrategia', NOTA: '6' },
-    { NOMBRE: 'Trabajo en equipo', NOTA: '8' },
-  ];
+  const [lastMatchData, setLastMatchData] = useState(null);
 
   const getRandomColor = () => {
     // Genera un color hexadecimal aleatorio
@@ -125,11 +121,50 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  const lastMatch = async () => {
+    try {
+      const data = await fetchData(MATCHES_API, 'lastMatch');
+      if (data.status) {
+        setLastMatchData(data.dataset);
+      } else {
+        console.error('No se encontraron datos del último partido:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching datos del último partido:', error);
+    }
+  };
+
+  const readImageMatch = async () => {
+    try{
+      const data = await fetchData(MATCHES_API, "lastMatch");
+      const profileData = data.dataset;
+      const teamImageUrl = profileData.logo_equipo
+        ? await imageData("equipos", profileData.logo_equipo)
+        : Image.resolveAssetSource(gol).uri;
+      const rivalImageUrl = profileData.logo_rival
+        ? await imageData("rivales", profileData.logo_rival)
+        : Image.resolveAssetSource(gol).uri
+      
+        setImages({
+          equipo: teamImageUrl,
+          rival: rivalImageUrl,
+        });
+      
+        console.log(data.dataset);
+    }catch (error) {
+      console.error(error);
+    } finally {
+      console.log("Petición hecha");
+    }
+  };
+
   useEffect(() => {
     const initializeApp = async () => {
       await getUser();
       await fillGraphicDoughnut();
-      await readProfile();         
+      await readProfile();    
+      await lastMatch(); 
+      await readImageMatch();    
     };
     initializeApp();
   }, []);
@@ -139,7 +174,9 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       const initializeApp = async () => {
         await getUser();
         await fillGraphicDoughnut();
-        await readProfile(); 
+        await readProfile();
+        await lastMatch();
+        await readImageMatch();
       };
       initializeApp();
     }, [])
@@ -150,6 +187,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         await getUser();
         await fillGraphicDoughnut();
         await readProfile();
+        await lastMatch();
+        await readImageMatch();
     setRefreshing(false);
   }, []);
 
@@ -231,31 +270,33 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           </Picker>
         </View>
       </View>
+      {lastMatchData && (
       <View style={styles.matchContainer}>
-        <Text style={styles.matchDate}>Miércoles 14 de agosto de 2023</Text>
-        <Text style={styles.matchCategory}>Categoría 17</Text>
+        <Text style={styles.matchDate}>{lastMatchData.fecha}</Text>
+        <Text style={styles.matchCategory}>{lastMatchData.localidad_partido}</Text>
         <View style={styles.matchResult}>
           <View style={styles.teamContainer}>
             <Image
-              source={gol}
+              source={{ uri: images.equipo }}
               style={styles.teamLogo}
             />
             <View style={styles.ancho}>
-              <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
+              <Text style={styles.teamName}>{lastMatchData.nombre_equipo}</Text>
             </View>
           </View>
-          <Text style={styles.score}>3 - 1</Text>
+          <Text style={styles.score}>{lastMatchData.resultado_partido}</Text>
           <View style={styles.teamContainer}>
             <Image
-              source={monaco}
+              source={{ uri: images.rival }}
               style={styles.teamLogo}
             />
             <View style={styles.ancho}>
-              <Text style={styles.teamName}>UN GOL PARA EL SALVADOR</Text>
+              <Text style={styles.teamName}>{lastMatchData.nombre_rival}</Text>
             </View>
           </View>
         </View>
       </View>
+      )}
     </ScrollView>
   );
 }

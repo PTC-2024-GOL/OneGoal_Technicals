@@ -187,6 +187,11 @@ const AssistsScreenM = () => {
         fillHorario();
     }, [idEntrenamiento]);
 
+    useFocusEffect(
+        useCallback(()=>{
+            fillJugadores();
+        },[idEntrenamiento])
+    );
 
     // Función que se encarga de manejar el cierre de la alerta, esta función se ejecuta al presionar el botón de cerrar.
     const handleAlertClose = () => {
@@ -350,8 +355,8 @@ const AssistsScreenM = () => {
                         />
 
                     }>
-                    {LoadingComponent ? (
-                        <ActivityIndicator size="large" color="#0000ff" />
+                    {loading ? (
+                        <LoadingComponent/>
                     ) : (
                         response ? (
                             < ScrollView
@@ -404,8 +409,8 @@ const AssistsScreenM = () => {
 
                     }>
                     <View>
-                        {LoadingComponent ? (
-                            <ActivityIndicator size="large" color="#0000ff" />
+                        {loading ? (
+                            <LoadingComponent/>
                         ) : (
                             response ? (
                                 < ScrollView

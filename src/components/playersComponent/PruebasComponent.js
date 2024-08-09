@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect, } from "@react-navigation/native";
 import edit from '../../../assets/iconPlayersScreen/Edit.png';
 import fetchData from '../../../api/components';
 import AlertComponent from "../../../src/components/AlertComponent";
+import LoadingComponent from "../LoadingComponent";
 
 const PruebasComponent = ({ idEntrenamiento }) => {
     const navigation = useNavigation();
@@ -84,7 +85,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
             const id_jugador = params.get('id_jugador');
             const jugador = params.get('jugador');
             const idEntrenamiento = params.get('idEntrenamiento');
-    
+
             // Navegar a la pantalla con los parámetros
             navigation.navigate('Analisis del jugador', { id_jugador, jugador, idEntrenamiento });
         }
@@ -115,7 +116,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                 />
             }>
             {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <LoadingComponent />
             ) : (
                 response ? (
                     <ScrollView
@@ -158,7 +159,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                     >
                         <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../../assets/find.png')} />
-                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
+                            <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
                         </View>
                     </ScrollView>
                 )
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
     leftText: {
         fontSize: 16,
         color: 'black',
+        maxWidth: 325
     },
     rightText: {
         fontSize: 16,

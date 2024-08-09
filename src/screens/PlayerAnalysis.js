@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, ActivityIndicator, RefreshControl, Modal } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import AlertComponent from '../../src/components/AlertComponent';
-import { PieChart, LineChart } from 'react-native-gifted-charts'; // Cambia PieChart a DonutChart
+import { PopulationPyramid, LineChart } from 'react-native-gifted-charts';
 
 import fetchData from '../../api/components';
 
@@ -13,12 +13,16 @@ const PlayerAnalysis = () => {
     const route = useRoute();
     const { id_jugador, jugador, idEntrenamiento } = route.params;
 
-    console.log(id_jugador);
-    console.log(idEntrenamiento);
-
-    const [dataLine, setDataLine] = useState([]);
-    const [dataPie, setDataPie] = useState([]);
-    const [playerStatuses, setPlayerStatuses] = useState([]);
+    // Datos estáticos para pruebas
+    const staticLineData = [
+        { NOMBRE: 'Velocidad', NOTA: '8' },
+        { NOMBRE: 'Resistencia', NOTA: '7' },
+        { NOMBRE: 'Técnica', NOTA: '9' },
+        { NOMBRE: 'Estrategia', NOTA: '6' },
+        { NOMBRE: 'Trabajo en equipo', NOTA: '8' },
+    ];
+    const [dataPyramid, setDataPyramid] = useState([]);
+    const [lineData, setLineData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [response, setResponse] = useState(false);
@@ -27,18 +31,8 @@ const PlayerAnalysis = () => {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertCallback, setAlertCallback] = useState(null);
     const [selectedNote, setSelectedNote] = useState(null); // Estado para manejar la nota seleccionada
-    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
-    // Datos estáticos para pruebas
-    const staticCaracteristicas = [
-        { NOMBRE: 'Velocidad', NOTA: '8' },
-        { NOMBRE: 'Resistencia', NOTA: '7' },
-        { NOMBRE: 'Técnica', NOTA: '9' },
-        { NOMBRE: 'Estrategia', NOTA: '6' },
-        { NOMBRE: 'Trabajo en equipo', NOTA: '8' },
-    ];
 
     const getRandomColor = () => {
-        // Genera un color hexadecimal aleatorio
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
@@ -47,22 +41,14 @@ const PlayerAnalysis = () => {
         return color;
     };
 
-    // Genera datos para las gráficas
-    const radarData = staticCaracteristicas.map((status, index) => ({
-        value: parseInt(status.NOTA, 10),
-        color: colors[getRandomColor()], // Asigna colores de forma cíclica
-        gradientCenterColor: colors[getRandomColor()],
-        label: status.NOMBRE,
-    }));
+    const API = 'services/technics/caracteristicas_analisis.php';
 
-    const lineData = staticCaracteristicas.map((status, index) => ({
+    const linealData = staticLineData.map((status, index) => ({
         value: parseInt(status.NOTA, 10),
         label: `Semana ${index + 1}`,
     }));
 
-    const API = 'services/technics/caracteristicas_analisis.php';
-
-    const fillGraphicDoughnut = async () => {
+    const fillGraphicPyramid = async () => {
         try {
             const FORM = new FormData();
             FORM.append('idJugador', id_jugador);
@@ -70,15 +56,15 @@ const PlayerAnalysis = () => {
             const response = await fetchData(API, 'graphic', FORM);
             if (response.status) {
                 let data = response.dataset.map(item => ({
-                    value: parseInt(item.NOTA, 10), // Asegúrate de que los valores sean enteros
-                    color: getRandomColor(), // Asigna colores aleatorios
+                    left: parseInt(item.NOTA, 10),
+                    right: parseInt(item.NOTA, 10),
                     label: item.CARACTERISTICA,
+                    color: getRandomColor()
                 }));
-                setDataPie(data);
+                setDataPyramid(data);
                 setResponse(true);
-                // RETORNA "CARACTERISTICA Y LA NOTA"
             } else {
-                setDataPie([]);
+                setDataPyramid([]);
                 setResponse(false);
             }
         } catch (error) {
@@ -88,42 +74,39 @@ const PlayerAnalysis = () => {
     };
 
     useEffect(() => {
-        // Simula un retraso para la carga de datos
         setTimeout(() => {
-            fillGraphicDoughnut();
-            setPlayerStatuses(staticCaracteristicas);
+            fillGraphicPyramid();
+            // Aquí podrías llenar los datos para la gráfica lineal
+            setLineData(linealData); // Asumiendo que tienes los datos estáticos para la gráfica lineal
             setLoading(false);
         }, 1000);
     }, []);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        // Simula el refresco de datos
         setTimeout(() => {
-            setPlayerStatuses(staticCaracteristicas);
+            setLineData(linealData); // Simula el refresco de datos para la gráfica lineal
             setRefreshing(false);
         }, 1000);
     }, []);
 
     const handleDataPointClick = (data) => {
-        // Maneja el clic en un punto de datos
         setSelectedNote(data.value);
     };
 
     const renderLegendComponent = () => {
         return (
             <View style={styles.legendContainer}>
-                {dataPie.map((item, index) => (
+                {dataPyramid.map((item, index) => (
                     <View key={index} style={styles.legendItem}>
-                        <View style={[styles.legendDot, { backgroundColor: getRandomColor() }]} />
-                        <Text style={styles.legendText}>{item.label}: {item.value}</Text>
+                        <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                        <Text style={styles.legendText}>{item.label}: {item.left}</Text>
                     </View>
                 ))}
             </View>
         );
     };
 
-    // Maneja el cierre del alert
     const handleAlertClose = () => {
         setAlertVisible(false);
         if (alertCallback) alertCallback();
@@ -148,23 +131,18 @@ const PlayerAnalysis = () => {
                     <View style={styles.chartContainer}>
                         <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
                         <View style={styles.chartWrapper}>
-                            <PieChart
-                                data={dataPie}
-                                donut
-                                showGradient
-                                sectionAutoFocus
-                                radius={90}
-                                innerRadius={60}
-                                innerCircleColor={'#03045E'}
-                                centerLabelComponent={() => {
-                                    return (
-                                        <View>
-                                            <Text style={{ color: 'white', fontSize: 36 }}>90</Text>
-                                            <Text style={{ color: 'white', fontSize: 18 }}>Total</Text>
-                                        </View>
-                                    );
-                                }}
-                                onDataPointClick={handleDataPointClick} // Agrega el manejador de clic
+                            <PopulationPyramid
+                                data={dataPyramid}
+                                showMidAxis
+                                midAxisThickness={2}
+                                leftLabelStyle={{ color: 'blue' }}
+                                rightLabelStyle={{ color: 'red' }}
+                                leftBarColor="blue"
+                                rightBarColor="red"
+                                barHeight={30}
+                                barGap={10}
+                                animationDuration={500}
+                                barColor={data => data.color} // Asignar color a la barra
                             />
                         </View>
                         {renderLegendComponent()}
@@ -173,14 +151,14 @@ const PlayerAnalysis = () => {
                         <Text style={styles.chartTitle}>Gráfico Lineal</Text>
                         <LineChart
                             areaChart
-                            hideDataPoints={false}  // Asegúrate de mostrar los puntos
+                            hideDataPoints={false}
                             isAnimated
                             animationDuration={1200}
                             startFillColor="#03045E"
                             startOpacity={1}
                             endOpacity={0.3}
                             initialSpacing={0}
-                            data={lineData}  // Utiliza el arreglo de datos lineData
+                            data={lineData} // Datos para la gráfica lineal
                             spacing={30}
                             thickness={5}
                             hideRules
@@ -197,14 +175,14 @@ const PlayerAnalysis = () => {
                                 pointerStripColor: 'lightgray',
                                 pointerStripWidth: 2,
                                 pointerColor: 'lightgray',
-                                radius: 10,  // Tamaño del punto
+                                radius: 10,
                                 pointerLabelWidth: 100,
                                 pointerLabelHeight: 90,
                                 activatePointersOnLongPress: true,
                                 autoAdjustPointerLabelPosition: false,
                                 pointerLabelComponent: (items) => {
-                                    if (items.length === 0) return null; // Evita errores si no hay datos
-                                    const item = items[0]; // Utiliza el primer item
+                                    if (items.length === 0) return null;
+                                    const item = items[0];
                                     return (
                                         <View
                                             style={{
@@ -231,7 +209,6 @@ const PlayerAnalysis = () => {
                     </View>
                 </ScrollView>
             )}
-            {/* Modal para mostrar la nota seleccionada */}
             <Modal
                 transparent={true}
                 visible={selectedNote !== null}
@@ -263,103 +240,70 @@ const PlayerAnalysis = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 15,
-        backgroundColor: '#fff',
-        marginBottom: windowHeight * 0.12,
+        padding: 16,
+        backgroundColor: '#FFFFFF',
     },
     headerText: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 8,
+        textAlign: 'center',
     },
     subHeaderText: {
         fontSize: 16,
         marginBottom: 16,
-        marginStart: 10,
-        maxWidth: windowWidth,
+        textAlign: 'center',
     },
     textHorario: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        textAlign: 'center',
-        marginBottom: 16,
-        shadowColor: '#D3D3D3',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
-        borderRightColor: '#D3D3D3',
-        borderRightWidth: 3,
-        borderBottomColor: '#D3D3D3',
-        borderBottomWidth: 3,
-    },
-    horariotext: {
-        color: '#000',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    scrollContainer: {
-        flex: 1,
-    },
-    chartContainer: {
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    chartTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        textAlign: 'center',
+        marginBottom: 16,
     },
-    chartStyle: {
-        backgroundColor: '#f5f5f5',
-        padding: 10,
-        borderRadius: 10,
-        color: 'white',
+    horariotext: {
+        color: '#30A2FF',
+        fontWeight: 'bold',
     },
     loader: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    chartWrapper: {
-        backgroundColor: '#03045E',
-        padding: 20,
-        borderRadius: 20,
+    scrollContainer: {
+        flex: 1,
     },
-    centerLabel: {
-        justifyContent: 'center',
-        alignItems: 'center',
+    chartContainer: {
+        marginBottom: 32,
     },
-    centerLabelText: {
-        fontSize: 22,
-        color: 'white',
+    chartTitle: {
+        fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 8,
+        textAlign: 'center',
     },
-    centerLabelSubtitle: {
-        fontSize: 14,
-        color: 'white',
+    chartWrapper: {
+        alignItems: 'center',
     },
     legendContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        marginTop: 10,
+        marginTop: 16,
     },
     legendItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: 20,
-        marginBottom: 10,
+        marginRight: 8,
+        marginBottom: 8,
     },
     legendDot: {
-        height: 10,
-        width: 10,
-        borderRadius: 5,
-        marginRight: 10,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginRight: 4,
     },
     legendText: {
-        color: 'black',
+        fontSize: 12,
     },
     modalBackground: {
         flex: 1,
@@ -368,22 +312,19 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContainer: {
-        backgroundColor: '#fff',
+        backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,
-        width: 300,
         alignItems: 'center',
     },
     modalText: {
         fontSize: 18,
-        fontWeight: 'bold',
-        color: '#03045E',
-        marginBottom: 20,
+        marginBottom: 10,
     },
     modalCloseButton: {
         fontSize: 16,
-        color: '#0077b6',
-        fontWeight: 'bold',
+        color: 'blue',
+        marginTop: 10,
     },
 });
 

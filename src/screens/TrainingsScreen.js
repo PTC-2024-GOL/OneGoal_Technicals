@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
+import LoadingComponent from "../components/LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -15,7 +16,7 @@ const TrainingCard = ({ date, time, playersPresent, onPress, idEntrenamiento }) 
             <Text style={styles.date}>{date}</Text>
             <Text style={styles.time}>{time}</Text>
             <View style={styles.infoRow}>
-                <TouchableOpacity style={styles.infoRowTwo}  onPress={() => onPress(idEntrenamiento)}>
+                <TouchableOpacity style={styles.infoRowTwo} onPress={() => onPress(idEntrenamiento)}>
                     <View style={styles.iconButton}>
                         <Image source={soccer}></Image>
                     </View>
@@ -85,6 +86,12 @@ const TrainingsScreen = () => {
         fillCards();
     }, [idEquipo]);
 
+    useFocusEffect(
+        useCallback(() => {
+            fillCards();
+        }, [idEquipo])
+    )
+
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>Entrenamientos</Text>
@@ -98,7 +105,7 @@ const TrainingsScreen = () => {
                 <Text style={styles.buttonText}>Pasar asistencia</Text>
             </TouchableOpacity>
             {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <LoadingComponent />
             ) : response ? (
                 <ScrollView
                     style={styles.scrollContainer}
@@ -131,10 +138,10 @@ const TrainingsScreen = () => {
                         />
                     }
                 >
-                <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                    <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron entrenamientos</Text>
-                </View>
+                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron entrenamientos</Text>
+                    </View>
                 </ScrollView>
             )}
         </View>
@@ -215,6 +222,7 @@ const styles = StyleSheet.create({
         color: '#000000',
         textDecorationLine: 'underline',
         marginHorizontal: 5,
+        maxWidth: 125
     },
     iconButton: {
         backgroundColor: '#5AE107',

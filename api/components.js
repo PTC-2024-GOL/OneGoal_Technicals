@@ -29,7 +29,10 @@ export default async function fetchData(filename, action, form = null) {
         return DATA;
 
     } catch (error) {
-        console.log('Fetch error:', error);
+        // Construcción de la URL con los parámetros necesarios
+        const PATH = new URL(SERVER_URL + filename);
+        PATH.searchParams.append('action', action);
+        console.log('Fetch error: ' , PATH,' ', error);
         throw error; // Lanza el error para que useEffect pueda manejarlo
     }
 };

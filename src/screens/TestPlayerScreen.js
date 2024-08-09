@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, ScrollView
 import { useRoute } from "@react-navigation/native"; // Importa useRoute
 import fetchData from '../../api/components';
 import AlertComponent from "../../src/components/AlertComponent";
+import LoadingComponent from "../../src/components/LoadingComponent";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -124,6 +125,7 @@ const TestPlayerScreen = () => {
     }, []);
 
     const handleStatusChange = (name, status) => {
+        console.log(`Status changed for ${name}: ${status}`);
         const value = status.trim() === '' ? '' : parseInt(status, 10);
         if (value === '' || (!isNaN(value) && value >= 0 && value <= 10)) {
             setPlayerStatuses((prevStatuses) =>
@@ -176,7 +178,7 @@ const TestPlayerScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.headerText}>Pruebas</Text>
             <Text style={styles.subHeaderText}>
                 Aquí podrás modificar o agregar calificaciones de este entrenamiento en específico, ¡Recuerda guardar antes de salir!
@@ -188,11 +190,12 @@ const TestPlayerScreen = () => {
                 <Text style={styles.buttonText}>Guardar prueba</Text>
             </TouchableOpacity>
             {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+                <LoadingComponent />
             ) : (
                 <ScrollView
                     style={styles.scrollContainer}
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    keyboardShouldPersistTaps="always" // Añadir esta línea
                 >
                     <View>
                         {response ? (
@@ -214,11 +217,12 @@ const TestPlayerScreen = () => {
                                         onRefresh={onRefresh}
                                     />
                                 }
+                                keyboardShouldPersistTaps="always"
                             >
-                            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
-                                <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron caracteristicas</Text>
-                            </View>
+                                <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                                    <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron caracteristicas</Text>
+                                </View>
                             </ScrollView>
                         )}
                     </View>
@@ -230,7 +234,7 @@ const TestPlayerScreen = () => {
                 message={alertMessage}
                 onClose={handleAlertClose}
             />
-        </View>
+        </ScrollView>
     );
 };
 
@@ -273,8 +277,8 @@ const styles = StyleSheet.create({
         borderColor: '#D3D3D3', // Color gris claro para el borde
         borderRadius: 8, // Bordes redondeados
         textAlign: 'center', // Texto centrado
+        textAlignVertical: 'center',  // Añade esta línea
         flex: 1,
-        justifyContent: 'center', // Alineación vertical centrada para TextInput
     },
     selectScheduleContainer: {
         flexDirection: 'row',

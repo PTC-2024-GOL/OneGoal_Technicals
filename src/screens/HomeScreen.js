@@ -178,10 +178,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       if (data.status) {
         setLastMatchData(data.dataset);
       } else {
-        console.error("No se encontraron datos del último partido:", data);
+        console.log("No se encontraron datos del último partido:", data);
       }
     } catch (error) {
-      console.error("Error fetching datos del último partido:", error);
+      console.log("Error fetching datos del último partido:", error);
     }
   };
 
@@ -203,7 +203,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
       console.log(data.dataset);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       console.log("Petición hecha");
     }
@@ -330,15 +330,6 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             Revisa las estadísticas generales tanto en áreas técnicas, tácticas,
             técnicas y mentales de los equipos
           </Text>
-          {/* <Picker
-            selectedValue={selectedTeam}
-            style={styles.picker}
-            onValueChange={(itemValue, itemIndex) => setSelectedTeam(itemValue)}
-          >
-            <Picker.Item label="Elige un equipo" value="" />
-            <Picker.Item label="Equipo 1" value="team1" />
-            <Picker.Item label="Equipo 2" value="team2" />
-          </Picker> */}
           <RNPickerSelect
             onValueChange={handleTeamsChange}
             items={teamsOptions}

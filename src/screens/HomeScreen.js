@@ -117,10 +117,10 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       } else {
         setDataPie([]);
         setResponse(false);
-        console.error("La respuesta no contiene datos válidos:", response);
+        console.log("La respuesta no contiene datos válidos:", response);
       }
     } catch (error) {
-      console.error("Error fetching datos de la gráfica:", error);
+      console.log("Error fetching datos de la gráfica:", error);
       setDataPie([]);
       setResponse(false);
     }
@@ -345,7 +345,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             style={styles.picker}
             useNativeAndroidPickerStyle={false}
             placeholder={{
-              label: "Elige un equipo:",
+              label: "Seleccione un equipo:",
               value: 0,
             }}
           />

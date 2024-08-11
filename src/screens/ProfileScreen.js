@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image} from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image, RefreshControl} from "react-native";
 import { TextInput, Card, Avatar, Button, Chip } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
@@ -8,7 +8,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
-import foto from "../../assets/chepe.jpg";
+import foto from "../../assets/imagen.jpg";
 import { TextInputMask } from "react-native-masked-text";
 import { PieChart, LineChart } from 'react-native-gifted-charts'; // Cambia PieChart a DonutChart
 
@@ -33,6 +33,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleEditPress = () => {
     setIsEditing(!isEditing);
@@ -189,7 +190,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
 
       console.log(data.dataset);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       console.log("Petición hecha");
     }
@@ -203,8 +204,16 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     setActiveChip(screen);
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await readProfile();
+    setRefreshing(false);
+  }, []);
+
   return (
-    <ScrollView>
+    <ScrollView refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    }>
       <View style={styles.container}>
         <LinearGradient colors={["#03045E", "#647AA3"]} style={styles.header}>
           <TouchableOpacity onPress={pickImage}>

@@ -5,7 +5,7 @@ import {
   View,
   ScrollView,
   Image,
-  RefreshControl,
+  RefreshControl
 } from "react-native";
 import { Dimensions } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
@@ -342,7 +342,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           />
         </View>
       </View>
-      {lastMatchData && (
+      {lastMatchData ? (
         <View style={styles.matchContainer}>
           <Text style={styles.matchDate}>{lastMatchData.fecha}</Text>
           <Text style={styles.matchCategory}>
@@ -367,6 +367,27 @@ const HomeScreen = ({ logueado, setLogueado }) => {
               </View>
             </View>
           </View>
+        </View>
+      ) : (
+        <View
+          style={{
+            height: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              backgroundColor: "#e6ecf1",
+              color: "#043998",
+              padding: 15,
+              borderRadius: 15,
+              maxWidth: 150,
+            }}
+          >
+            No se encontraron datos para la gráfica
+          </Text>
         </View>
       )}
     </ScrollView>

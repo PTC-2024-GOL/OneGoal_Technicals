@@ -117,7 +117,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
           {/*Indicacion*/}
           <View style={styles.row3}>
             <Image style={styles.images2} source={require('../../assets/Soccer Ball.png')}/>
-            <Text>Revisa el cuerpo técnico de cada equipo así como los jugadores por equipo.</Text>
+            <Text style={styles.textTechnics}>Revisa el cuerpo técnico de cada equipo así como los jugadores por equipo.</Text>
           </View>
           {/*Scroll para las cartas*/}
           <ScrollView>
@@ -377,6 +377,10 @@ const styles = StyleSheet.create({
   text: {
     color: '#fff',
     textAlign: "center"
+  },
+  textTechnics: {
+    color: '#000',
+    maxWidth: 350
   },
   container: {
     flex: 1

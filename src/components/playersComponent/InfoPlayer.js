@@ -68,7 +68,7 @@ const InfoPlayers = ({informationPlayer, estadoFisico}) => {
                 <View style={styles.row}>
                     <Image style={styles.icon} source={require('../../../assets/iconPlayersScreen/Schedule.png')}/>
                     <Text style={styles.bold}>Fecha de nacimiento:</Text>
-                    <Text>{informationPlayer.nacimiento}</Text>
+                    <Text>{informationPlayer.fecha_nacimiento_jugador}</Text>
                 </View>
 
                 {/*Primeras cartas*/}

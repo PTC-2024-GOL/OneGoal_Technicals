@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image, RefreshControl } from 'react-native';
-import { Dimensions } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
-import { PieChart } from 'react-native-gifted-charts';
-import fetchData from '../../api/components';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  RefreshControl,
+} from "react-native";
+import { Dimensions } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import { PieChart } from "react-native-gifted-charts";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import fetchData from "../../api/components";
+import RNPickerSelect from "react-native-picker-select";
 import imageData from "../../api/images";
-import gol from '../../assets/gol.png';
-import monaco from '../../assets/image 56.png';
-import { useFocusEffect } from '@react-navigation/native';
+import gol from "../../assets/gol.png";
+import monaco from "../../assets/image 56.png";
+import { useFocusEffect } from "@react-navigation/native";
 
-const screenWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
 const HomeScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
@@ -30,25 +39,59 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const [images, setImages] = useState({
     equipo: Image.resolveAssetSource(gol).uri,
     rival: Image.resolveAssetSource(monaco).uri,
-  })
-  const [username, setUsername] = useState('');
+  });
+  const [username, setUsername] = useState("");
   const [selectedTeam, setSelectedTeam] = useState();
   const [playerStatuses, setPlayerStatuses] = useState([]);
   const widthAndHeight = 150;
   const series = [5, 2, 1, 3];
-  const sliceColor = ['#4CAF50', '#F44336', '#FFC107', '#00BCD4'];
-  const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+  const sliceColor = ["#4CAF50", "#F44336", "#FFC107", "#00BCD4"];
+  const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
   const [dataPie, setDataPie] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [response, setResponse] = useState(false);
-  const [idEquipo, setIdEquipo] = useState(1);
+  const [idEquipo, setIdEquipo] = useState(0);
   const [lastMatchData, setLastMatchData] = useState(null);
+  const [teamsOptions, setTeamsOptions] = useState([]);
+  const [alertMessage2, setAlertMessage2] = useState("");
+
+  const fillTeams = async () => {
+    const data = await fetchData(API_SOCCER, "readAll");
+    if (data.status) {
+      setAlertMessage2("Elige un equipo");
+      console.log("Equipos :", data.dataset);
+      const equipos = data.dataset.map((item) => ({
+        label: item.nombre_equipo,
+        value: item.id_equipo,
+      }));
+      setTeamsOptions(equipos);
+    } else {
+      console.log(data.error);
+      setAlertMessage2("No hay opciones disponibles.");
+    }
+  };
+
+  const handleTeamsChange = (value) => {
+    console.log("Equipo seleccionado:", value);
+    setIdEquipo(value);
+  };
+
+  useEffect(() => {
+    if (idEquipo >= 0) {
+      rechargeFetch();
+    }
+  }, [idEquipo]);
+
+  const rechargeFetch = async () => {
+    await fillGraphicDoughnut();
+    await readProfile();
+  };
 
   const getRandomColor = () => {
     // Genera un color hexadecimal aleatorio
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
@@ -58,15 +101,15 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const fillGraphicDoughnut = async () => {
     try {
       const FORM = new FormData();
-      FORM.append('idEquipo', idEquipo);
-      const response = await fetchData(MATCHES_API, 'trainingAnylsis', FORM);
+      FORM.append("idEquipo", idEquipo);
+      const response = await fetchData(MATCHES_API, "trainingAnylsis", FORM);
 
       if (response.status) {
-        let data = response.dataset.map(item => ({
+        let data = response.dataset.map((item) => ({
           value: parseInt(item.promedio, 10), // Asegúrate de que los valores sean enteros
           color: getRandomColor(), // Asigna colores aleatorios
           label: item.caracteristica,
-          text: `${item.caracteristica}: ${parseInt(item.promedio, 10)}`
+          text: `${item.caracteristica}: ${parseInt(item.promedio, 10)}`,
         }));
         setDataPie(data);
         setResponse(true);
@@ -85,13 +128,13 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
   const getUser = async () => {
     try {
-      const data = await fetchData(USER_API, 'getUserMobile');
+      const data = await fetchData(USER_API, "getUserMobile");
       if (data.status) {
-        const [firstName] = data.username.split(' ');
-        const [firstSurname] = data.apellido.split(' ');
+        const [firstName] = data.username.split(" ");
+        const [firstSurname] = data.apellido.split(" ");
         setUsername(`${firstName} ${firstSurname}`);
       } else {
-        console.log('Error: Nombre de Tecnico indefinido');
+        console.log("Error: Nombre de Tecnico indefinido");
       }
     } catch (error) {
       console.log(error);
@@ -101,7 +144,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const readProfile = async () => {
     try {
       const FORM = new FormData();
-      FORM.append('idEquipo', idEquipo);
+      FORM.append("idEquipo", idEquipo);
       const data = await fetchData(MATCHES_API, "matchesResult", FORM);
       const profileData = data.dataset;
       setResults({
@@ -115,7 +158,15 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
       console.log(data.dataset);
     } catch (error) {
-      console.error(error);
+      console.log(error);
+      setResults({
+        ganados: " ",
+        perdidos: " ",
+        empatados: " ",
+        contra: " ",
+        favor: " ",
+        diferencia: " ",
+      });
     } finally {
       console.log("Petición hecha");
     }
@@ -123,19 +174,19 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
   const lastMatch = async () => {
     try {
-      const data = await fetchData(MATCHES_API, 'lastMatch');
+      const data = await fetchData(MATCHES_API, "lastMatch");
       if (data.status) {
         setLastMatchData(data.dataset);
       } else {
-        console.error('No se encontraron datos del último partido:', data);
+        console.error("No se encontraron datos del último partido:", data);
       }
     } catch (error) {
-      console.error('Error fetching datos del último partido:', error);
+      console.error("Error fetching datos del último partido:", error);
     }
   };
 
   const readImageMatch = async () => {
-    try{
+    try {
       const data = await fetchData(MATCHES_API, "lastMatch");
       const profileData = data.dataset;
       const teamImageUrl = profileData.logo_equipo
@@ -143,15 +194,15 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         : Image.resolveAssetSource(gol).uri;
       const rivalImageUrl = profileData.logo_rival
         ? await imageData("rivales", profileData.logo_rival)
-        : Image.resolveAssetSource(gol).uri
-      
-        setImages({
-          equipo: teamImageUrl,
-          rival: rivalImageUrl,
-        });
-      
-        console.log(data.dataset);
-    }catch (error) {
+        : Image.resolveAssetSource(gol).uri;
+
+      setImages({
+        equipo: teamImageUrl,
+        rival: rivalImageUrl,
+      });
+
+      console.log(data.dataset);
+    } catch (error) {
       console.error(error);
     } finally {
       console.log("Petición hecha");
@@ -161,10 +212,11 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   useEffect(() => {
     const initializeApp = async () => {
       await getUser();
+      await fillTeams();
       await fillGraphicDoughnut();
-      await readProfile();    
-      await lastMatch(); 
-      await readImageMatch();    
+      await readProfile();
+      await lastMatch();
+      await readImageMatch();
     };
     initializeApp();
   }, []);
@@ -173,6 +225,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     useCallback(() => {
       const initializeApp = async () => {
         await getUser();
+        await fillTeams();
         await fillGraphicDoughnut();
         await readProfile();
         await lastMatch();
@@ -184,19 +237,27 @@ const HomeScreen = ({ logueado, setLogueado }) => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-        await getUser();
-        await fillGraphicDoughnut();
-        await readProfile();
-        await lastMatch();
-        await readImageMatch();
+    await getUser();
+    await fillTeams();
+    await fillGraphicDoughnut();
+    await readProfile();
+    await lastMatch();
+    await readImageMatch();
     setRefreshing(false);
   }, []);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.welcomeContainer}>
         <Text style={styles.welcomeText}>Bienvenido {username}</Text>
-        <Text style={styles.subText}>Ponte al día sobre las nuevas actualizaciones</Text>
+        <Text style={styles.subText}>
+          Ponte al día sobre las nuevas actualizaciones
+        </Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>{results.ganados}</Text>
@@ -232,34 +293,44 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             showGradient
             sectionAutoFocus
             showText
-            textColor='black'
+            textColor="black"
             radius={90}
-            innerRadius={60}
+            innerRadius={50}
             textSize={12}
             showTextBackground
             textBackgroundRadius={0.1}
           />
         ) : (
-          <ScrollView
-            style={styles.scrollContainer}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-              />
-            }
+          <View
+            style={{
+              height: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15 }}>No se encontraron datos para la gráfica</Text>
-            </View>
-          </ScrollView>
+            <Text
+              style={{
+                backgroundColor: "#e6ecf1",
+                color: "#043998",
+                padding: 15,
+                borderRadius: 15,
+                maxWidth: 150,
+              }}
+            >
+              No se encontraron datos para la gráfica
+            </Text>
+          </View>
         )}
         <View style={styles.textContainer}>
-          <Text style={styles.chartTitle}>Estadísticas generales del equipo</Text>
-          <Text style={styles.chartDescription}>
-            Revisa las estadísticas generales tanto en áreas técnicas, tácticas, técnicas y mentales de los equipos
+          <Text style={styles.chartTitle}>
+            Estadísticas generales del equipo
           </Text>
-          <Picker
+          <Text style={styles.chartDescription}>
+            Revisa las estadísticas generales tanto en áreas técnicas, tácticas,
+            técnicas y mentales de los equipos
+          </Text>
+          {/* <Picker
             selectedValue={selectedTeam}
             style={styles.picker}
             onValueChange={(itemValue, itemIndex) => setSelectedTeam(itemValue)}
@@ -267,54 +338,64 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             <Picker.Item label="Elige un equipo" value="" />
             <Picker.Item label="Equipo 1" value="team1" />
             <Picker.Item label="Equipo 2" value="team2" />
-          </Picker>
+          </Picker> */}
+          <RNPickerSelect
+            onValueChange={handleTeamsChange}
+            items={teamsOptions}
+            style={styles.picker}
+            useNativeAndroidPickerStyle={false}
+            placeholder={{
+              label: "Elige un equipo:",
+              value: 0,
+            }}
+          />
         </View>
       </View>
       {lastMatchData && (
-      <View style={styles.matchContainer}>
-        <Text style={styles.matchDate}>{lastMatchData.fecha}</Text>
-        <Text style={styles.matchCategory}>{lastMatchData.localidad_partido}</Text>
-        <View style={styles.matchResult}>
-          <View style={styles.teamContainer}>
-            <Image
-              source={{ uri: images.equipo }}
-              style={styles.teamLogo}
-            />
-            <View style={styles.ancho}>
-              <Text style={styles.teamName}>{lastMatchData.nombre_equipo}</Text>
+        <View style={styles.matchContainer}>
+          <Text style={styles.matchDate}>{lastMatchData.fecha}</Text>
+          <Text style={styles.matchCategory}>
+            {lastMatchData.localidad_partido}
+          </Text>
+          <View style={styles.matchResult}>
+            <View style={styles.teamContainer}>
+              <Image source={{ uri: images.equipo }} style={styles.teamLogo} />
+              <View style={styles.ancho}>
+                <Text style={styles.teamName}>
+                  {lastMatchData.nombre_equipo}
+                </Text>
+              </View>
             </View>
-          </View>
-          <Text style={styles.score}>{lastMatchData.resultado_partido}</Text>
-          <View style={styles.teamContainer}>
-            <Image
-              source={{ uri: images.rival }}
-              style={styles.teamLogo}
-            />
-            <View style={styles.ancho}>
-              <Text style={styles.teamName}>{lastMatchData.nombre_rival}</Text>
+            <Text style={styles.score}>{lastMatchData.resultado_partido}</Text>
+            <View style={styles.teamContainer}>
+              <Image source={{ uri: images.rival }} style={styles.teamLogo} />
+              <View style={styles.ancho}>
+                <Text style={styles.teamName}>
+                  {lastMatchData.nombre_rival}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
       )}
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: windowWidth * 0.02,
-    marginBottom: windowHeight * 0.16
+    marginBottom: windowHeight * 0.16,
   },
   header: {
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
   },
   welcomeContainer: {
@@ -322,7 +403,7 @@ const styles = StyleSheet.create({
     margin: 10,
     elevation: 10,
     borderRadius: 11,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -330,24 +411,24 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subText: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
     marginBottom: 20,
   },
   statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   statBox: {
-    width: '30%',
-    backgroundColor: '#f0f0f0',
+    width: "30%",
+    backgroundColor: "#f0f0f0",
     padding: 10,
     marginBottom: 10,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -357,20 +438,20 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   statLabel: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   chartTextContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     margin: 10,
     elevation: 10,
     borderRadius: 30,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -378,17 +459,17 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    paddingLeft: 20,
+    paddingLeft: 5,
   },
   chartTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   chartDescription: {
-    textAlign: 'left',
+    textAlign: "left",
     fontSize: 12,
-    color: '#888',
+    color: "#888",
     marginTop: 10,
   },
   picker: {
@@ -398,11 +479,11 @@ const styles = StyleSheet.create({
   },
   matchContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     margin: 10,
     elevation: 10,
     borderRadius: 30,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -410,19 +491,19 @@ const styles = StyleSheet.create({
   },
   matchDate: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
   },
   matchCategory: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   matchResult: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   teamContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   teamLogo: {
     width: 40,
@@ -432,24 +513,24 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   score: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginHorizontal: 20,
   },
   navContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingVertical: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: "#ccc",
   },
   navItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   navText: {
     fontSize: 12,
@@ -460,26 +541,26 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     marginBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   chartTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   chartStyle: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 10,
     borderRadius: 10,
-    color: 'white',
+    color: "white",
   },
   loader: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   chartWrapper: {
-    backgroundColor: '#03045E',
+    backgroundColor: "#03045E",
     padding: 20,
     borderRadius: 20,
   },

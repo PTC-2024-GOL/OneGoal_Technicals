@@ -3,8 +3,10 @@ import React from 'react';
 import LottieView from 'lottie-react-native';
 import {LinearGradient} from "expo-linear-gradient";
 
+//En este componente se encuentra la animacion de carga (Circulo de carga)
 const LoadingComponent = ()=> {
 
+    //Carga la animacion
     return(
         <View style={styles.container}>
             <LottieView

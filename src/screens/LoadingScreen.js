@@ -3,6 +3,8 @@ import React from 'react';
 import LottieView from 'lottie-react-native';
 import {LinearGradient} from "expo-linear-gradient";
 
+//En esta pantalla se encuentra la animacion que se muestra al principio de la aplicacion, cuando
+//esta iniciando.
 const LoadingScreen = ()=> {
 
     return(

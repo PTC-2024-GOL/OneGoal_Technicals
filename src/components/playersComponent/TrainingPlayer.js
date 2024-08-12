@@ -9,20 +9,24 @@ import LoadingComponent from "../LoadingComponent";
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
+//Recibimos el parametro de idJugador.
 const TrainingPlayer = ({idJugador}) => {
 
+    //Declaracion de variables
     const API_PLAYERS = 'services/technics/jugadores.php';
     const [prom, setProm] = useState(0.0);
     const [matches, setMatches] = useState(0);
     const [notes, setNotes] = useState([]);
     const [load, setLoading] = useState(true); // Estado de carga inicializado en true
 
+    //Obtiene el promedio del jugador de acuerdo a las notas registradas
     const getProm = async () => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
 
         const DATA = await fetchData(API_PLAYERS, 'promByPlayer', FORM);
 
+        //Si la peticion viene bien entonces le asigna la data a la variable setProm.
         if(DATA.status){
             setProm(DATA.dataset);
         }else{
@@ -30,12 +34,14 @@ const TrainingPlayer = ({idJugador}) => {
         }
     };
 
+    //Funcion que devuelve la cantidad de partidos jugados por el jugador
     const getMatches = async () => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
 
         const DATA = await fetchData(API_PLAYERS, 'matchesByPlayer', FORM);
 
+        //Si la peticion viene correcta entonces se le asigana la data a la varibale setMatches.
         if(DATA.status){
             setMatches(DATA.dataset);
         }else{
@@ -43,12 +49,14 @@ const TrainingPlayer = ({idJugador}) => {
         }
     };
 
+    //Funcion que devuelve cada una de las notas que el jugador ha tenido en sus areas de entrenamiento
     const getNotes = async ()=>{
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
 
         const DATA = await fetchData(API_PLAYERS, 'notesByPlayer', FORM);
 
+        //Si la peticion viene correcta entonces se asignan las notas a la varibale notes.
         if(DATA.status){
             setNotes(DATA.dataset);
         }else{
@@ -56,6 +64,7 @@ const TrainingPlayer = ({idJugador}) => {
         }
     }
 
+    //Cada vez que haya un cambio las peticiones se ejecutan nuevamente.
     useFocusEffect(
         useCallback(() => {
             //Espera a que todas las peticiones se terminen.
@@ -72,8 +81,8 @@ const TrainingPlayer = ({idJugador}) => {
         }, [idJugador])
     );
 
+    //en la variable data le asignamos todas la notas traidas de la api asi como su area.
     const data = notes.map(note => ({
-        
         value: parseFloat(note.nota_por_area, 10),
         label: note.clasificacion_caracteristica_jugador
     }));
@@ -114,6 +123,7 @@ const TrainingPlayer = ({idJugador}) => {
                         <Text style={styles.title}>Promedio de las áreas evaluadas</Text>
                         <Text style={styles.subtitle}>En la gráfica podrás observar el promedio de notas por cada una de las áreas que se le han evaluado</Text>
 
+                        {/*Grafica de barras */}
                         <ScrollView horizontal={true}>
                             <BarChart
                                 barWidth={50}

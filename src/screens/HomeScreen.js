@@ -561,11 +561,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
   chartStyle: {
     backgroundColor: "#f5f5f5",
     padding: 10,

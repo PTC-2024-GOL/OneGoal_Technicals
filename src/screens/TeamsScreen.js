@@ -30,6 +30,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
 
   const navigation = useNavigation();
 
+  //Funcion que manda la peticion para ver todos los equipo de los que es parte un tecnico
   const fillCards = async () => {
     let action;
     let form = new FormData();
@@ -51,6 +52,7 @@ const TeamsScreen = ({ logueado, setLogueado}) => {
     }
   }
 
+  //Funcion pque manda la peticion para ver los tecnicos de un equipo
   const seeModal = async (id) => {
     setModalVisible(true);
     const form = new FormData();

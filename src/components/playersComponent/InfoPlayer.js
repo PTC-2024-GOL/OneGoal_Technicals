@@ -9,6 +9,7 @@ const windowWidth = Dimensions.get('window').width;
 
 const InfoPlayers = ({informationPlayer, estadoFisico}) => {
 
+    //Declaracion de variables.
     const [load, setLoading] = useState(true); // Estado de carga inicializado en true
 
     useFocusEffect(
@@ -24,10 +25,12 @@ const InfoPlayers = ({informationPlayer, estadoFisico}) => {
     );
 
 
+    //Variables para guardar el imc del jugador, asignacion de color y estado
     let imc = estadoFisico.indice_masa_corporal;
     let color;
     let estado;
 
+    //If que de acuerdo al imc que tenga el jugador, asi sera el color que le sera asignado.
     if(imc <= 18.5) {
         estado = 'Peso bajo';
         color = '#1141a8';

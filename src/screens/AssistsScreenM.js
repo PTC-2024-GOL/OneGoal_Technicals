@@ -327,24 +327,26 @@ const AssistsScreenM = () => {
                 onClose={handleAlertClose}
             />
             <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('historial')}
-                >
-                    <Text style={styles.tabText}>Historial</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('observaciones')}
-                >
-                    <Text style={styles.tabText}>Observaciones</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
-                    onPress={() => setActiveTab('pruebas')}
-                >
-                    <Text style={styles.tabText}>pruebas</Text>
-                </TouchableOpacity>
+               <ScrollView horizontal={true}>
+                   <TouchableOpacity
+                       style={activeTab === 'historial' ? styles.tabActive : styles.tabInactive}
+                       onPress={() => setActiveTab('historial')}
+                   >
+                       <Text style={styles.tabText}>Historial</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity
+                       style={activeTab === 'observaciones' ? styles.tabActive : styles.tabInactive}
+                       onPress={() => setActiveTab('observaciones')}
+                   >
+                       <Text style={styles.tabText}>Observaciones</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity
+                       style={activeTab === 'pruebas' ? styles.tabActive : styles.tabInactive}
+                       onPress={() => setActiveTab('pruebas')}
+                   >
+                       <Text style={styles.tabText}>pruebas</Text>
+                   </TouchableOpacity>
+               </ScrollView>
             </View>
             {activeTab === 'historial' ? (
                 <ScrollView style={{ flex: 1 }}
@@ -651,16 +653,13 @@ const styles = StyleSheet.create({
         marginEnd: 10,
     },
     tabContainer: {
-        flexDirection: 'row',
-        marginBottom: 16,
-        paddingStart: 0,
-        paddingEnd: 0,
-        justifyContent: 'space-between'
+        marginBottom: 18,
     },
     tabActive: {
         flex: 1,
         padding: 10,
         margin: 3,
+        width: 110,
         backgroundColor: '#334195', // Active tab color
         alignItems: 'center',
         borderRadius: 8,
@@ -672,6 +671,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         margin: 3,
+        width: 110,
         backgroundColor: '#9A9A9A', // Inactive tab color
         alignItems: 'center',
         borderRadius: 8,

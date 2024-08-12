@@ -286,20 +286,43 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         </View>
       </View>
       <View style={styles.chartTextContainer}>
-        {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
-          <PieChart
-            data={dataPie}
-            donut
-            showGradient
-            sectionAutoFocus
-            showText
-            textColor="black"
-            radius={90}
-            innerRadius={50}
-            textSize={12}
-            showTextBackground
-            textBackgroundRadius={0.1}
+        <View style={styles.textContainer}>
+          <Text style={styles.chartTitle}>
+            Estadísticas generales del equipo
+          </Text>
+          <Text style={styles.chartDescription}>
+          Revisa el promedio que el equipo tiene en las áreas técnicas, tácticas, físicas y psicológicas en las pruebas de entrenamiento
+          </Text>
+          <RNPickerSelect
+            onValueChange={handleTeamsChange}
+            items={teamsOptions}
+            style={styles.picker}
+            useNativeAndroidPickerStyle={false}
+            placeholder={{
+              label: "Seleccione un equipo:",
+              value: 0,
+            }}
+            Icon={() => {
+              return <Ionicons name="chevron-up" size={32} color="black" />;
+          }}
           />
+        </View>
+        {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
+          <View style={styles.chartContainer}>
+            <PieChart
+              data={dataPie}
+              donut
+              showGradient
+              sectionAutoFocus
+              showText
+              textColor="black"
+              radius={130}
+              innerRadius={45}
+              textSize={10}
+              showTextBackground
+              textBackgroundRadius={0.1}
+            />
+          </View>
         ) : (
           <View
             style={{
@@ -322,25 +345,6 @@ const HomeScreen = ({ logueado, setLogueado }) => {
             </Text>
           </View>
         )}
-        <View style={styles.textContainer}>
-          <Text style={styles.chartTitle}>
-            Estadísticas generales del equipo
-          </Text>
-          <Text style={styles.chartDescription}>
-            Revisa las estadísticas generales tanto en áreas técnicas, tácticas,
-            técnicas y mentales de los equipos
-          </Text>
-          <RNPickerSelect
-            onValueChange={handleTeamsChange}
-            items={teamsOptions}
-            style={styles.picker}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{
-              label: "Seleccione un equipo:",
-              value: 0,
-            }}
-          />
-        </View>
       </View>
       {lastMatchData ? (
         <View style={styles.matchContainer}>
@@ -457,9 +461,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   chartTextContainer: {
-    flexDirection: "row",
     padding: 20,
-    alignItems: "center",
     margin: 10,
     elevation: 10,
     borderRadius: 30,
@@ -472,6 +474,7 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     paddingLeft: 5,
+    marginBottom: 20,
   },
   chartTitle: {
     fontSize: 16,
@@ -479,15 +482,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   chartDescription: {
-    textAlign: "left",
-    fontSize: 12,
+    textAlign: "justify",
+    marginBottom: 20,
     color: "#888",
-    marginTop: 10,
   },
   picker: {
-    height: 50,
-    width: 200,
-    marginTop: 20,
+    inputAndroid: {
+      height: 40,
+      borderWidth: 1,
+      borderColor: "#ccc",
+      borderRadius: 8,
+      padding: 10,
+    },
   },
   matchContainer: {
     padding: 20,
@@ -552,7 +558,7 @@ const styles = StyleSheet.create({
     maxWidth: 100,
   },
   chartContainer: {
-    marginBottom: 20,
+    flex: 1,
     alignItems: "center",
   },
   chartTitle: {

@@ -20,14 +20,15 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     const [alertCallback, setAlertCallback] = useState(null);
     const [url, setUrl] = useState('');
 
+    // Función para cargar las cartas de las pruebas
     const fillCards = async () => {
         try {
             const form = new FormData();
             form.append('idEntrenamiento', idEntrenamiento);
-            const DATA = await fetchData(API, 'readAll', form);
+            const dataResponse = await fetchData(API, 'readAll', form);
 
-            if (DATA.status) {
-                let data = DATA.dataset;
+            if (dataResponse.status) {
+                let data = dataResponse.dataset;
                 setPlayers(data);
                 calculateGlobalAverage(data);
                 setResponse(true);
@@ -45,6 +46,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
     };
 
 
+    // Metodo para calcular el promedio del equipo entero.
     const calculateGlobalAverage = (playersData) => {
         if (playersData.length === 0) return 0;
 
@@ -53,29 +55,35 @@ const PruebasComponent = ({ idEntrenamiento }) => {
         setGlobalAverage(average.toFixed(1));
     };
 
+    // Metodo para ir a evaluar notas
     const goToTest = (id_jugador, jugador) => {
         navigation.navigate('Pruebas', { id_jugador, jugador, idEntrenamiento });
     };
 
+    // Metodo para ir a detalle de jugadores
     const goToPlayersDetails = (id_jugador) => {
         navigation.navigate('PlayersDetails', { id_jugador });
     };
 
+    //Metodo para refrescar
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
     }, [idEntrenamiento]);
 
+    //Cargar los datos
     useEffect(() => {
         fillCards();
     }, [idEntrenamiento]);
 
+    //Cargar los datos si se regresa a la pantalla
     useFocusEffect(
         useCallback(() => {
             fillCards();
         }, [idEntrenamiento])
     )
 
+    // Función para cerrar la alerta
     const handleAlertClose = () => {
         setAlertVisible(false);
         if (alertCallback) alertCallback();
@@ -91,6 +99,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
         }
     };
 
+    //Función para ir a pantalla analisis del jugador
     const showPlayerAverage = (id_jugador, average, jugador) => {
         setAlertMessage(`Promedio del jugador: ${average}`);
         setAlertVisible(true);
@@ -98,6 +107,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
         setUrl(`Analisis del jugador?id_jugador=${id_jugador}&jugador=${jugador}&idEntrenamiento=${idEntrenamiento}`);
     };
 
+    //Función para cambiar el color según el promedio
     const getColorByPromedio = (promedio) => {
         if (promedio <= 3) return '#FF0000'; // Rojo
         if (promedio <= 5) return '#FF69B4'; // Rosado

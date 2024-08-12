@@ -51,10 +51,10 @@ const PlayerAnalysis = () => {
 
     const fillGraphicPyramid = async () => {
         try {
-            const FORM = new FormData();
-            FORM.append('idJugador', id_jugador);
-            FORM.append('idEntrenamiento', idEntrenamiento);
-            const response = await fetchData(API, 'graphic', FORM);
+            const form = new FormData();
+            form.append('idJugador', id_jugador);
+            form.append('idEntrenamiento', idEntrenamiento);
+            const response = await fetchData(API, 'graphic', form);
             if (response.status) {
                 let data = response.dataset.map(item => ({
                     value: parseInt(item.NOTA, 10),
@@ -74,12 +74,13 @@ const PlayerAnalysis = () => {
     };
 
     
+    //Cargar los datos de la gráfica lineal
     const fillGraphicLine = async () => {
         try {
-            const FORM = new FormData();
-            FORM.append('idJugador', id_jugador);
-            FORM.append('idEntrenamiento', idEntrenamiento);
-            const response = await fetchData(API, 'graphicPromedyByJourney', FORM);
+            const form = new FormData();
+            form.append('idJugador', id_jugador);
+            form.append('idEntrenamiento', idEntrenamiento);
+            const response = await fetchData(API, 'graphicPromedyByJourney', form);
             if (response.status) {
                 let data = response.dataset.map(item => ({
                     value: parseFloat(item.PROMEDIO, 10),
@@ -97,6 +98,7 @@ const PlayerAnalysis = () => {
         }
     };
 
+    //Cargar los datos
     useEffect(() => {
         setTimeout(() => {
             fillGraphicPyramid();
@@ -106,6 +108,7 @@ const PlayerAnalysis = () => {
         }, 1000);
     }, []);
 
+    //Metodo para refrescar
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         setTimeout(() => {
@@ -115,6 +118,8 @@ const PlayerAnalysis = () => {
         }, 1000);
     }, []);
 
+
+    // Función para cerrar la alerta
     const handleAlertClose = () => {
         setAlertVisible(false);
         if (alertCallback) alertCallback();

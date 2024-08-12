@@ -9,6 +9,7 @@ import LoadingComponent from "../../src/components/LoadingComponent";
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
+// Componente para mostrar una tarjeta de jugador con su estado
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
     return (
         <View style={[styles.textHorario]}>
@@ -25,9 +26,10 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
 
 
 const TestPlayerScreen = () => {
-    const route = useRoute();
+    const route = useRoute(); // Obtiene los parámetros de la ruta
     const { id_jugador, jugador, idEntrenamiento } = route.params;
 
+    // Estados del componente
     const [playerStatuses, setPlayerStatuses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -40,6 +42,7 @@ const TestPlayerScreen = () => {
     const CARACTERISTICAS_API = 'services/technics/caracteristicas.php';
     const NOTAS_API = 'services/technics/caracteristicas_analisis.php';
 
+    // Método para obtener las características desde la API
     const fetchCaracteristicas = async () => {
         try {
             const response = await fetchData(CARACTERISTICAS_API, 'readAll');
@@ -55,12 +58,13 @@ const TestPlayerScreen = () => {
         }
     };
 
+    // Método para obtener las notas desde la API
     const fetchNotas = async () => {
         try {
-            const FORM = new FormData();
-            FORM.append('idJugador', id_jugador);
-            FORM.append('idEntrenamiento', idEntrenamiento);
-            const response = await fetchData(NOTAS_API, 'readOne', FORM);
+            const form = new FormData();
+            form.append('idJugador', id_jugador);
+            form.append('idEntrenamiento', idEntrenamiento);
+            const response = await fetchData(NOTAS_API, 'readOne', form);
             if (response.status) {
                 return response.dataset;
             } else {
@@ -73,6 +77,7 @@ const TestPlayerScreen = () => {
         }
     };
 
+    // Método para llenar las tarjetas de jugador con características y notas
     const fillCards = async () => {
         try {
             const caracteristicas = await fetchCaracteristicas();
@@ -106,6 +111,7 @@ const TestPlayerScreen = () => {
         }
     };
 
+    // Método para asignar un color según la nota
     const getColorByNota = (nota) => {
         if (nota <= 3) return '#8B0000'; // Rojo oscuro
         if (nota <= 5) return '#C71585'; // Rosado oscuro
@@ -115,15 +121,18 @@ const TestPlayerScreen = () => {
         return '#00008B'; // Azul oscuro
     };
 
+    // Método para refrescar la pantalla al tirar hacia abajo
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillCards();
     }, []);
 
+    // Hook useEffect para cargar las tarjetas cuando el componente se monta
     useEffect(() => {
         fillCards();
     }, []);
 
+    // Método para manejar el cambio de estado de un jugador
     const handleStatusChange = (name, status) => {
         console.log(`Status changed for ${name}: ${status}`);
         const value = status.trim() === '' ? '' : parseInt(status, 10);
@@ -136,11 +145,13 @@ const TestPlayerScreen = () => {
         }
     };
 
+    // Método para cerrar la alerta
     const handleAlertClose = () => {
         setAlertVisible(false);
         if (alertCallback) alertCallback();
     };
 
+    // Método para guardar las notas en la base de datos
     const handleSave = async () => {
         const formData = new FormData();
         formData.append('jugador', id_jugador);
@@ -154,19 +165,19 @@ const TestPlayerScreen = () => {
         formData.append('caracteristicas', JSON.stringify(caracteristicas));
 
         try {
-            const DATA = await fetchData(NOTAS_API, 'createRow', formData);
-            if (DATA.status) {
+            const responseData = await fetchData(NOTAS_API, 'createRow', formData);
+            if (responseData.status) {
                 setAlertType(1);
-                setAlertMessage(`${DATA.message}`);
+                setAlertMessage(`${responseData.message}`);
                 setAlertCallback(null);
                 setAlertVisible(true);
                 await fillCards();
             } else {
                 setAlertType(2);
-                setAlertMessage(`Error: ${DATA.exception}`);
+                setAlertMessage(`Error: ${responseData.exception}`);
                 setAlertCallback(null);
                 setAlertVisible(true);
-                console.error(DATA.exception);
+                console.error(responseData.exception);
             }
         } catch (error) {
             setAlertType(2);

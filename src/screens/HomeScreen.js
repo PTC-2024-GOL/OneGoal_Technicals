@@ -19,15 +19,17 @@ import gol from "../../assets/gol.png";
 import monaco from "../../assets/image 56.png";
 import { useFocusEffect } from "@react-navigation/native";
 
+//Obtiene las dimensiones de la pantalla
 const screenWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
 const HomeScreen = ({ logueado, setLogueado }) => {
-  // URL de la API para el usuario
+  // URL de las API que se utilizarán
   const USER_API = "services/technics/tecnicos.php";
   const MATCHES_API = "services/technics/partidos.php";
   const API_SOCCER = "services/technics/equipos.php";
+  //Estados para almacenar los datos
   const [results, setResults] = useState({
     ganados: " ",
     perdidos: " ",
@@ -56,6 +58,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
   const [teamsOptions, setTeamsOptions] = useState([]);
   const [alertMessage2, setAlertMessage2] = useState("");
 
+  //Función para obtener y llenar las opciones de equipos en el Picker
   const fillTeams = async () => {
     const data = await fetchData(API_SOCCER, "readAll");
     if (data.status) {
@@ -72,24 +75,27 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Maneja el cambio de equipo seleccionado
   const handleTeamsChange = (value) => {
     console.log("Equipo seleccionado:", value);
     setIdEquipo(value);
   };
 
+  //Efecto para recargar datos cuando cambia el equipo seleccionado
   useEffect(() => {
     if (idEquipo >= 0) {
       rechargeFetch();
     }
   }, [idEquipo]);
 
+  //Función para recargar la gráfica y el readProfile
   const rechargeFetch = async () => {
     await fillGraphicDoughnut();
     await readProfile();
   };
 
+  // Genera un color hexadecimal aleatorio
   const getRandomColor = () => {
-    // Genera un color hexadecimal aleatorio
     const letters = "0123456789ABCDEF";
     let color = "#";
     for (let i = 0; i < 6; i++) {
@@ -98,6 +104,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     return color;
   };
 
+  //Llena la gráfica con los datos obtenidos de la API
   const fillGraphicDoughnut = async () => {
     try {
       const FORM = new FormData();
@@ -126,6 +133,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Obtiene la información del usuario desde la API
   const getUser = async () => {
     try {
       const data = await fetchData(USER_API, "getUserMobile");
@@ -141,6 +149,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Leer el perfil del equipo y establece los resultados obtenidos
   const readProfile = async () => {
     try {
       const FORM = new FormData();
@@ -172,6 +181,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Obtiene los datos del último partido
   const lastMatch = async () => {
     try {
       const data = await fetchData(MATCHES_API, "lastMatch");
@@ -185,6 +195,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Lee y establece las imágenes correspondientes al equipo y al rival del último partido
   const readImageMatch = async () => {
     try {
       const data = await fetchData(MATCHES_API, "lastMatch");
@@ -209,6 +220,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Efecto que se ejecuta al montar el componente para inicializar la aplicación
   useEffect(() => {
     const initializeApp = async () => {
       await getUser();
@@ -234,7 +246,8 @@ const HomeScreen = ({ logueado, setLogueado }) => {
       initializeApp();
     }, [])
   );
-
+  
+  //Función de refresco manual
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await getUser();
@@ -258,6 +271,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
         <Text style={styles.subText}>
           Ponte al día sobre las nuevas actualizaciones
         </Text>
+        {/*Muestra los resultados del equipo */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>{results.ganados}</Text>
@@ -293,6 +307,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           <Text style={styles.chartDescription}>
           Revisa el promedio que el equipo tiene en las áreas técnicas, tácticas, físicas y psicológicas en las pruebas de entrenamiento
           </Text>
+          {/*Muestra el picker */}
           <RNPickerSelect
             onValueChange={handleTeamsChange}
             items={teamsOptions}
@@ -307,6 +322,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           }}
           />
         </View>
+        {/*Muestra la gráfica de dona */}
         {response && Array.isArray(dataPie) && dataPie.length > 0 ? (
           <View style={styles.chartContainer}>
             <PieChart
@@ -346,6 +362,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
           </View>
         )}
       </View>
+      {/*Muestra el último partido jugado */}
       {lastMatchData ? (
         <View style={styles.matchContainer}>
           <Text style={styles.matchDate}>{lastMatchData.fecha}</Text>
@@ -390,7 +407,7 @@ const HomeScreen = ({ logueado, setLogueado }) => {
               maxWidth: 150,
             }}
           >
-            No se encontraron datos para la gráfica
+            No se encontraron datos para el último partido
           </Text>
         </View>
       )}

@@ -10,13 +10,14 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
 import foto from "../../assets/imagen.jpg";
 import { TextInputMask } from "react-native-masked-text";
-import { PieChart, LineChart } from 'react-native-gifted-charts'; // Cambia PieChart a DonutChart
 
+//Obtiene la altura de la ventana
 const windowHeight = Dimensions.get("window").height;
 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
   const USER_API = "services/technics/tecnicos.php";
+  //Estados iniciales del perfil
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: " ",
@@ -35,18 +36,28 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
+  //Alterna el modo de edición y lee el perfil del usuario
   const handleEditPress = () => {
     setIsEditing(!isEditing);
     readProfile();
   };
 
+  //Guarda los cambios realizados en el perfil
   const handleSavePress = async () => {
     try {
+      //Validación de correo electrónico
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(profile.email)) {
+          Alert.alert("Error","Correo electrónico no válido");
+          return;
+        } 
+        
       const formData = new FormData();
       formData.append("nombrePerfil", profile.name);
       formData.append("apellidoPerfil", profile.fullname);
       formData.append("correoPerfil", profile.email);
       formData.append("duiPerfil", profile.dui);
+      //Verifica si la fecha de nacimiento es válida
       if (profile.birthday instanceof Date) {
         formData.append(
           "fechanacimientoPerfil",
@@ -57,6 +68,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         return;
       }
       formData.append("telefonoPerfil", profile.phone);
+      //Verifica si hay una imagen seleccionada y la agrega a formData
       if (profile.image) {
         const uriParts = profile.image.split(".");
         const fileType = uriParts[uriParts.length - 1];
@@ -67,6 +79,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         });
       }
 
+      //Envía la solicitud de actualización del perfil
       const response = await fetchData(USER_API, "updateRowProfile", formData);
 
       if (response.status) {
@@ -81,7 +94,9 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Maneja los cambios en los campos de texto
   const handleChange = (name, value) => {
+    //Solo permite letras y espacios
     if (name === "name" || name === "fullname") {
       if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
         setProfile({ ...profile, [name]: value });
@@ -89,23 +104,18 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         Alert.alert("Error", "Solo se permiten letras y espacios.");
       }
     } else if (name === "dui" || name === "phone") {
+      //Solo permite números y guiones
       if (/^[\d-]*$/.test(value)) {
         setProfile({ ...profile, [name]: value });
       } else {
         Alert.alert("Error", "Solo se permiten números y guiones.");
-      }
-    } else if (name === "email") {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (value === "" || emailPattern.test(value)) {
-        setProfile({ ...profile, [name]: value });
-      } else {
-        Alert.alert("Error", "Correo electrónico no válido.");
       }
     } else {
       setProfile({ ...profile, [name]: value });
     }
   };  
 
+  //Maneja el cambio de contraseña
   const handlePasswordChange = async () => {
     try {
       if (newPassword !== confirmPassword) {
@@ -149,6 +159,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Selecciona una imagen de la galería
   const pickImage = async () => {
     if (isEditing) {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -164,12 +175,14 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Maneja el cambio de fecha de nacimiento
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || profile.birthday;
     setShowDatePicker(false);
     handleChange("birthday", currentDate);
   };
 
+  //Lee los datos del perfil del usuario desde la API
   const readProfile = async () => {
     try {
       const data = await fetchData(USER_API, "readProfile");
@@ -196,14 +209,17 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  //Llama a readProfile al cargar el componente
   useEffect(() => {
     readProfile();
   }, []);
 
+  //Cambia la pantalla activa
   const changeScreen = (screen) => {
     setActiveChip(screen);
   };
 
+  //Función para refrescar la pantalla
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await readProfile();

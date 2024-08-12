@@ -7,9 +7,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
 import edit from '../../assets/iconPlayersScreen/Edit.png';
 import PruebasComponent from '../components/playersComponent/PruebasComponent'; // Importa el nuevo componente
-import fetchData from '../../api/components';
-import AlertComponent from '../components/AlertComponent';
-import LoadingComponent from "../components/LoadingComponent";
+import fetchData from '../../api/components';  // Importa función para realizar peticiones API
+import AlertComponent from '../components/AlertComponent'; 
+import LoadingComponent from "../components/LoadingComponent"; 
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -28,6 +28,7 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
         updateStatus(id, value);
     };
 
+     // Opciones de estado de asistencia
     const statusOptions = [
         { label: 'Asistencia', value: 'Asistencia' },
         { label: 'Ausencia injustificada', value: 'Ausencia injustificada' },
@@ -43,6 +44,7 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
 
     const borderColor = asistenciaColors(selectedStatus);
 
+    // Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
     return (
         <View style={[styles.playerCard, { borderLeftColor: borderColor }]}>
             <Text style={styles.playerName}>{name}</Text>
@@ -113,12 +115,14 @@ const PlayerCardObservation = ({ index, name, color, id, openObservationModal })
     );
 };
 
+// Este componente es el encargado de mostrar la pantalla de asistencias, se encarga de mostrar los horarios disponibles y los jugadores que asistieron a cada horario.
 const AssistsScreenM = () => {
-    const API = 'services/technics/asistencias.php';
+    const API = 'services/technics/asistencias.php'; //Url de la api
     const [refreshing, setRefreshing] = useState(false); // Estado para controlar el refresco
     const [loading, setLoading] = useState(true); // Estado para controlar la carga inicial
     const [modalVisible, setModalVisible] = useState(false);
     const [jugadores, setJugadores] = useState([]);
+    // Esta variable contiene el IDENTRENAMIENTO seleccionado
     const [hora, setHora] = useState([]);
     const [boolAsistance, setBoolAsistance] = useState(1);
     const [idHorario, setIdHorario] = useState([]);
@@ -177,16 +181,19 @@ const AssistsScreenM = () => {
 
     };
 
+     //Metodo para refrescar
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fillJugadores();
     }, [idEntrenamiento]);
 
+    // Función para cargar los horarios disponibles, esta función se ejecuta al cargar la pantalla. en el caso de actualizar no se cargan los horarios, de un solo los jugadores.
     useEffect(() => {
         fillJugadores();
         fillHorario();
     }, [idEntrenamiento]);
 
+    //Cargar los datos si se regresa a la pantalla
     useFocusEffect(
         useCallback(()=>{
             fillJugadores();
@@ -236,6 +243,7 @@ const AssistsScreenM = () => {
 
     };
 
+    //Funcion que se encarga de mostrar el horario seleccionado
     const fillHorario = async () => {
         try {
             const formData = new FormData();

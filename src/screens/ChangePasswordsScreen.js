@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
 import fetchData from '../../api/components';
-import AlertComponent from '../components/AlertComponent';
+import AlertComponent from '../components/AlertComponent';  // Importa función para realizar peticiones API
 
  
 const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
@@ -13,11 +13,13 @@ const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
   const [alertType, setAlertType] = useState(1);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertCallback, setAlertCallback] = useState(null);
-  const API = 'services/recuperacion/recuperacion.php';
+  const API = 'services/recuperacion/recuperacion.php'; //Url de la api
   
   const navigation = useNavigation(); // Obtiene el objeto de navegación
 
+  // Función para manejar el proceso de recuperación de contraseña
   const handleRecoverPassword = async () => {
+    // Verifica si el campo de correo está vacío
     if (email === '') {
         setAlertType(3);
         setAlertMessage(`El campo no puede estar vacio`);
@@ -26,7 +28,7 @@ const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
       return;
     }
 
-    const fechaActualUTC = new Date();
+    const fechaActualUTC = new Date(); // Fecha actual en UTC
     const formData = new FormData();
     formData.append('correo', email);
     formData.append('nivel', 2);
@@ -36,11 +38,12 @@ const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
     console.log('Esto contiene la fecha actual en UTC: ' + fechaActualUTC.toISOString());
 
     try {
+      // Realiza la petición a la API
       const data = await fetchData(API, 'envioCorreo', formData);
       if (data.status) {
         setAlertType(1);
         setAlertMessage(`${data.message}`);
-        setAlertCallback(null);
+        setAlertCallback(() => () => navigation.navigate('LoginScreen'));
         setAlertVisible(true);
       } else {
         setAlertType(2);
@@ -56,6 +59,7 @@ const RecoverPasswordScreen = ({ logueado, setLogueado }) => {
     }
   };
 
+  // Función para manejar el cierre de la alerta
   const handleAlertClose = () => {
     setAlertVisible(false);
     if (alertCallback) alertCallback();

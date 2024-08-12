@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image } from 'react-native';
+import { View, StyleSheet, ImageBackground, TouchableOpacity, Text, Image, Dimensions } from 'react-native';
 import { TextInput, DefaultTheme, Provider as PaperProvider, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import fetchData from '../../api/components';
@@ -10,6 +10,8 @@ import { useNavigation } from '@react-navigation/native'; // Importa useNavigati
 import background from '../../assets/background.png';
 import logo from '../../assets/gol_blanco 2.png';
 
+const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get('window').width;
 // Define un tema personalizado
 const theme = {
   ...DefaultTheme,
@@ -62,7 +64,7 @@ const LoginScreen = ({ logueado, setLogueado }) => {
     } catch (error) {
       console.log('Error: ', error);
       setAlertType(2);
-      setAlertMessage(`Error: ${error}`);
+      setAlertMessage(`Error: no se detecto usuario`);
       setAlertCallback(null);
       setAlertVisible(true);
     }
@@ -197,6 +199,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'semibold',
     fontSize: 16,
+    width: windowWidth * 0.35
   },
   forgotPassword: {
     marginTop: 10,

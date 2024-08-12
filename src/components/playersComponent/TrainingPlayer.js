@@ -73,7 +73,8 @@ const TrainingPlayer = ({idJugador}) => {
     );
 
     const data = notes.map(note => ({
-        value: note.nota_por_area,
+        
+        value: parseFloat(note.nota_por_area, 10),
         label: note.clasificacion_caracteristica_jugador
     }));
 

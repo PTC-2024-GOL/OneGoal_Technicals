@@ -134,7 +134,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                         {players.map((player, index) => (
                             <TouchableOpacity key={index} style={[styles.playerCard, { borderLeftColor: getColorByPromedio(player.PROMEDIO) }]} onPress={() => goToPlayersDetails(player.IDJ)}>
                                 <Text style={styles.playerName}>{player.JUGADOR}</Text>
-                                <TouchableOpacity onLongPress={() => showPlayerAverage(player.IDJ, player.PROMEDIO, player.JUGADOR)}>
+                                <TouchableOpacity onPress={() => showPlayerAverage(player.IDJ, player.PROMEDIO, player.JUGADOR)}>
                                     <Text style={styles.playerTextPromedio}>{player.PROMEDIO}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity

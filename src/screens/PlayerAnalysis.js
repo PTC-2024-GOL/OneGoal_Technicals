@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, ActivityIndicator, RefreshControl, Modal } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, ActivityIndicator, RefreshControl, Modal, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import AlertComponent from '../../src/components/AlertComponent';
-import { PopulationPyramid, LineChart } from 'react-native-gifted-charts';
+import { LineChart, BarChart } from 'react-native-gifted-charts';
+import LoadingComponent from "../components/LoadingComponent";
 
 import fetchData from '../../api/components';
 
@@ -13,15 +14,15 @@ const PlayerAnalysis = () => {
     const route = useRoute();
     const { id_jugador, jugador, idEntrenamiento } = route.params;
 
-    // Datos estáticos para pruebas
     const staticLineData = [
-        { NOMBRE: 'Velocidad', NOTA: '8' },
-        { NOMBRE: 'Resistencia', NOTA: '7' },
-        { NOMBRE: 'Técnica', NOTA: '9' },
-        { NOMBRE: 'Estrategia', NOTA: '6' },
-        { NOMBRE: 'Trabajo en equipo', NOTA: '8' },
+        { NOMBRE: 'Velocidad', NOTA: '0' },
+        { NOMBRE: 'Resistencia', NOTA: '0' },
+        { NOMBRE: 'Técnica', NOTA: '0' },
+        { NOMBRE: 'Estrategia', NOTA: '0' },
+        { NOMBRE: 'Trabajo en equipo', NOTA: '0' },
     ];
-    const [dataPyramid, setDataPyramid] = useState([]);
+
+    const [dataBar, setDataBar] = useState([]); // Cambiar nombre a dataBar
     const [lineData, setLineData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -30,7 +31,7 @@ const PlayerAnalysis = () => {
     const [alertType, setAlertType] = useState(1);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertCallback, setAlertCallback] = useState(null);
-    const [selectedNote, setSelectedNote] = useState(null); // Estado para manejar la nota seleccionada
+    const [selectedNote, setSelectedNote] = useState(null);
 
     const getRandomColor = () => {
         const letters = '0123456789ABCDEF';
@@ -56,15 +57,38 @@ const PlayerAnalysis = () => {
             const response = await fetchData(API, 'graphic', FORM);
             if (response.status) {
                 let data = response.dataset.map(item => ({
-                    left: parseInt(item.NOTA, 10),
-                    right: parseInt(item.NOTA, 10),
+                    value: parseInt(item.NOTA, 10),
                     label: item.CARACTERISTICA,
-                    color: getRandomColor()
+                    color: getRandomColor(),
                 }));
-                setDataPyramid(data);
+                setDataBar(data); // Guardar datos en dataBar
                 setResponse(true);
             } else {
-                setDataPyramid([]);
+                setDataBar([]);
+                setResponse(false);
+            }
+        } catch (error) {
+            console.error("Error fetching caracteristicas:", error);
+            return [];
+        }
+    };
+
+    
+    const fillGraphicLine = async () => {
+        try {
+            const FORM = new FormData();
+            FORM.append('idJugador', id_jugador);
+            FORM.append('idEntrenamiento', idEntrenamiento);
+            const response = await fetchData(API, 'graphicPromedyByJourney', FORM);
+            if (response.status) {
+                let data = response.dataset.map(item => ({
+                    value: parseFloat(item.PROMEDIO, 10),
+                    label: `${item.FECHA}`,
+                }));
+                setLineData(data); // Guardar datos en dataBar
+                setResponse(true);
+            } else {
+                setLineData([]);
                 setResponse(false);
             }
         } catch (error) {
@@ -76,8 +100,8 @@ const PlayerAnalysis = () => {
     useEffect(() => {
         setTimeout(() => {
             fillGraphicPyramid();
-            // Aquí podrías llenar los datos para la gráfica lineal
-            setLineData(linealData); // Asumiendo que tienes los datos estáticos para la gráfica lineal
+            setLineData(linealData);
+            fillGraphicLine();
             setLoading(false);
         }, 1000);
     }, []);
@@ -85,27 +109,11 @@ const PlayerAnalysis = () => {
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         setTimeout(() => {
-            setLineData(linealData); // Simula el refresco de datos para la gráfica lineal
+            fillGraphicPyramid();
+            fillGraphicLine();
             setRefreshing(false);
         }, 1000);
     }, []);
-
-    const handleDataPointClick = (data) => {
-        setSelectedNote(data.value);
-    };
-
-    const renderLegendComponent = () => {
-        return (
-            <View style={styles.legendContainer}>
-                {dataPyramid.map((item, index) => (
-                    <View key={index} style={styles.legendItem}>
-                        <View style={[styles.legendDot, { backgroundColor: item.color }]} />
-                        <Text style={styles.legendText}>{item.label}: {item.left}</Text>
-                    </View>
-                ))}
-            </View>
-        );
-    };
 
     const handleAlertClose = () => {
         setAlertVisible(false);
@@ -122,8 +130,9 @@ const PlayerAnalysis = () => {
                 <Text style={styles.horariotext}>Estás evaluando a {jugador}</Text>
             </Text>
             {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
-            ) : (
+                <LoadingComponent />
+            ) : ( 
+                response ? (
                 <ScrollView
                     style={styles.scrollContainer}
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -131,24 +140,21 @@ const PlayerAnalysis = () => {
                     <View style={styles.chartContainer}>
                         <Text style={styles.chartTitle}>Gráfico de notas obtenidas en el entrenamiento</Text>
                         <View style={styles.chartWrapper}>
-                            <PopulationPyramid
-                                data={dataPyramid}
-                                showMidAxis
-                                midAxisThickness={2}
-                                leftLabelStyle={{ color: 'blue' }}
-                                rightLabelStyle={{ color: 'red' }}
-                                leftBarColor="blue"
-                                rightBarColor="red"
-                                barHeight={30}
-                                barGap={10}
-                                animationDuration={500}
-                                barColor={data => data.color} // Asignar color a la barra
+                            <BarChart
+                                data={dataBar} // Usar dataBar para BarChart
+                                barWidth={35}
+                                cappedBars
+                                capColor={'rgba(78, 0, 142)'}
+                                capThickness={4}
+                                frontColor={'rgba(9, 11, 160,0.2)'}
+                                labelTextStyle={{ color: 'black', fontSize: 14 }}  // Estilo para etiquetas
+                                width={windowWidth * 0.8}
+                                yAxisTextStyle={{ color: '#03045E', fontSize: 12 }}  // Estilo para eje Y
                             />
                         </View>
-                        {renderLegendComponent()}
                     </View>
                     <View style={styles.chartContainer}>
-                        <Text style={styles.chartTitle}>Gráfico Lineal</Text>
+                        <Text style={styles.chartTitle}>Gráfico del promedio de las ultimas 3 sesiones de entrenamiento</Text>
                         <LineChart
                             areaChart
                             hideDataPoints={false}
@@ -158,8 +164,8 @@ const PlayerAnalysis = () => {
                             startOpacity={1}
                             endOpacity={0.3}
                             initialSpacing={0}
-                            data={lineData} // Datos para la gráfica lineal
-                            spacing={30}
+                            data={lineData}
+                            spacing={windowWidth * 0.5}
                             thickness={5}
                             hideRules
                             showYAxis
@@ -168,7 +174,7 @@ const PlayerAnalysis = () => {
                             xAxisColor="#03045E"
                             color="#03045E"
                             width={windowWidth * 0.8}
-                            xAxisTextStyle={{ color: '#03045E', fontSize: 12 }}
+                            xAxisTextStyle={{ color: '#03045E', fontSize: 12, transform: [{ rotate: '45deg' }] }}
                             yAxisTextStyle={{ color: '#03045E', fontSize: 12 }}
                             pointerConfig={{
                                 pointerStripHeight: 160,
@@ -191,6 +197,7 @@ const PlayerAnalysis = () => {
                                                 justifyContent: 'center',
                                                 marginTop: -30,
                                                 marginLeft: -40,
+                                                transform: [{ rotate: '45deg' }],
                                             }}
                                         >
                                             <Text style={{ color: 'white', fontSize: 14, marginBottom: 6, textAlign: 'center' }}>
@@ -208,7 +215,22 @@ const PlayerAnalysis = () => {
                         />
                     </View>
                 </ScrollView>
-            )}
+            ) : (
+                <ScrollView
+                    style={styles.scrollContainer}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    <View style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image style={{ height: 80, width: 80, marginBottom: 10 }} source={require('../../assets/find.png')} />
+                        <Text style={{ backgroundColor: '#e6ecf1', color: '#043998', padding: 20, borderRadius: 15, maxWidth: 300 }}>No se encontraron datos para las gráficas</Text>
+                    </View>
+                </ScrollView>
+            ))}
             <Modal
                 transparent={true}
                 visible={selectedNote !== null}
@@ -242,6 +264,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: '#FFFFFF',
+        marginBottom: windowHeight * 0.12,
     },
     headerText: {
         fontSize: 24,
@@ -276,6 +299,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     chartTitle: {
+        maxWidth: windowWidth * 0.9,
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 8,

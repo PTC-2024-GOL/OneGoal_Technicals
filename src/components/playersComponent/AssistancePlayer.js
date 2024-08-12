@@ -12,6 +12,7 @@ import LoadingComponent from "../LoadingComponent";
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
+//Tarjeta de estado de asistencia
 const PlayerCard = ({ name, status, color, onStatusChange }) => {
     const [selectedStatus, setSelectedStatus] = useState(status);
 
@@ -20,6 +21,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
         onStatusChange(name, value);
     };
 
+    // Opciones de estado de asistencia
     const statusOptions = [
         { label: 'Asistencia', value: 'Asistencia' },
         { label: 'Ausencia injus...', value: 'Ausencia injustificada' },
@@ -32,7 +34,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
         { label: 'Lesion', value: 'Lesion' },
         { label: 'Otro', value: 'Otro' },
     ];
-
+    // retorna la tarjeta de estado de asistencia
     return (
         <View style={[styles.playerCard, { borderLeftColor: color }]}>
             <Text style={styles.playerName}>{name}</Text>
@@ -55,6 +57,7 @@ const PlayerCard = ({ name, status, color, onStatusChange }) => {
     );
 };
 
+// Componente de estadisticas de asistencia, recibe el id del jugador y llena la variable datosgrafica con los datos de asistencias promediados
 const AssistancePlayer = ({ idJugador }) => {
     const [datosgrafica, setDatosGrafica] = useState({});
     const API = 'services/technics/asistencias.php';
@@ -75,6 +78,7 @@ const AssistancePlayer = ({ idJugador }) => {
         }
     }
 
+    // Función para obtener el color de acuerdo al estado de asistencia
     const getColorByAssistance = (assistance) => {
         switch (assistance) {
             case 'Asistencia':
@@ -96,6 +100,7 @@ const AssistancePlayer = ({ idJugador }) => {
         }
     }
 
+    // Obtiene los datos de asistencia de un jugador en especifico
     const fillPlayersAssistance = async () => {
         const FORM = new FormData();
         FORM.append('idJugador', idJugador);
@@ -118,14 +123,15 @@ const AssistancePlayer = ({ idJugador }) => {
         }
     };
 
+    //Constantes
     const [modalVisible, setModalVisible] = useState(false);
     const navigation = useNavigation();
-
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
     const [playerStatuses, setPlayerStatuses] = useState(playersData);
     const [players, setPlayers] = useState(playersData);
 
+    // Función para abrir el modal de observaciones
     const handleStatusChange = (name, status) => {
         setPlayerStatuses((prevStatuses) =>
             prevStatuses.map((player) =>
@@ -133,11 +139,13 @@ const AssistancePlayer = ({ idJugador }) => {
             )
         );
     };
+    // Función para llenar las observaciones
     const llenarObservaciones = (observacion) => {
         setObservaciones(observacion);
         setModalVisible(true);
     }
 
+    // Efecto para llenar los datos de asistencia al enfocar el componente
     useFocusEffect(
         useCallback(() => {
             setLoading(true); // Inicia la carga al enfocar el componente
@@ -146,6 +154,7 @@ const AssistancePlayer = ({ idJugador }) => {
         }, [idJugador])
     );
 
+    // Retorna la vista de las estadisticas de asistencia
     return (
         <ScrollView>
             {load ? (

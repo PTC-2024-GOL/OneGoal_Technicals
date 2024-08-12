@@ -25,6 +25,7 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
         updateStatus(id, value);
     };
 
+    // Opciones de estado de asistencia
     const statusOptions = [
         { label: 'Asistencia', value: 'Asistencia' },
         { label: 'Ausencia injustificada', value: 'Ausencia injustificada' },
@@ -38,6 +39,7 @@ const PlayerCard = ({ name, status, color, id, updateStatus }) => {
         { label: 'Otro', value: 'Otro' },
     ];
 
+    // Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
     return (
         <View style={[styles.playerCard, { borderLeftColor: color }]}>
             <Text style={styles.playerName}>{name}</Text>

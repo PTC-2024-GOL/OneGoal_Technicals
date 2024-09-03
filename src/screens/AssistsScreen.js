@@ -7,79 +7,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import soccer from '../../assets/icon-observacion.png';
 import fetchData from '../../api/components';
 import AlertComponent from '../components/AlertComponent';
+import PlayerCardObservation from '../components/asistenciasComponents/PlayerCardObservation';
+import PlayerCard from '../components/asistenciasComponents/PlayerCard';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
-
-// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
-// name: Nombre del jugador
-// status: Estado de asistencia del jugador
-// color: Color de la tarjeta
-// id: Identificador del jugador
-// updateStatus: Función para actualizar el estado de asistencia del jugador
-const PlayerCard = ({ name, status, color, id, updateStatus }) => {
-    const [selectedStatus, setSelectedStatus] = useState(status);
-
-    const handleStatusChange = (value) => {
-        setSelectedStatus(value);
-        updateStatus(id, value);
-    };
-
-    // Opciones de estado de asistencia
-    const statusOptions = [
-        { label: 'Asistencia', value: 'Asistencia' },
-        { label: 'Ausencia injustificada', value: 'Ausencia injustificada' },
-        { label: 'Enfermedad', value: 'Enfermedad' },
-        { label: 'Estudio', value: 'Estudio' },
-        { label: 'Trabajo', value: 'Trabajo' },
-        { label: 'Viaje', value: 'Viaje' },
-        { label: 'Permiso', value: 'Permiso' },
-        { label: 'Falta', value: 'Falta' },
-        { label: 'Lesion', value: 'Lesion' },
-        { label: 'Otro', value: 'Otro' },
-    ];
-
-    // Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectivo estado de asistencia, se le pasan las siguientes cosas:
-    return (
-        <View style={[styles.playerCard, { borderLeftColor: color }]}>
-            <Text style={styles.playerName}>{name}</Text>
-            <RNPickerSelect
-                onValueChange={handleStatusChange}
-                items={statusOptions}
-                style={pickerSelectCardStyles}
-                value={selectedStatus}
-                useNativeAndroidPickerStyle={false}
-                placeholder={{
-                    label: 'Selecciona un estado...',
-                    value: null,
-                }}
-                Icon={() => {
-                    return <Ionicons name="chevron-up" size={16} color="#5AE107" />;
-                }}
-            />
-        </View>
-    );
-};
-
-// Este componente es el encargado de mostrar la tarjeta de cada jugador con su respectiva observación, se le pasan las siguientes cosas:
-// name: Nombre del jugador
-// color: Color de la tarjeta
-// id: Identificador del jugador
-// openObservationModal: Función para abrir el modal de observación
-const PlayerCardObservation = ({ index, name, color, id, openObservationModal }) => {
-
-    return (
-        <View key={index} style={[styles.playerCard, { borderLeftColor: color }]}>
-            <Text style={styles.playerName}>{name}</Text>
-            <TouchableOpacity
-                style={styles.observationButtonM}
-                onPress={() => openObservationModal(id)}
-            >
-                <Image source={soccer} style={styles.observationIconM} />
-            </TouchableOpacity>
-        </View>
-    );
-};
 
 // Este componente es el encargado de mostrar la pantalla de asistencias, se encarga de mostrar los horarios disponibles y los jugadores que asistieron a cada horario.
 const AssistsScreen = () => {
@@ -330,7 +262,6 @@ const AssistsScreen = () => {
                                     key={index}
                                     name={player.jugador}
                                     status={player.asistencia}
-                                    color={player.color}
                                     id={player.id}
                                     updateStatus={updateStatus}
                                 />

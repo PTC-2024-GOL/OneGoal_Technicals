@@ -4,34 +4,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import fetchData from '../../api/components';
 import LoadingComponent from "../components/LoadingComponent";
+import TrainingCard from "../components/TrainingsCards/TrainingCard";
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
-
-import soccer from '../../assets/Player-soccer.png';
-
-const TrainingCard = ({ date, time, playersPresent, onPress, idEntrenamiento }) => {
-    return (
-        <TouchableOpacity style={styles.card}>
-            <Text style={styles.date}>{date}</Text>
-            <Text style={styles.time}>{time}</Text>
-            <View style={styles.infoRow}>
-                <TouchableOpacity style={styles.infoRowTwo} onPress={() => onPress(idEntrenamiento)}>
-                    <View style={styles.iconButton}>
-                        <Image source={soccer}></Image>
-                    </View>
-                    <Text style={styles.linkText}>Ver asistencias</Text>
-                </TouchableOpacity>
-                <View style={styles.infoRowTwo}>
-                    <View style={styles.playersCount}>
-                        <Text style={styles.playersCountText}>{playersPresent}</Text>
-                    </View>
-                    <Text style={styles.linkText}>Jugadores presentes</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
-};
 
 const TrainingsScreen = () => {
     const navigation = useNavigation();
@@ -70,7 +46,7 @@ const TrainingsScreen = () => {
                 setResponse(false);
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.log("Error fetching data:", error);
         } finally {
             setLoading(false);
             setRefreshing(false);

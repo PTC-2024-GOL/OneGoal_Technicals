@@ -9,7 +9,7 @@ export default async function imageData(folder, filename) {
     try {
         return imageUrl; // Retornar la URL de la imagen si está disponible
     } catch (error) {
-        console.error('Imagen error:', error);
+        console.log('Imagen error:', error);
         throw error; // Lanza el error para que useEffect pueda manejarlo
     }
 };

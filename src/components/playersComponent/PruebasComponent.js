@@ -38,7 +38,7 @@ const PruebasComponent = ({ idEntrenamiento }) => {
                 setResponse(false);
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.log("Error fetching data:", error);
         } finally {
             setLoading(false);
             setRefreshing(false);

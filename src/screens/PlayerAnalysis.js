@@ -68,7 +68,7 @@ const PlayerAnalysis = () => {
                 setResponse(false);
             }
         } catch (error) {
-            console.error("Error fetching caracteristicas:", error);
+            console.log("Error fetching caracteristicas:", error);
             return [];
         }
     };
@@ -93,7 +93,7 @@ const PlayerAnalysis = () => {
                 setResponse(false);
             }
         } catch (error) {
-            console.error("Error fetching caracteristicas:", error);
+            console.log("Error fetching caracteristicas:", error);
             return [];
         }
     };

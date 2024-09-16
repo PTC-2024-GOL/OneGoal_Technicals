@@ -5,25 +5,10 @@ import { useRoute } from "@react-navigation/native"; // Importa useRoute
 import fetchData from '../../api/components';
 import AlertComponent from "../../src/components/AlertComponent";
 import LoadingComponent from "../../src/components/LoadingComponent";
+import PlayerCard from '../components/TrainingsCards/PlayerCard';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
-
-// Componente para mostrar una tarjeta de jugador con su estado
-const PlayerCard = ({ name, status, color, onStatusChange }) => {
-    return (
-        <View style={[styles.textHorario]}>
-            <Text style={[styles.headTest, { backgroundColor: color }]}>{name}</Text>
-            <TextInput
-                style={styles.infoText}
-                value={status}
-                keyboardType='numeric'
-                onChangeText={(text) => onStatusChange(name, text)}
-            />
-        </View>
-    );
-};
-
 
 const TestPlayerScreen = () => {
     const route = useRoute(); // Obtiene los parámetros de la ruta
@@ -53,7 +38,7 @@ const TestPlayerScreen = () => {
                 return [];
             }
         } catch (error) {
-            console.error("Error fetching caracteristicas:", error);
+            console.log("Error fetching caracteristicas:", error);
             return [];
         }
     };
@@ -72,7 +57,7 @@ const TestPlayerScreen = () => {
                 return [];
             }
         } catch (error) {
-            console.error("Error fetching notas:", error);
+            console.log("Error fetching notas:", error);
             return [];
         }
     };
@@ -103,7 +88,7 @@ const TestPlayerScreen = () => {
                 setResponse(false); // No hay datos
             }
         } catch (error) {
-            console.error("Error filling cards:", error);
+            console.log("Error filling cards:", error);
             setResponse(false); // Error al cargar datos
         } finally {
             setLoading(false);
@@ -135,7 +120,7 @@ const TestPlayerScreen = () => {
     // Método para manejar el cambio de estado de un jugador
     const handleStatusChange = (name, status) => {
         console.log(`Status changed for ${name}: ${status}`);
-        const value = status.trim() === '' ? '' : parseInt(status, 10);
+        const value = status.trim() === '' ? '' : parseFloat(status, 10);
         if (value === '' || (!isNaN(value) && value >= 0 && value <= 10)) {
             setPlayerStatuses((prevStatuses) =>
                 prevStatuses.map((player) =>
@@ -164,6 +149,7 @@ const TestPlayerScreen = () => {
 
         formData.append('caracteristicas', JSON.stringify(caracteristicas));
 
+        console.log(caracteristicas);
         try {
             const responseData = await fetchData(NOTAS_API, 'createRow', formData);
             if (responseData.status) {
@@ -177,7 +163,7 @@ const TestPlayerScreen = () => {
                 setAlertMessage(`Error: ${responseData.exception}`);
                 setAlertCallback(null);
                 setAlertVisible(true);
-                console.error(responseData.exception);
+                console.log(responseData.exception);
             }
         } catch (error) {
             setAlertType(2);

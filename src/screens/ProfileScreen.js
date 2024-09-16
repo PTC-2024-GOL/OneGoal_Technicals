@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ScrollView, Image, RefreshControl} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  ScrollView,
+  Image,
+  RefreshControl,
+} from "react-native";
 import { TextInput, Card, Avatar, Button, Chip } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import fetchData from "../../api/components";
@@ -45,13 +55,37 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   //Guarda los cambios realizados en el perfil
   const handleSavePress = async () => {
     try {
+      // Validación de campos vacíos
+      if (
+        !profile.name ||
+        !profile.fullname ||
+        !profile.email ||
+        !profile.dui ||
+        !profile.phone
+      ) {
+        Alert.alert(
+          "Error",
+          "Campos requeridos. Por favor, complete todos los campos."
+        );
+        return;
+      }
+
+      // Validación de longitud para nombre y apellido
+      if (profile.name.length < 2 || profile.fullname.length < 2) {
+        Alert.alert(
+          "Error",
+          "El nombre y apellido deben tener al menos 2 caracteres."
+        );
+        return;
+      }
+
       //Validación de correo electrónico
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(profile.email)) {
-          Alert.alert("Error","Correo electrónico no válido");
-          return;
-        } 
-        
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(profile.email)) {
+        Alert.alert("Error", "Correo electrónico no válido");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("nombrePerfil", profile.name);
       formData.append("apellidoPerfil", profile.fullname);
@@ -113,7 +147,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     } else {
       setProfile({ ...profile, [name]: value });
     }
-  };  
+  };
 
   //Maneja el cambio de contraseña
   const handlePasswordChange = async () => {
@@ -227,9 +261,11 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
   }, []);
 
   return (
-    <ScrollView refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    }>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.container}>
         <LinearGradient colors={["#03045E", "#647AA3"]} style={styles.header}>
           <TouchableOpacity onPress={pickImage}>
@@ -351,7 +387,10 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                     <TextInputMask
                       type={"custom"}
                       options={{ mask: "99999999-9" }}
-                      style={[styles.infoText, !isEditing && styles.inputNotEditable]}
+                      style={[
+                        styles.infoText,
+                        !isEditing && styles.inputNotEditable,
+                      ]}
                       value={profile.dui}
                       editable={isEditing}
                       onChangeText={(text) => handleChange("dui", text)}
@@ -367,7 +406,10 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
                     <TextInputMask
                       type={"custom"}
                       options={{ mask: "9999-9999" }}
-                      style={[styles.infoText, !isEditing && styles.inputNotEditable]}
+                      style={[
+                        styles.infoText,
+                        !isEditing && styles.inputNotEditable,
+                      ]}
                       value={profile.phone}
                       editable={isEditing}
                       onChangeText={(text) => handleChange("phone", text)}

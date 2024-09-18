@@ -32,10 +32,10 @@ notas de cada entrenamiento, así como también información de los jugadores.
 - react-native-gifted-charts
 
 ## Nomenclaturas
-Nombre de archivos js (Pantallas)	- PascalCase
-Declaración de variables - camelCase
-Declaración de variables constantes (Rutas para los diferentes servicios de la API)	- Mayúsculas.
-Funciones	- camelCase
+- Nombre de archivos js (Pantallas)	- PascalCase
+- Declaración de variables - camelCase
+- Declaración de variables constantes (Rutas para los diferentes servicios de la API)	- Mayúsculas.
+- Funciones	- camelCase
 
 
 

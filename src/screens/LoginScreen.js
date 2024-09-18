@@ -41,32 +41,41 @@ const LoginScreen = ({ logueado, setLogueado }) => {
 
   // Manejo de inicio de sesión
   const handleLogin = async () => {
-    // Creación del formulario para la petición
-    const formData = new FormData();
-    formData.append('correo', alias);
-    formData.append('clave', clave);
+    // Verifica que los campos no estén vacíos
+    if (!alias || !clave) {
+      setAlertType(2);
+      setAlertMessage(`Campos requeridos, Por favor, complete todos los campos.`);
+      setAlertCallback(null);
+      setAlertVisible(true);
+      return;
+    } else {
+      // Creación del formulario para la petición
+      const formData = new FormData();
+      formData.append('correo', alias);
+      formData.append('clave', clave);
 
-    try {
-      // Realización de la petición de inicio de sesión
-      const data = await fetchData(USER_API, 'logIn', formData);
-      if (data.status) {
-        setAlertType(1);
-        setAlertMessage(`${data.message}`);
-        setAlertCallback(() => () => setLogueado(!logueado));
-        setAlertVisible(true);
-      } else {
-        console.log(data);
+      try {
+        // Realización de la petición de inicio de sesión
+        const data = await fetchData(USER_API, 'logIn', formData);
+        if (data.status) {
+          setAlertType(1);
+          setAlertMessage(`${data.message}`);
+          setAlertCallback(() => () => setLogueado(!logueado));
+          setAlertVisible(true);
+        } else {
+          console.log(data);
+          setAlertType(2);
+          setAlertMessage(`Error sesión: ${data.error}`);
+          setAlertCallback(null);
+          setAlertVisible(true);
+        }
+      } catch (error) {
+        console.log('Error: ', error);
         setAlertType(2);
-        setAlertMessage(`Error sesión: ${data.error}`);
+        setAlertMessage(`Error: no se detecto usuario`);
         setAlertCallback(null);
         setAlertVisible(true);
       }
-    } catch (error) {
-      console.log('Error: ', error);
-      setAlertType(2);
-      setAlertMessage(`Error: no se detecto usuario`);
-      setAlertCallback(null);
-      setAlertVisible(true);
     }
   };
 

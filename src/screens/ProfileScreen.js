@@ -151,30 +151,38 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
 
   //Maneja el cambio de contraseña
   const handlePasswordChange = async () => {
-    try {
-      if (newPassword !== confirmPassword) {
-        Alert.alert("Error", "La confirmación de la contraseña no coincide.");
-        return;
+    if(!password || !newPassword || !confirmPassword){
+      Alert.alert(
+        "Error",
+        "Campos requeridos. Por favor, complete todos los campos."
+      );
+      return;
+    }else{
+      try {
+        if (newPassword !== confirmPassword) {
+          Alert.alert("Error", "La confirmación de la contraseña no coincide.");
+          return;
+        }
+  
+        const formData = new FormData();
+        formData.append("claveActual", password);
+        formData.append("claveCliente", newPassword);
+        formData.append("repetirclaveCliente", confirmPassword);
+  
+        const response = await fetchData(USER_API, "changePassword", formData);
+  
+        if (response.status) {
+          Alert.alert("Éxito", response.message);
+          setPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        } else {
+          Alert.alert("Error", response.error);
+        }
+      } catch (error) {
+        Alert.alert("No se pudo acceder a la API", error.message);
+        console.log(error.message);
       }
-
-      const formData = new FormData();
-      formData.append("claveActual", password);
-      formData.append("claveCliente", newPassword);
-      formData.append("repetirclaveCliente", confirmPassword);
-
-      const response = await fetchData(USER_API, "changePassword", formData);
-
-      if (response.status) {
-        Alert.alert("Éxito", response.message);
-        setPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        Alert.alert("Error", response.error);
-      }
-    } catch (error) {
-      Alert.alert("No se pudo acceder a la API", error.message);
-      console.log(error.message);
     }
   };
 

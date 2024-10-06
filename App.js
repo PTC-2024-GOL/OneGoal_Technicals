@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import LoginNav from './src/navigation/LoginNav';
 import BottomTab from './src/navigation/BottomTab';
-import fetchData from './api/components';
+import fetchData from './api/components.js';
 import LoadingScreen from "./src/screens/LoadingScreen";
 
 //Componente principal

@@ -723,6 +723,7 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         fontWeight: 'bold',
+        width: windowWidth * 0.45,
     },
 
 })

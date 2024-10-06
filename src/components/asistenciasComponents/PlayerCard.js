@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get('window').width;
 const PlayerCard = ({ name, status, id, updateStatus }) => {
     const [selectedStatus, setSelectedStatus] = useState(status);
 
@@ -52,12 +54,9 @@ const PlayerCard = ({ name, status, id, updateStatus }) => {
         { label: 'Otro', value: 'Otro' },
     ];
 
-    // Truncar el nombre si excede los 12 caracteres
-    const truncatedName = name.length > 16 ? `${name.substring(0, 16)}...` : name;
-
     return (
         <View style={[styles.playerCard, { borderLeftColor: borderColor }]}>
-            <Text style={styles.playerName}>{truncatedName}</Text>
+            <Text style={styles.playerName}>{name}</Text>
             <RNPickerSelect
                 onValueChange={handleStatusChange}
                 items={statusOptions}
@@ -86,11 +85,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        textAlign: 'center',
         elevation: 2,
+        width: windowWidth * 0.95,
+        height: windowHeight * 0.13,
     },
     playerName: {
         fontSize: 16,
         fontWeight: 'bold',
+        width: windowWidth * 0.35,
     }
 });
 

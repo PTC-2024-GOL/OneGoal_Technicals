@@ -7,21 +7,27 @@
     "icon": "./assets/gol.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash3.png",
-      "resizeMode": "cover"
-
+      "image": "./assets/gol.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/gol.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jupadi140949.OneGoal"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/gol.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fdd47e91-5ded-489f-baba-00ad19cba34a"
+      }
     }
   }
 }

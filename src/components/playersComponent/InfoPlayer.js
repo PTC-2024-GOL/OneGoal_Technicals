@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     },
     card: {
-        height: 100,
+        height: windowHeight * 0.17,
         backgroundColor: 'white',
         marginRight: 10,
         width: 150

@@ -251,7 +251,7 @@ const AssistsScreenM = () => {
             </Text>
             <Text style={styles.textHorario}>
                 {hora.map((hora, index) => (
-                    <View key={index}>
+                    <View style={styles.textHorario} key={index}>
                         <Text style={styles.horariotext}>{hora.horario}</Text>
                     </View>
                 ))}
@@ -562,14 +562,15 @@ const styles = StyleSheet.create({
     },
     textHorario: {
         backgroundColor: '#000', // black color
-        padding: 12,
+        padding: 7,
         borderRadius: 8,
         textAlign: 'center',
         marginBottom: 16,
+        alignItems: 'center'
     },
     horariotext: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
     },
     buttonText: {

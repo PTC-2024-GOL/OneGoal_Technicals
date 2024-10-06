@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
         maxWidth: 325
     },
     rightText: {
-        fontSize: 16,
+        fontSize: 13,
         color: 'white',
         fontWeight: 'bold',
         backgroundColor: '#5AE107', // Green color

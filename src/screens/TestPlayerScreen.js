@@ -116,19 +116,41 @@ const TestPlayerScreen = () => {
     useEffect(() => {
         fillCards();
     }, []);
-
+    
     // Método para manejar el cambio de estado de un jugador
     const handleStatusChange = (name, status) => {
         console.log(`Status changed for ${name}: ${status}`);
-        const value = status.trim() === '' ? '' : parseFloat(status, 10);
-        if (value === '' || (!isNaN(value) && value >= 0 && value <= 10)) {
+
+        // Expresión regular para permitir números con un punto decimal, y que no comience con un punto
+        const regex = /^(?:[0-9]+(?:\.[0-9]{0,2})?)?$/;
+
+        // Si el campo está vacío, se asigna 0 pero no se hace validación inmediata
+        if (status === '') {
             setPlayerStatuses((prevStatuses) =>
                 prevStatuses.map((player) =>
-                    player.NOMBRE === name ? { ...player, nota: status } : player
+                    player.NOMBRE === name ? { ...player, nota: '0' } : player
                 )
             );
+            return;
+        }
+
+        // Validar la entrada mientras se escribe
+        if (regex.test(status)) {
+            // Evitar la conversión inmediata a número, permitimos la entrada del punto
+            const value = status;
+
+            // Al final, validamos que esté en el rango entre 0 y 10 solo si es un número válido
+            const parsedValue = parseFloat(value);
+            if (!isNaN(parsedValue) && parsedValue >= 0 && parsedValue <= 10) {
+                setPlayerStatuses((prevStatuses) =>
+                    prevStatuses.map((player) =>
+                        player.NOMBRE === name ? { ...player, nota: value } : player
+                    )
+                );
+            }
         }
     };
+
 
     // Método para cerrar la alerta
     const handleAlertClose = () => {
@@ -142,14 +164,18 @@ const TestPlayerScreen = () => {
         formData.append('jugador', id_jugador);
         formData.append('entrenamiento', idEntrenamiento);
 
-        const caracteristicas = playerStatuses.map(player => ({
-            id_caracteristica_jugador: player.ID,
-            nota_caracteristica_analisis: player.nota
-        }));
+        // Filtrar las características que no sean null o 0
+        const caracteristicas = playerStatuses
+            .filter(player => player.nota !== null && player.nota !== '0')
+            .map(player => ({
+                id_caracteristica_jugador: player.ID,
+                nota_caracteristica_analisis: player.nota
+            }));
 
         formData.append('caracteristicas', JSON.stringify(caracteristicas));
 
-        console.log(caracteristicas);
+        console.log(caracteristicas);  // Mostrar los datos filtrados antes de enviarlos
+
         try {
             const responseData = await fetchData(NOTAS_API, 'createRow', formData);
             if (responseData.status) {

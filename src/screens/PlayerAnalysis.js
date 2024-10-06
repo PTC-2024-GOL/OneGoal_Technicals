@@ -45,7 +45,7 @@ const PlayerAnalysis = () => {
     const API = 'services/technics/caracteristicas_analisis.php';
 
     const linealData = staticLineData.map((status, index) => ({
-        value: parseInt(status.NOTA, 10),
+        value: parseFloat(status.NOTA, 10),
         label: `Semana ${index + 1}`,
     }));
 
@@ -57,7 +57,7 @@ const PlayerAnalysis = () => {
             const response = await fetchData(API, 'graphic', form);
             if (response.status) {
                 let data = response.dataset.map(item => ({
-                    value: parseInt(item.NOTA, 10),
+                    value: parseFloat(item.NOTA, 10),
                     label: item.CARACTERISTICA,
                     color: getRandomColor(),
                 }));
@@ -152,9 +152,14 @@ const PlayerAnalysis = () => {
                                 capColor={'rgba(78, 0, 142)'}
                                 capThickness={4}
                                 frontColor={'rgba(9, 11, 160,0.2)'}
-                                labelTextStyle={{ color: 'black', fontSize: 14 }}  // Estilo para etiquetas
+                                labelTextStyle={{
+                                    color: 'black',
+                                    fontSize: 10,
+                                    transform: [{ rotate: '-90deg' }], // Rotación para texto vertical
+                                    textAlign: 'center', // Alineación del texto
+                                }}
                                 width={windowWidth * 0.8}
-                                yAxisTextStyle={{ color: '#03045E', fontSize: 12 }}  // Estilo para eje Y
+                                yAxisTextStyle={{ color: '#03045E', fontSize: 10 }}  // Estilo para eje Y
                             />
                         </View>
                     </View>

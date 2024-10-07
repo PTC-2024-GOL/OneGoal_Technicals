@@ -226,19 +226,24 @@ const AssistsScreenM = () => {
     // Esta función mapea el arreglo de objetos para actulizar registros en base a los id de los jugadores.
     // Esta función obtiene el id del jugador y la nueva observación solito (la verdad no sé ni cómo funciona lol, pero funciona).
     const saveObservation = () => {
+        // Validar si la observación está vacía o contiene solo espacios en blanco
+        const cleanedObservation = observationText.trim() === '' ? null : observationText;
+        console.log('Observación guardada:', cleanedObservation);
         setJugadores((prevJugadores) => {
             const updatedJugadores = prevJugadores.map((jugador) => {
                 if (jugador.id === selectedPlayerId) {
-                    return { ...jugador, observacion: observationText };
+                    return { ...jugador, observacion: cleanedObservation }; // Asigna null si es necesario
                 }
                 return jugador;
             });
-            console.log('Jugadores actualizados observacion:', jugadores);
+            console.log('Jugadores actualizados observacion:', updatedJugadores);
             return updatedJugadores;
         });
-        setModalVisible(false);
+    
+        setModalVisible(false); // Cerrar el modal después de guardar la observación válida
     };
-
+    
+    
     const [activeTab, setActiveTab] = useState('historial'); // Estado para rastrear la pestaña activa
 
     return (

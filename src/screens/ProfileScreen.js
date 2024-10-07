@@ -20,10 +20,11 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import imageData from "../../api/images";
 import foto from "../../assets/imagen.jpg";
 import { TextInputMask } from "react-native-masked-text";
-
+import AlertComponent from '../components/AlertComponent';
+ 
 //Obtiene la altura de la ventana
 const windowHeight = Dimensions.get("window").height;
-
+ 
 const ProfileScreen = ({ logueado, setLogueado }) => {
   // URL de la API para el usuario
   const USER_API = "services/technics/tecnicos.php";
@@ -38,20 +39,29 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
     birthday: new Date(" "),
     image: Image.resolveAssetSource(foto).uri,
   });
-
+ 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [activeChip, setActiveChip] = useState("perfil");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertType, setAlertType] = useState(1);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertCallback, setAlertCallback] = useState(null);
+ 
   //Alterna el modo de edición y lee el perfil del usuario
   const handleEditPress = () => {
     setIsEditing(!isEditing);
     readProfile();
   };
-
+ 
+  const handleAlertClose = () => {
+    setAlertVisible(false);
+    if (alertCallback) alertCallback();
+  };
+ 
   //Guarda los cambios realizados en el perfil
   const handleSavePress = async () => {
     try {
@@ -63,29 +73,32 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         !profile.dui ||
         !profile.phone
       ) {
-        Alert.alert(
-          "Error",
-          "Campos requeridos. Por favor, complete todos los campos."
-        );
+        setAlertType(2);
+        setAlertMessage(`Error: Campos requeridos. Por favor, complete todos los campos`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         return;
       }
-
+ 
       // Validación de longitud para nombre y apellido
       if (profile.name.length < 2 || profile.fullname.length < 2) {
-        Alert.alert(
-          "Error",
-          "El nombre y apellido deben tener al menos 2 caracteres."
-        );
+        setAlertType(2);
+        setAlertMessage(`Error: El nombre y apellido deben tener al menos 2 caracteres`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         return;
       }
-
+ 
       //Validación de correo electrónico
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailPattern.test(profile.email)) {
-        Alert.alert("Error", "Correo electrónico no válido");
+        setAlertType(2);
+        setAlertMessage(`Error: Correo electrónico no válido`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         return;
       }
-
+ 
       const formData = new FormData();
       formData.append("nombrePerfil", profile.name);
       formData.append("apellidoPerfil", profile.fullname);
@@ -98,7 +111,10 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
           profile.birthday.toISOString().split("T")[0]
         );
       } else {
-        Alert.alert("Error", "Fecha de nacimiento no válida");
+        setAlertType(2);
+        setAlertMessage(`Error: Fecha de nacimiento no válida`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         return;
       }
       formData.append("telefonoPerfil", profile.phone);
@@ -112,22 +128,31 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
           type: `image/${fileType}`,
         });
       }
-
+ 
       //Envía la solicitud de actualización del perfil
       const response = await fetchData(USER_API, "updateRowProfile", formData);
-
-      if (response.status) {
-        Alert.alert(response.message);
+      // Verifica si la respuesta indica éxito
+      if (response.status === 1) {
+        setAlertType(1);
+        setAlertMessage(`${response.message}`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         setIsEditing(false);
       } else {
-        Alert.alert("Error", response.error);
+        setAlertType(2);
+        setAlertMessage(`Error: ${response.error}`);
+        setAlertCallback(null);
+        setAlertVisible(true);
       }
     } catch (error) {
-      Alert.alert("No se pudo acceder a la API", error.message);
+      setAlertType(2);
+      setAlertMessage(`No se pudo acceder a la API: ${error.message}`);
+      setAlertCallback(null);
+      setAlertVisible(true);
       console.log(error.message);
     }
   };
-
+ 
   //Maneja los cambios en los campos de texto
   const handleChange = (name, value) => {
     //Solo permite letras y espacios
@@ -135,57 +160,75 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
         setProfile({ ...profile, [name]: value });
       } else {
-        Alert.alert("Error", "Solo se permiten letras y espacios.");
+        setAlertType(2);
+        setAlertMessage(`Error: Solo se permiten letras y espacios.`);
+        setAlertCallback(null);
+        setAlertVisible(true);
       }
     } else if (name === "dui" || name === "phone") {
       //Solo permite números y guiones
       if (/^[\d-]*$/.test(value)) {
         setProfile({ ...profile, [name]: value });
       } else {
-        Alert.alert("Error", "Solo se permiten números y guiones.");
+        setAlertType(2);
+        setAlertMessage(`Error: Solo se permiten números y guiones.`);
+        setAlertCallback(null);
+        setAlertVisible(true);
       }
     } else {
       setProfile({ ...profile, [name]: value });
     }
   };
-
+ 
   //Maneja el cambio de contraseña
   const handlePasswordChange = async () => {
-    if(!password || !newPassword || !confirmPassword){
-      Alert.alert(
-        "Error",
-        "Campos requeridos. Por favor, complete todos los campos."
-      );
+    if (!password || !newPassword || !confirmPassword) {
+      setAlertType(2);
+      setAlertMessage(`Error: Campos requeridos. Por favor, complete todos los campos`);
+      setAlertCallback(null);
+      setAlertVisible(true);
       return;
-    }else{
+    } else {
       try {
         if (newPassword !== confirmPassword) {
-          Alert.alert("Error", "La confirmación de la contraseña no coincide.");
+          setAlertType(2);
+          setAlertMessage(`Error: La confirmación de la contraseña no coincide`);
+          setAlertCallback(null);
+          setAlertVisible(true);
           return;
         }
-  
+ 
         const formData = new FormData();
         formData.append("claveActual", password);
         formData.append("claveCliente", newPassword);
         formData.append("repetirclaveCliente", confirmPassword);
-  
+ 
         const response = await fetchData(USER_API, "changePassword", formData);
-  
+ 
         if (response.status) {
-          Alert.alert("Éxito", response.message);
+          setAlertType(1);
+          setAlertMessage(`${response.message}`);
+          setAlertCallback(null);
+          setAlertVisible(true);
           setPassword("");
           setNewPassword("");
           setConfirmPassword("");
         } else {
-          Alert.alert("Error", response.error);
+          setAlertType(2);
+          setAlertMessage(`${response.error}`);
+          setAlertCallback(null);
+          setAlertVisible(true);
         }
       } catch (error) {
-        Alert.alert("No se pudo acceder a la API", error.message);
+        setAlertType(2);
+        setAlertMessage(`No se pudo acceder a la API: ${error.message}`);
+        setAlertCallback(null);
+        setAlertVisible(true);
         console.log(error.message);
       }
     }
   };
-
+ 
   // Manejo de cierre de sesión
   const handleLogOut = async () => {
     try {
@@ -193,14 +236,20 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       if (data.status) {
         setLogueado(false);
       } else {
-        Alert.alert("Error sesión", data.error);
+        setAlertType(2);
+        setAlertMessage(`Error con la sesión: ${data.error}`);
+        setAlertCallback(null);
+        setAlertVisible(true);
       }
     } catch (error) {
       console.log("Error: ", error);
-      Alert.alert("Error sesión", error);
+      setAlertType(2);
+      setAlertMessage(`No se pudo acceder a la API: ${error.message}`);
+      setAlertCallback(null);
+      setAlertVisible(true);
     }
   };
-
+ 
   //Selecciona una imagen de la galería
   const pickImage = async () => {
     if (isEditing) {
@@ -210,20 +259,20 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         aspect: [1, 1],
         quality: 1,
       });
-
+ 
       if (!result.canceled) {
         setProfile({ ...profile, image: result.assets[0].uri });
       }
     }
   };
-
+ 
   //Maneja el cambio de fecha de nacimiento
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || profile.birthday;
     setShowDatePicker(false);
     handleChange("birthday", currentDate);
   };
-
+ 
   //Lee los datos del perfil del usuario desde la API
   const readProfile = async () => {
     try {
@@ -232,7 +281,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       const imageUrl = profileData.IMAGEN
         ? await imageData("tecnicos", profileData.IMAGEN)
         : Image.resolveAssetSource(foto).uri;
-
+ 
       setProfile({
         name: profileData.NOMBRETEC,
         fullname: profileData.APELLIDO,
@@ -242,7 +291,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
         birthday: new Date(profileData.NACIMIENTO),
         image: imageUrl,
       });
-
+ 
       console.log(data.dataset);
     } catch (error) {
       console.log(error);
@@ -250,24 +299,24 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
       console.log("Petición hecha");
     }
   };
-
+ 
   //Llama a readProfile al cargar el componente
   useEffect(() => {
     readProfile();
   }, []);
-
+ 
   //Cambia la pantalla activa
   const changeScreen = (screen) => {
     setActiveChip(screen);
   };
-
+ 
   //Función para refrescar la pantalla
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await readProfile();
     setRefreshing(false);
   }, []);
-
+ 
   return (
     <ScrollView
       refreshControl={
@@ -294,7 +343,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
             <Entypo name="log-out" size={30} color="#FFF" />
           </TouchableOpacity>
         </LinearGradient>
-
+ 
         <View style={styles.rowButton}>
           <Chip
             style={{
@@ -318,7 +367,7 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
             Cambiar Contraseña
           </Chip>
         </View>
-
+ 
         {activeChip === "perfil" ? (
           <Card style={styles.profileCard}>
             <Card.Content>
@@ -492,10 +541,16 @@ const ProfileScreen = ({ logueado, setLogueado }) => {
           </Card>
         )}
       </View>
+      <AlertComponent
+        visible={alertVisible}
+        type={alertType}
+        message={alertMessage}
+        onClose={handleAlertClose}
+      />
     </ScrollView>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -630,5 +685,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
-
+ 
 export default ProfileScreen;
